@@ -1,0 +1,58 @@
+{
+	"name": "Gogogo",
+	"version": "2025.4.8.1",
+	"description": "Automate your browser with AI",
+	"action": {
+		"default_icon": {
+			"16": "resources/icon_color_16x16.png",
+			"32": "resources/icon_color_32x32.png",
+			"48": "resources/icon_color_48x48.png",
+			"128": "resources/icon_color_128x128.png"
+		},
+		"default_title": "Gogogo",
+		"default_popup": "ui/action/index.html"
+	},
+	"icons": {
+		"16": "resources/icon_color_16x16.png",
+		"32": "resources/icon_color_32x32.png",
+		"48": "resources/icon_color_48x48.png",
+		"128": "resources/icon_color_128x128.png"
+	},
+
+	"manifest_version": 3,
+	"minimum_chrome_version": "95",
+	"background": {
+		"service_worker": "background.js"
+	},
+
+	"options_page": "ui/options/index.html",
+	"content_scripts": [{
+		"matches": ["<all_urls>"],
+		"match_about_blank": true,
+		"js": [
+			"content.js"
+		],
+		"run_at": "document_start",
+		"all_frames": true
+	}],
+	"permissions": [
+		"nativeMessaging",
+		"webNavigation",
+		"tabs",
+		"cookies",
+		"browsingData",
+		"debugger",
+		"storage",
+		"scripting",
+		"action",
+		"unlimited_storage",
+		"system.display"
+	],
+	"host_permissions": [
+		"<all_urls>"
+	],
+	"web_accessible_resources": [{
+		"resources": ["resources/*.*"],
+		"matches": ["<all_urls>"]
+	}]
+}

@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",                                 // Modern JavaScript targeting most Chromium browsers
+    "module": "ESNext",                                 // Let Webpack handle module bundling
+    "lib": ["DOM", "ES2023"],                           // Access to browser APIs and modern JS features
+    "moduleResolution": "node",                         // Look for modules like Node.js
+    "strict": true,                                     // Enable all strict type checks
+    "sourceMap": true,                                  // Enable source maps
+    "noImplicitAny": true,                              // Prevent variables without a defined type
+    "noUnusedLocals": true,                             // Catch unused variables
+    "noUnusedParameters": true,                         // Catch unused function params
+    "noFallthroughCasesInSwitch": true,                 // Safer switch statements
+    "esModuleInterop": true,                            // Allow default import of CommonJS modules
+    "emitDecoratorMetadata": true,                      // Required for Angular decorators
+    "experimentalDecorators": true,                     // Required for Angular decorators
+    "skipLibCheck": true,                               // Skip type-checking declaration files for speed
+    "allowSyntheticDefaultImports": true,               // Allow default imports from modules with no default export
+    "forceConsistentCasingInFileNames": true,           // Avoid case-related issues across OSes
+    "isolatedModules": true,                            // Required for tools like Babel + TS
+    "resolveJsonModule": true,                          // Allow importing JSON files
+    "rootDir": "./",                                    // Root directory of source files
+    "outDir": "dist",                                   // IDE-only — Webpack handles actual build output
+    "types": ["chrome", "firefox-webext-browser"],      // Chrome extension API types
+    "paths": { "@ui/*": ["./src/ui/*"] },               // mapping the ui module
+    "declaration": false
+  },
+  "angularCompilerOptions": {
+    "enableIvy": true,
+    "aot": true, // Force AOT compilation
+    "strictTemplates": true,
+    "fullTemplateTypeCheck": true,
+    "standalone": true,
+    "enableResourceInlining": true,                     // Critical for extensions
+    "compilationMode": "full"                           // Full AOT compilation
+  },
+  "include": ["src/**/*"],                              // Includes all TS files (existing + Angular)
+  "exclude": ["node_modules", "dist"]
+}

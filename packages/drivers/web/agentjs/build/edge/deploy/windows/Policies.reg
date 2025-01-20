@@ -1,0 +1,21 @@
+Windows Registry Editor Version 5.00
+
+; https://docs.microsoft.com/en-us/deployedge/microsoft-edge-policies#extensioninstallallowlist
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallAllowlist]
+"10001"="imcoelekoapmlngkdofleambknkkkicp"
+
+; here's the setting to disable all extensions
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallBlocklist]
+; "1"="*"
+
+; https://docs.microsoft.com/en-us/deployedge/microsoft-edge-policies#nativemessagingallowlist
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\NativeMessagingAllowlist]
+"10001"="com.sagi.web.nativemessaginghost"
+
+; https://docs.microsoft.com/en-us/deployedge/microsoft-edge-policies#nativemessaginguserlevelhosts
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge]
+"NativeMessagingUserLevelHosts"=dword:00000001
+
+; here's the setting to disable all nativemessaginghost
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge\NativeMessagingBlocklist]
+; "1"="*"

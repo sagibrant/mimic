@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenText Functional Testing Agent Options</title>
+    <style type="text/css">
+        body {
+            font-family: Lucida, Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            background-color: #b5c7df;
+        }
+
+        #header #icon {
+            width: 64px;
+            vertical-align: middle;
+            padding: 0 10px 3px 3px;
+        }
+
+        #header h1 {
+            display: inline;
+            font-size: 156%;
+            font-weight: bold;
+        }
+
+        #main {
+            width: 704px;
+            margin: 0px auto;
+            background-color: #ffffff;
+        }
+
+        .groupbox {
+            border: 1px solid #c7cfe6;
+            margin: 3px;
+            padding: 3px;
+        }
+
+        .hbox {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-box-align: stretch;
+        }
+
+        .delBtn {
+            width: 22px;
+            background-color: #ebeff9;
+        }
+
+        .disabled {
+            color: gray;
+        }
+
+        button {
+            padding: 3px;
+            width: 80px;
+            background-color: #b5c7de;
+        }
+
+        .exceptionItemCatName {
+            width: 70%;
+        }
+
+        .exceptionItemCatLevel {
+            width: 33%;
+        }
+
+        #exceptions th {
+            font-weight: normal;
+            background-color: #ebeff9;
+        }
+
+        #exceptions thead {
+            background-color: #b5c7de;
+            width: 670px;
+        }
+
+        table#exceptions thead th {
+            width: 30px;
+        }
+
+            table#exceptions thead th + th {
+                width: 424px;
+            }
+
+                table#exceptions thead th + th + th {
+                    width: 216px;
+                }
+
+        table#exceptions tbody td {
+            width: 28px;
+        }
+
+            table#exceptions tbody td + td {
+                width: 418px;
+            }
+
+                table#exceptions tbody td + td + td {
+                    width: 196px;
+                }
+
+        table#exceptions tbody {
+            font-weight: normal;
+            display: block;
+            height: 262px;
+            overflow-y: scroll;
+            width: 100%;
+        }
+
+        table#exceptions thead tr {
+            display: block;
+        }
+
+        div.exceptionsContainer {
+            clear: both;
+            border: 1px solid #c7cfe6;
+            height: 292px;
+            overflow: auto;
+            width: 688px;
+        }
+
+        tbody.exceptionsBody td {
+            font-weight: normal;
+            border: 1px solid #c7cfe6;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 30px;">
+    </div>
+
+    <div id="main">
+        <div style="height: 23px;">
+        </div>
+        <div id="header">
+            <img src="QTP_128.png" id="icon" alt="" />
+            <h1>OpenText Functional Testing Agent Opti<span id="option">o</span>ns</h1>
+        </div>
+        <div id="content">
+            <div class="hbox">
+                <div class="groupbox" style="line-height: 170%">
+                    <div id="Div1">
+                        OpenText Functional Testing for Developers Server Port
+                        <input type="number" style="width: 80px" id="defaultPort" />
+                    </div>
+                </div>
+                <div class="groupbox" style="line-height: 170%">
+                    <div id="defaultLogLevelContainer">
+                        Default Logging Level
+                    </div>
+                </div>
+                <div class="groupbox" style="line-height: 170%; display: none">
+                    <div id="frameCommunicationModeContainer">
+                        Frame Communication Mode
+                    </div>
+                </div>
+                <div class="groupbox" style="line-height: 170%; display: none">
+                    <div id="scriptEvaluationModeContainer">
+                        Script Evaluation Mode
+                    </div>
+                </div>
+                <div class="groupbox" style="line-height: 170%; display: none">
+                    <div id="scriptEvaluationModeOptionContainer">
+                        Script Evaluation Options
+                    </div>
+                </div>
+                <div class="groupbox" style="line-height: 170%; display: none">
+                    <div id="actionPopupContainer">
+                        <label for="extensionPopup">Display Extension Popup</label>
+                        <input type="checkbox" name="extensionPopup" id="extensionPopup"/>
+                    </div>
+                </div>
+                <div class="groupbox">
+                    <div>
+                        Exceptions:
+		                <table border="0" cellspacing="0" cellpadding="0" width="100%" id="newExceptionTable">
+                            <tr>
+                                <td style="width: 70%">
+                                    <input type="text" id="newCatName" value="" size="70" />
+                                </td>
+                                <td id="newExceptionsSelect"></td>
+                                <td>
+                                    <button id="addCategorySetting">
+                                        Add</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="exceptionsContainer">
+                        <table id="exceptions" cellpadding="3" cellspacing="1">
+                            <thead>
+                                <tr style="width: 100%">
+                                    <th>&nbsp;
+                                    </th>
+                                    <th>Category
+                                    </th>
+                                    <th>Log Level
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody class="exceptionsBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center">
+            <button id="saveBtn" i18n-content="save">
+                Save</button>
+        </div>
+        <!--<script type="text/javascript" src="i18n.js"></script>-->
+        <div style="text-align: center; margin-top: 1em; height: 30px; overflow-y: hidden;">
+        </div>
+    </div>
+    <script type="text/javascript" src="../ThirdParty/log4javascript_uncompressed.js"></script>
+    <script type="text/javascript" src="../Common/LoggerUtil.js"></script>
+    <script type="text/javascript" src="options.js"></script>
+</body>
+</html>

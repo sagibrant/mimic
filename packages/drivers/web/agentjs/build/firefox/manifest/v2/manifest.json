@@ -1,0 +1,54 @@
+{
+	"name": "Gogogo",
+	"version": "2025.4.8.1",
+	"description": "Automate your browser with AI",
+	"manifest_version": 2,
+	"icons": {
+		"16": "resources/icon_color_16x16.png",
+		"32": "resources/icon_color_32x32.png",
+		"48": "resources/icon_color_48x48.png",
+		"128": "resources/icon_color_128x128.png"
+	},
+	"browser_action": {
+		"default_icon": "resources/icon_color_16x16.png",
+		"default_popup": "ui/action/index.html"
+	},
+	"options_ui": {
+		"page": "ui/options/index.html",
+		"open_in_tab": true
+	},
+	"background": {
+		"page": "resources/bg-loader.html"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"match_about_blank": true,
+			"js": [
+				"content.js"
+			],
+			"run_at": "document_start",
+			"all_frames": true
+		}
+	],
+	"permissions": [
+		"tabs",
+		"debugger",
+		"cookies",
+		"browsingData",
+		"storage",
+		"webNavigation",
+		"nativeMessaging"
+	],
+	"web_accessible_resources": [
+		"resources/*.*"
+	],
+	"applications": {
+		"gecko": {
+			"id": "sagibrant@163.com",
+			"strict_min_version": "58.0"
+		}
+	}
+}

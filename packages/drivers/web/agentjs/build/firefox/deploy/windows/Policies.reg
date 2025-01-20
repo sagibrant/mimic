@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+
+; https://github.com/mozilla/policy-templates/blob/master/README.md#extensions
+[HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Install]
+"1"="ProductDir\Installations\\Firefox\\Extension.xpi"

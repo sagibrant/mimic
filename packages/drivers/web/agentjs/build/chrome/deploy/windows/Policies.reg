@@ -1,0 +1,32 @@
+Windows Registry Editor Version 5.00
+
+; https://cloud.google.com/docs/chrome-enterprise/policies/#extensions
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallWhitelist]
+"10001"="kpohfimcpcmbcihhpgnjcomihmcnfpna"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallAllowlist]
+"10001"="kpohfimcpcmbcihhpgnjcomihmcnfpna"
+
+; here's the setting to disable all extensions
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallBlocklist]
+; "1"="*"
+; 
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallBlacklist]
+; "1"="*"
+
+; https://cloud.google.com/docs/chrome-enterprise/policies/#nativeMessaging
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\NativeMessagingAllowlist]
+"10001"="com.sagi.web.nativemessaginghost"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\NativeMessagingWhitelist]
+"10001"="com.sagi.web.nativemessaginghost"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome]
+"NativeMessagingUserLevelHosts"=dword:00000001
+
+; here's the setting to disable all nativemessaginghost
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\NativeMessagingBlocklist]
+; "1"="*"
+;
+; [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\NativeMessagingBlacklist]
+; "1"="*"
