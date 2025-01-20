@@ -1,0 +1,20 @@
+{
+  "import": ["@cspell/dict-lorem-ipsum/cspell-ext.json"],
+  "caseSensitive": false,
+  "dictionaries": ["custom-dictionary"],
+  "dictionaryDefinitions": [
+    {
+      "name": "custom-dictionary",
+      "path": "./.cspell/custom-dictionary.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/lib/**",
+    "**/docs/**",
+    "**/package.json",
+  ]
+}

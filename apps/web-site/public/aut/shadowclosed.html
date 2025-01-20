@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <h1>The editor Element inside the closed shadowdom</h1>
+
+  <div id="shadowdiv1">
+
+  </div>
+  <br />
+  <br />
+  <br />
+  <div id="container1">
+    <iframe sandbox="allow-scripts allow-modals allow-popups" id="frame1" style="border: 10px red solid;" width="80%"
+      height="200" src="https://developer.mozilla.org/en-US/"></iframe>
+  </div>
+  <div id="container2">
+    <iframe sandbox="allow-scripts allow-modals allow-popups" id="frame2" style="border: 10px red solid;" width="80%"
+      height="200" src="https://cn.bing.com/translator?setlang=zh-cn/"></iframe>
+  </div>
+
+</body>
+<script>
+  var component = document.getElementById('shadowdiv1');
+  var shadow = component.attachShadow({
+    mode: 'closed'
+  });
+  shadow.innerHTML =
+    `<br />
+      <a href="javascript:jsclick('ttt')" for="text_aaa">
+        <div>Click me!</div>
+      </a>
+      <br />
+      <input type="text" name="aaa" id="text_aaa"></input>
+    <br />
+     `;
+  window.text_aaa_clickNum = 1;
+  window.text_aaa = shadow.getElementById("text_aaa");
+  var script = document.createElement('script');
+  script.textContent = `
+      function jsclick(msg) {
+        console.warn(msg, arguments);
+        if(window.text_aaa) {
+          let clickNum = window.text_aaa_clickNum ?? 1;
+          window.text_aaa.value = msg + clickNum;
+          window.text_aaa_clickNum = clickNum + 1;
+        }
+      }
+    `;
+  shadow.appendChild(script);
+
+
+</script>
+
+</html>

@@ -1,0 +1,12 @@
+{
+  // 控制编辑器默认缩进
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  // TypeScript文件的专用设置
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.typescript-language-features"  // 使用TS默认格式化器
+  },
+  // 禁用格式化工具的独立配置（如果使用prettier等）
+  "prettier.tabWidth": 2  // 如果用prettier，需同步设置
+}

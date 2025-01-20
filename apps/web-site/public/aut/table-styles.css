@@ -1,0 +1,79 @@
+/* Table container for responsiveness and border radius */
+.table-container {
+  margin: 10px;
+  overflow: hidden; /* Preserve border radius when using border-collapse */
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Base table styles */
+table {
+  width: 100%;
+  min-width: 600px; /* Prevent over-narrow tables */
+  border-collapse: collapse;
+  font-family: inherit;
+  font-size: 16px;
+  background-color: #fff;
+}
+
+/* Header cells */
+th {
+  padding: 12px 15px;
+  text-align: center;
+  width: 220px;
+  max-width: 220px;
+  min-width: 220px;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle header borders */
+}
+
+/* Body cells */
+td {
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  color: #333;
+  text-align: center;
+  width: 220px;
+  max-width: 220px;
+  min-width: 220px;
+}
+
+/* Zebra striping for rows (improves readability) */
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* Hover effect for interactive rows */
+tbody tr:hover {
+  background-color: #eef4ff; /* Light blue tint matching primary color */
+  transition: background-color 0.2s ease;
+}
+
+/* Focus state for accessibility (when cells are interactive) */
+td:focus,
+th:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(0, 123, 255, 0.25); /* Matches input focus style */
+}
+
+/* Responsive behavior for small screens */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto; /* Enable horizontal scrolling on small screens */
+  }
+  
+  table {
+    min-width: auto;
+  }
+}
+
+/* Optional: Table caption */
+caption {
+  padding: 10px;
+  font-size: 20px;
+  color: #666;
+  text-align: center;
+}
+    

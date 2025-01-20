@@ -1,0 +1,187 @@
+<html>
+
+<head>
+  <title>frame test</title>
+</head>
+
+<body>
+
+
+  <div id="shadowdiv1" style="margin: auto; text-align: center;">
+
+  </div>
+  <table>
+    <tr>
+      <td>
+        <p>web editor</p>
+      </td>
+      <td>
+        <p>web link</p>
+      </td>
+      <td>
+        <p>elems & words</p>
+      </td>
+      <td>
+        <p>event history</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div id="container1">
+          <iframe sandbox="allow-scripts allow-modals allow-popups allow-same-origin" id="frame1" style="border: 20px red solid;"
+            width="300" height="600" src="shadowclosed.html"></iframe>
+        </div>
+      </td>
+      <td>
+        <div id="container2">
+          <iframe sandbox="allow-scripts allow-modals allow-popups allow-same-origin" id="frame2"
+            style="border: 20px red solid;" width="300" height="600" src="shadowopen.html"></iframe>
+        </div>
+      </td>
+      <td>
+        <div id="container3">
+          <iframe sandbox="allow-scripts allow-modals allow-popups allow-same-origin" id="frame3"
+            style="border: 20px red solid;" width="300" height="600" src="text.html"></iframe>
+        </div>
+      </td>
+      <td>
+        <div id="output" style="margin-top: 30px; margin-left: 50px;"></div>
+      </td>
+    </tr>
+  </table>
+</body>
+<script>
+  var component = document.getElementById('shadowdiv1');
+  var shadow = component.attachShadow({
+    mode: 'open'
+  });
+  shadow.innerHTML =
+    `<input type="button" name="btn" id="btn1" onclick="adjustFrames()" onchange="adjustFrames()" value="click to change frames" /> 
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" name="btn" id="btn2" onclick="listenEvents()" value="click to monitor events" />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:alert('href alert')" onclick="javascript:alert('javascript:alert');" role="button" id="role_based_link_button">Click to alert (role)</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" name="btn" id="alert_button" onclick="click_alert('this is the alert message');" value="Click to alert" />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" name="btn" id="confirm_button" onclick="click_confirm('this is the confirm message')" value="Click to confirm" />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" name="btn" id="prompt_button" onclick="click_prompt('this is the default prompt message', 'this is the default prompt message value')" value="Click to prompt" />
+        `;
+
+  function adjustFrames() {
+    var html_frame1 =
+      `<iframe id="frame1" style="border: 20px red solid;" width="300" height="600" src="shadowclosed.html"></iframe>`;
+    var html_frame2 =
+      `<iframe id="frame2" style="border: 20px red solid;" width="300" height="600" src="shadowopen.html"></iframe>`;
+
+    var frame1 = document.getElementById("frame1");
+    var frame2 = document.getElementById("frame2");
+    if (frame1 !== null && frame2 !== null) {
+      frame1.parentElement.removeChild(frame1);
+    } else if (frame1 === null && frame2 !== null) {
+      frame2.parentElement.removeChild(frame2);
+    } else if (frame1 === null && frame2 === null) {
+      var container1 = document.getElementById("container1");
+      container1.innerHTML = html_frame1;
+    } else if (frame1 !== null && frame2 === null) {
+      var container2 = document.getElementById("container2");
+      container2.innerHTML = html_frame2;
+    }
+  }
+
+  var toMonitorEvents = true;
+  function listenEvents() {
+    if (toMonitorEvents) {
+      window.addEventListener("mouseover", monitorEvents, true);
+      window.addEventListener("resize", monitorEvents, true);
+      toMonitorEvents = false;
+    }
+    else {
+      window.removeEventListener("mouseover", monitorEvents, true);
+      window.removeEventListener("resize", monitorEvents, true);
+      toMonitorEvents = true;
+    }
+  }
+  var output = document.getElementById('output');
+  var eventInfoList = [];
+  function addEventInfo(eventInfo) {
+    eventInfoList.reverse();
+    eventInfoList.push(eventInfo);
+    eventInfoList.reverse();
+    if (eventInfoList.length > 15) {
+      eventInfoList = eventInfoList.slice(0, 15);
+    }
+    output.innerHTML = "";
+    eventInfoList.forEach(function (eventText) {
+      output.innerHTML = output.innerHTML + eventText + "<br\>";
+    });
+  }
+
+  function monitorEvents(ev) {
+    let newOffset = {
+      x: ev.screenX - window.screenX - ev.clientX,
+      y: ev.screenY - window.screenY - ev.clientY,
+      "ev.screenX": ev.screenX == null ? "null" : ev.screenX,
+      "ev.screenY": ev.screenY == null ? "null" : ev.screenY,
+      "ev.clientX": ev.clientX == null ? "null" : ev.clientX,
+      "ev.clientY": ev.clientY == null ? "null" : ev.clientY,
+      "window.screenX": window.screenX,
+      "window.screenY": window.screenY,
+      "window.innerWidth": window.innerWidth,
+      "window.innerHeight": window.innerHeight,
+      "window.outerWidth": window.outerWidth,
+      "window.outerHeight": window.outerHeight
+    };
+    var eventInfo = `event ${new Date().toISOString()} \r\n${ev.type}: offset ${JSON.stringify(newOffset)}`;
+    addEventInfo(eventInfo);
+  };
+
+  function click_alert(message) {
+    alert(message);
+    let shadowdiv1 = document.getElementById('shadowdiv1');
+    if (shadowdiv1.shadowRoot) {
+      const alert_button = shadowdiv1.shadowRoot.querySelector('#alert_button');
+      if (alert_button) {
+        alert_button.value = 'alert dialog is clicked';
+      }
+    }
+  }
+
+  function click_confirm(message) {
+    let confirmed = confirm(message);
+    if (confirmed) {
+      console.log('confirm dialog is accepted');
+      let shadowdiv1 = document.getElementById('shadowdiv1');
+      if (shadowdiv1.shadowRoot) {
+        const confirm_button = shadowdiv1.shadowRoot.querySelector('#confirm_button');
+        if (confirm_button) {
+          confirm_button.value = 'confirm dialog is accepted';
+        }
+      }
+    }
+    else {
+      console.log('confirm dialog is dismissed');
+      if (shadowdiv1.shadowRoot) {
+        const confirm_button = shadowdiv1.shadowRoot.querySelector('#confirm_button');
+        if (confirm_button) {
+          confirm_button.value = 'confirm dialog is dismissed';
+        }
+      }
+    }
+  }
+
+  function click_prompt(message, defaultValue) {
+    const result = prompt(message, defaultValue)
+    let shadowdiv1 = document.getElementById('shadowdiv1');
+    if (shadowdiv1.shadowRoot) {
+      const prompt_button = shadowdiv1.shadowRoot.querySelector('#prompt_button');
+      if (prompt_button) {
+        prompt_button.value = `prompt dialog is clicked with value-${result}`;
+      }
+    }
+  }
+
+</script>
+
+</html>

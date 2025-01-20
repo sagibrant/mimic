@@ -1,0 +1,133 @@
+name: Build Extension
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Build version (e.g., 2026.1.1.0)'
+        required: true
+        default: '2026.1.1.0'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      build_version: ${{ steps.set-version.outputs.build_version }}
+    steps:
+      - name: Set build version
+        id: set-version
+        run: |
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            BUILD_VERSION="${{ github.event.inputs.version }}"
+          else
+            # Generate dynamic version: year.month.day.hour
+            BUILD_VERSION=$(date +'%Y.%m.%d.%H')
+          fi
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_OUTPUT
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    # strategy:
+    #   matrix:
+    #     browser: [chrome, edge, firefox]
+    #     manifestVersion: [v3]
+    #     target: [unpacked, packed, store]
+    #     exclude:
+    #       # Firefox doesn't support all targets
+    #       - browser: firefox
+    #         target: packed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install
+
+      - name: Set build version from setup
+        run: |
+          echo "BUILD_VERSION=${{ needs.setup.outputs.build_version }}" >> $GITHUB_ENV
+
+      - name: Build extension
+        env:
+          # Chrome keys (from GitHub Secrets)
+          EXTENSION_CHROME_PRIVATEKEY: ${{ secrets.EXTENSION_CHROME_PRIVATEKEY }}
+          EXTENSION_CHROME_PUBLICKEY: ${{ secrets.EXTENSION_CHROME_PUBLICKEY }}
+          # Edge keys (from GitHub Secrets)
+          EXTENSION_EDGE_PRIVATEKEY: ${{ secrets.EXTENSION_EDGE_PRIVATEKEY }}
+          EXTENSION_EDGE_PUBLICKEY: ${{ secrets.EXTENSION_EDGE_PUBLICKEY }}
+          # Firefox keys (from GitHub Secrets)
+          EXTENSION_FIREFOX_APIKEY: ${{ secrets.EXTENSION_FIREFOX_APIKEY }}
+          EXTENSION_FIREFOX_APISECRET: ${{ secrets.EXTENSION_FIREFOX_APISECRET }}
+        run: |
+          # cd apps/extension
+          # Run appropriate build command based on matrix
+          # if [ "${{ matrix.browser }}" = "firefox" ] && [ "${{ matrix.target }}" = "packed" ]; then
+          #   echo "Skipping Firefox packed build (not supported)"
+          # else
+          #   pnpm build:${{ matrix.browser }}:${{ matrix.manifestVersion }}:${{ matrix.target }} --env version=${{ env.BUILD_VERSION }}
+          # fi
+          pnpm build --env version=${{ env.BUILD_VERSION }}
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          # name: extension-${{ matrix.browser }}-${{ matrix.manifestVersion }}-${{ matrix.target }}
+          name: extension-${{ env.BUILD_VERSION }}
+          path: apps/extension/dist/
+          retention-days: 14
+
+  build-summary:
+    needs: [setup, build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build summary
+        run: |
+          echo "# Build Summary"
+          echo "- Build version: ${{ needs.setup.outputs.build_version }}"
+          echo "- Build status: ${{ needs.build.result }}"
+          echo "- Artifacts available for 14 days"
+
+  # Optional: Deploy to stores (example)
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: extension-chrome-v3-store
+  #         path: dist/chrome/v3/
+  #     
+  #     - name: Deploy to Chrome Web Store
+  #       env:
+  #         CHROME_WEB_STORE_CLIENT_ID: ${{ secrets.CHROME_WEB_STORE_CLIENT_ID }}
+  #         CHROME_WEB_STORE_CLIENT_SECRET: ${{ secrets.CHROME_WEB_STORE_CLIENT_SECRET }}
+  #         CHROME_WEB_STORE_REFRESH_TOKEN: ${{ secrets.CHROME_WEB_STORE_REFRESH_TOKEN }}
+  #       run: |
+  #         # Add deployment logic here
+  #         echo "Deploying to Chrome Web Store..."

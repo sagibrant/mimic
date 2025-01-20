@@ -1,0 +1,134 @@
+ /* Prevent text selection on node */
+.tree-node {
+  user-select: none;
+}
+
+.node-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px 0;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+  max-width: 160px;
+}
+
+/* Hover effect for better interactivity */
+.node-content:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Styling for indentation guide lines */
+.indent-guide {
+  position: relative;
+  width: 16px;
+  height: 20px;
+}
+
+/* Vertical guide lines for non-last items in hierarchy */
+.indent-guide:not(.last)::before {
+  display: none;
+}
+
+/* Horizontal guide lines for non-last items in hierarchy */
+.indent-guide:not(.last)::after {
+  display: none;
+}
+
+/* Vertical guide lines for last items in hierarchy */
+.indent-guide.last::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  height: 50%;
+  width: 1px;
+  background-color: #ddd;
+}
+
+/* Horizontal guide lines for last items in hierarchy */
+.indent-guide.last::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 8px;
+  height: 1px;
+  background-color: #ddd;
+}
+
+/* Expand/collapse icon styling */
+.node-icon {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* File/folder type icon styling */
+.node-type-icon {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  font-style: normal;
+}
+
+.node-label {
+  padding: 2px 4px;
+  flex: 1;
+  line-height: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  word-break: break-word;
+}
+
+.node-name {
+  flex: 1;
+  padding: 0;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Styling for active/selected node */
+.node-label.active {
+  color: #2196f3;
+  border-radius: 2px;
+  background-color: rgba(33, 150, 243, 0.08);
+}
+
+/* Container for child nodes */
+.node-children {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* node editor */
+.node-edit input {
+  padding: 2px 4px;
+  width: 120px;
+}
+
+/* Dark mode adaptations */
+@media (prefers-color-scheme: dark) {
+  .node-content:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .node-icon {
+    color: #aaa;
+  }
+
+  /* Dark mode guide lines */
+  .indent-guide.last::before,
+  .indent-guide.last::after {
+    background-color: #444;
+  }
+
+  .node-label.active {
+    color: #82b1ff;
+    background-color: rgba(33, 150, 243, 0.15);
+  }
+}

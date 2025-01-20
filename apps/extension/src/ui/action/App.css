@@ -1,0 +1,35 @@
+.action-container {
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  background-color: var(--color-popover);
+  color: var(--color-popover-foreground);
+}
+.action-container [data-slot="command-list"] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 5px;
+}
+.action-container [data-slot="command-item"] {
+  width: 100%;
+  padding: 10px 20px;
+  gap: 10px;
+}
+.action-container [data-slot="command-item"]:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+}
+.action-container [data-slot="command-item"]:active {
+  background-color: var(--color-muted);
+  color: var(--color-muted-foreground);
+}
+.action-container [data-slot="command-item"][data-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+.action-container [data-slot="command-item"][data-selected="true"] {
+  background-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+}

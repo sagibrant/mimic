@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Output
+dist
+
+# Runtime
+package-lock.json
+pnpm-lock.yaml
+.DS_Store
+.log
+.rollup.cache
+.temp
+.output
+
+## ts build
+tsconfig.tsbuildinfo
+
+# IDE
+.vscode
+
+# Local secret keys directory
+.secret/
+
+# Temporary keys directory
+build/temp/

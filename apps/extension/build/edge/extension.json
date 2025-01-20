@@ -1,0 +1,12 @@
+{
+    "browser": "Edge",
+    "extensions": [
+        {
+            "id": "ilcdijkgbkkllhojpgbiajmnbdiadppj",
+            "packed": "v3/packed/Extension.crx",
+            "store": "v3/store/Extension.zip",
+            "unpacked": "v3/unpacked/Extension",
+            "minVersion": 96
+        }
+    ]
+}

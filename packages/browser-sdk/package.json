@@ -1,0 +1,55 @@
+{
+  "name": "@gogogo/browser-sdk",
+  "version": "0.1.0",
+  "description": "Browser automation SDK for Gogogo project",
+  "repository": "https://github.com/sagibrant/gogogo",
+  "homepage": "https://qagogogo.com/",
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.mjs",
+  "browser": "./dist/browser/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/es/index.mjs",
+      "browser": "./dist/browser/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "rollup -c --watch",
+    "build": "rimraf dist && rollup -c",
+    "build:types": "tsc --emitDeclarationOnly",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "web",
+    "automation",
+    "sdk",
+    "typescript",
+    "chrome-extension",
+    "node",
+    "web"
+  ],
+  "author": "Sagi",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.26.2",
+  "dependencies": {
+    "@gogogo/shared": "workspace:*",
+    "openai": "^6.4.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^6.0.0"
+  }
+}
