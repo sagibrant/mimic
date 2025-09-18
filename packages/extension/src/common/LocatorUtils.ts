@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file LocatorUtils.ts
  * @description 
@@ -21,7 +21,7 @@
  */
 
 import { Utils } from "./Common";
-import { OrdinalSelector, QueryInfo, Selector } from "@/types/message";
+import { OrdinalSelector, QueryInfo, RegExpSpec, Selector } from "@/types/protocol";
 
 
 export class LocatorUtils {
@@ -115,7 +115,7 @@ export class LocatorUtils {
     if (assistive.length > 0) {
       const candidates = queryResult.objects;
       for (let i = assistive.length; i > 0; --i) {
-        const nCi = Utils.get_combinations(assistive, i);
+        const nCi = Utils.getCombinations(assistive, i);
         for (let j = 0; j < nCi.length; ++j) {
           const assistive_selectors = nCi[j];
           const filtered_objects = LocatorUtils.filterObjects(candidates, assistive_selectors);
@@ -134,13 +134,13 @@ export class LocatorUtils {
     }
 
     // filter with ordinal selector
-    if (ordinal && ordinal.index >= 0
-      && queryResult.objects.length > ordinal.index) {
+    if (ordinal) {
       // todo: sort queryResult.objects by ordinal.type
       // e.g. queryResult.objects.sort(...by creationtime, ...by location x,y, ...)
-      const obj = queryResult.objects[ordinal.index];
+      const index = ordinal.reverse ? queryResult.objects.length - 1 - ordinal.index : ordinal.index;
+      const objs = (index >= 0 && index < queryResult.objects.length) ? [queryResult.objects[index]] : [];
       return {
-        objects: [obj],
+        objects: objs,
         queryInfo: {
           primary: queryResult.queryInfo.primary,
           mandatory: queryResult.queryInfo.mandatory,
@@ -191,9 +191,9 @@ export class LocatorUtils {
    * @returns {boolean}
    */
   static matchSelector<T extends object>(obj: T, selector: Selector): boolean {
-    const key = !Utils.isNullOrUndefined(selector.key) ? selector.key : selector.name;
+    const key = selector.name;
     if (Utils.isNullOrUndefined(key)) {
-      throw new Error(`Invalid Arguments: selector.key and selector.name are null or undefined`);
+      throw new Error(`Invalid Arguments: selector.name are null or undefined`);
     }
 
     const matchType = selector.match;
@@ -216,7 +216,7 @@ export class LocatorUtils {
    * @returns if the selector item exists in object
    */
   static hasSelectorKey<T extends object>(obj: T, selector: Selector): boolean {
-    const key = !Utils.isNullOrUndefined(selector.key) ? selector.key : selector.name;
+    const key = selector.name;
     if (selector.match !== 'has') {
       throw new Error(`Invalid Arguments: selector.match cannot be ${selector.match}`);
     }
@@ -246,7 +246,7 @@ export class LocatorUtils {
    * @returns actual value in the object 
    */
   static getValueBySelector<T extends object>(obj: T, selector: Selector): string | number | boolean | undefined | null {
-    const key = !Utils.isNullOrUndefined(selector.key) ? selector.key : selector.name;
+    const key = selector.name;
     let nodeValue: string | number | boolean | undefined | null = undefined;
 
     if (selector.type === 'property') {
@@ -264,7 +264,7 @@ export class LocatorUtils {
     }
     else if (selector.type === 'text') {
       if (obj instanceof Node && obj.nodeType === Node.TEXT_NODE) {
-        nodeValue = obj.nodeValue as string;
+        nodeValue = obj.textContent as string;
       }
     }
 
@@ -279,7 +279,7 @@ export class LocatorUtils {
    */
   static matchValue(
     matchType: 'exact' | 'includes' | 'startsWith' | 'endsWith' | 'regex',
-    expected: string | number | boolean | RegExp | undefined | null,
+    expected: string | number | boolean | RegExpSpec | undefined | null,
     actual: string | number | boolean | undefined | null): boolean {
 
     if (matchType === 'exact') {
@@ -295,8 +295,9 @@ export class LocatorUtils {
       return (actual as string).endsWith(expected as string);
     }
     else if (matchType === 'regex') {
-      if (expected instanceof RegExp) {
-        return expected.test(actual as string);
+      if (Utils.isRegExpSpec(expected)) {
+        const regExp = new RegExp(expected.pattern, expected.flags);
+        return regExp.test(actual as string);
       }
       else {
         var regExp = new RegExp(expected as string);

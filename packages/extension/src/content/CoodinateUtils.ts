@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file ChromeContentUtils.ts
  * @description 
@@ -21,35 +21,25 @@
  */
 
 import { BrowserUtils, Utils } from "@/common/Common";
-import { RectInfo } from "@/types/api";
+import { RectInfo } from "@/types/types";
 
 export class CoodinateUtils {
-
-  /** the zoom factor for the page, get updated by chrome.tabs.onZoomChange listeners */
-  static pageZoomFactor: number | undefined = undefined;
-  /** force device scale factor */
-  static deviceScaleFactor: number | undefined = undefined;
-  /** force desktop scale factor */
-  static desktopScaleFactor: number | undefined = undefined;
-  /** force device pixel ratio */
-  static devicePixelRatio: number | undefined = undefined;
   /** the page's window offset x */
   static pageWindowOffsetX: number | undefined = undefined;
   /** the page's window offset y */
   static pageWindowOffsetY: number | undefined = undefined;
-  /** if there's a page padding (only available for edge new look) */
-  static isPagePaddingEnabled: boolean | undefined = undefined;
+  static onMouseOverListener?: (ev: MouseEvent) => void;
+  static onResizeListener?: (ev: UIEvent) => void;
 
-  static test(): void {
-    const onMouseOverListener = (ev: MouseEvent) => {
+  static turnOnUserInteractiveMode(deviceScaleFactor: number): void {
+    CoodinateUtils.onMouseOverListener = (ev: MouseEvent) => {
       if (window.parent !== window) {
         return; // check if in page
       }
       if (typeof (ev.isTrusted) === "boolean" && ev.isTrusted === true &&
         typeof (ev.screenX) === "number" && typeof (ev.screenY) === "number" &&
         typeof (ev.clientX) === "number" && typeof (ev.clientY) === "number") {
-        var devicePixelRatio = CoodinateUtils.getDevicePixelRatio() || CoodinateUtils.getDevicePixelRatio();
-        var deviceScaleFactor = CoodinateUtils.getDeviceScaleFactor() || CoodinateUtils.getDevicePixelRatio()
+        const devicePixelRatio = window.devicePixelRatio;
         CoodinateUtils.pageWindowOffsetX = Math.floor(((ev.screenX - window.screenX) * deviceScaleFactor) - (ev.clientX * devicePixelRatio));
         CoodinateUtils.pageWindowOffsetY = Math.floor(((ev.screenY - window.screenY) * deviceScaleFactor) - (ev.clientY * devicePixelRatio));
         if (CoodinateUtils.pageWindowOffsetX < 0 || CoodinateUtils.pageWindowOffsetY < 0) {
@@ -58,108 +48,48 @@ export class CoodinateUtils {
         }
       }
     };
-    const onResize = (ev: UIEvent) => {
+    CoodinateUtils.onResizeListener = (ev: UIEvent) => {
       if (window.parent !== window) {
         return; // check if in page
       }
       CoodinateUtils.pageWindowOffsetX = undefined;
       CoodinateUtils.pageWindowOffsetY = undefined;
     };
-    window.addEventListener("mouseover", onMouseOverListener, true);
-    window.addEventListener("resize", onResize, true);
+    window.addEventListener("mouseover", CoodinateUtils.onMouseOverListener, true);
+    window.addEventListener("resize", CoodinateUtils.onResizeListener, true);
+  }
+  static turnOffUserInteractiveMode() {
+    if (CoodinateUtils.onMouseOverListener) {
+      window.removeEventListener('mouseover', CoodinateUtils.onMouseOverListener);
+    }
+    CoodinateUtils.onResizeListener = undefined;
+    if (CoodinateUtils.onResizeListener) {
+      window.removeEventListener('resize', CoodinateUtils.onResizeListener);
+    }
+    CoodinateUtils.onResizeListener = undefined;
   }
 
-  static updatePagePaddingState(windowState: 'maximized' | 'normal') {
-    // on edge, users can disable the new look to remove the round corner
-    const isMaximized = CoodinateUtils.isMaximized();
-    // we need to first make sure the pageWindowOffsetX is reliable (set by tool in the same browser window state or set by user actions)
-    if (!Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetX) &&
-      (!Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetY) ||
-        (windowState === "maximized" && isMaximized) ||
-        (windowState === "normal" && !isMaximized))) {
-      let deltaOffset = 0;
-      const deviceScaleFactor = CoodinateUtils.getDeviceScaleFactor() || CoodinateUtils.getDevicePixelRatio();
-      const desktopScaleFactor = CoodinateUtils.getDesktopScaleFactor() || CoodinateUtils.getDevicePixelRatio();
-      const borderPixels = CoodinateUtils.calculatePageBorder(deviceScaleFactor) || 8;
-      let screenX_maximized_browser = CoodinateUtils.calculatePageBorder(desktopScaleFactor);
-      if (!Utils.isNullOrUndefined(screenX_maximized_browser)) {
-        screenX_maximized_browser = 0 - screenX_maximized_browser;
-      }
-      else {
-        screenX_maximized_browser = -8;
-      }
-      if (isMaximized) {
-        deltaOffset = Math.abs(CoodinateUtils.pageWindowOffsetX - (screenX_maximized_browser + borderPixels));
-      } else {
-        deltaOffset = Math.abs(CoodinateUtils.pageWindowOffsetX - borderPixels);
-      }
-      if (deltaOffset <= 1) {
-        CoodinateUtils.isPagePaddingEnabled = false;
-      }
-    }
-  };
-
-  static getDevicePixelRatio(): number {
-
-    if (!Utils.isNullOrUndefined(CoodinateUtils.devicePixelRatio) && CoodinateUtils.devicePixelRatio > 0) {
-      return CoodinateUtils.devicePixelRatio;
+  static getPageRectUsingUserInteractiveMode(pageZoomFactor: number): RectInfo {
+    // user interactive mode: user action help us to fix the offset issue
+    if (Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetX) || Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetY)) {
+      throw new Error('pageWindowOffsetX & pageWindowOffsetY is not valid');
     }
 
-    return window.devicePixelRatio;
-  }
+    const pageRect: Partial<RectInfo> = {};
+    const devicePixelRatio = window.devicePixelRatio;
+    const deviceScaleFactor = window.devicePixelRatio / pageZoomFactor;
+    pageRect.left = window.screenX * deviceScaleFactor + CoodinateUtils.pageWindowOffsetX;
+    pageRect.top = window.screenY * deviceScaleFactor + CoodinateUtils.pageWindowOffsetY;
 
-  /**
-   * get the device scale factor 
-   * @returns the browser's device scale factor
-   */
-  static getDeviceScaleFactor(): number | undefined {
-    // device scale factor describe the scale factor for the window but not the page
-    // it can be set by launching chrome with --force-device-scale-factor or auto inherit the desktop scale factor (DEVICE_SCALE_FACTOR)
-    // devicePixelRatio = pageZoomFactor * deviceScaleFactor
+    pageRect.right = pageRect.left + window.innerWidth * devicePixelRatio;
+    pageRect.bottom = pageRect.top + window.innerHeight * devicePixelRatio;
 
-    if (!Utils.isNullOrUndefined(CoodinateUtils.deviceScaleFactor) && CoodinateUtils.deviceScaleFactor > 0) {
-      return CoodinateUtils.deviceScaleFactor;
-    }
+    pageRect.left = Math.floor(pageRect.left);
+    pageRect.top = Math.floor(pageRect.top);
+    pageRect.right = Math.ceil(pageRect.right);
+    pageRect.bottom = Math.ceil(pageRect.bottom);
 
-    if (!Utils.isNullOrUndefined(CoodinateUtils.pageZoomFactor)) {
-      const deviceScaleFactor = CoodinateUtils.getDevicePixelRatio() / CoodinateUtils.pageZoomFactor;
-      return deviceScaleFactor;
-    }
-
-    // assume the pageZoomFactor is 100% by default
-    return undefined;
-  }
-
-  /**
-   * get the desktop scale factor
-   * @returns the desktop's scale factor
-   */
-  static getDesktopScaleFactor(): number | undefined {
-    // desktop scale factor describe the scale factor for the desktop when chrome launched
-
-    if (!Utils.isNullOrUndefined(CoodinateUtils.desktopScaleFactor) && CoodinateUtils.desktopScaleFactor > 0) {
-      const desktopScaleFactor = CoodinateUtils.desktopScaleFactor;
-      return desktopScaleFactor;
-    }
-
-    // assume in most cases, the desktop scale factor is the device scale factor of browser 
-    // unless the browser is launched with --force-device-scale-factor
-    return undefined;
-  }
-
-  /** get the window rect in the screen coordinate */
-  static getWindowRect(): RectInfo {
-    const deviceScaleFactor = CoodinateUtils.getDeviceScaleFactor() || CoodinateUtils.getDevicePixelRatio();
-    const rect = {
-      top: Math.floor(window.screenY * deviceScaleFactor),
-      left: Math.floor(window.screenX * deviceScaleFactor),
-      right: Math.ceil((window.screenX + window.outerWidth) * deviceScaleFactor),
-      bottom: Math.ceil((window.screenY + window.outerHeight) * deviceScaleFactor),
-      // width: Math.ceil(window.outerWidth * deviceScaleFactor),
-      // height: Math.ceil(window.outerHeight * deviceScaleFactor),
-    };
-    const rectInfo = Utils.fixRectange(rect);
-    return rectInfo;
+    return Utils.fixRectange(pageRect);
   }
 
   /** check if the page is in full screen mode */
@@ -201,10 +131,10 @@ export class CoodinateUtils {
    * @param {number} bounds - the known bounds array
    * @returns the bound size
    */
-  static calculateBound(scale: number, scales: number[], bounds: number[]): number | undefined {
+  static calculateBound(scale: number, scales: number[], bounds: number[]): number {
     let bound = 8;
     if (scale > scales[scales.length - 1] || scale < scales[0]) {
-      return undefined;
+      throw new Error('the given scale exceeded the known bounds');
     }
     for (let i = 0; i < scales.length; i++) {
       const cur = scales[i];
@@ -225,10 +155,7 @@ export class CoodinateUtils {
     return bound;
   }
 
-  static calculatePagePadding(scale: number): number | undefined {
-    if (!CoodinateUtils.isPagePaddingEnabled) {
-      return 0;
-    }
+  static calculatePagePadding(scale: number): number {
     const browserInfo = BrowserUtils.getBrowserInfo();
     if (browserInfo.name === 'edge') {
       return CoodinateUtils.calculateEdgePagePadding(scale);
@@ -236,13 +163,7 @@ export class CoodinateUtils {
     return 0;
   }
 
-  static calculateEdgePagePadding(scale: number): number | undefined {
-    if (!CoodinateUtils.isPagePaddingEnabled) {
-      return 0;
-    }
-    if (Utils.isNullOrUndefined(scale)) {
-      scale = CoodinateUtils.getDeviceScaleFactor() || CoodinateUtils.getDevicePixelRatio();
-    }
+  static calculateEdgePagePadding(scale: number): number {
     if (scale === 1) {
       return 4;
     }
@@ -252,10 +173,7 @@ export class CoodinateUtils {
     return padding;
   };
 
-  static calculatePageBorder(scale: number) {
-    if (Utils.isNullOrUndefined(scale)) {
-      scale = CoodinateUtils.getDeviceScaleFactor() || 1;
-    }
+  static calculatePageBorder(scale: number): number {
     if (scale === 1) {
       return 8;
     }
@@ -265,61 +183,42 @@ export class CoodinateUtils {
     return border;
   }
 
-  static getPageRect(): RectInfo {
-    const pageRect = {} as RectInfo;
-    const devicePixelRatio = CoodinateUtils.getDevicePixelRatio();
-    const deviceScaleFactor = CoodinateUtils.getDeviceScaleFactor() || devicePixelRatio;
-    const desktopScaleFactor = CoodinateUtils.getDesktopScaleFactor() || devicePixelRatio;
-    const isMaximized = CoodinateUtils.isMaximized();
-    let paddingPixels = CoodinateUtils.calculatePagePadding(deviceScaleFactor);
-    let borderPixels = CoodinateUtils.calculatePageBorder(deviceScaleFactor);
-    let screenX_maximized_browser = CoodinateUtils.calculatePageBorder(desktopScaleFactor);
+  static getPageRect(pageZoomFactor: number, isMaximized?: boolean, desktopScaleFactor?: number): RectInfo {
+    const pageRect: Partial<RectInfo> = {};
+    const devicePixelRatio = window.devicePixelRatio;
+    // device scale factor describe the scale factor for the window but not the page
+    // it can be set by launching chrome with --force-device-scale-factor or auto inherit the desktop scale factor (DEVICE_SCALE_FACTOR)
+    // devicePixelRatio = pageZoomFactor * deviceScaleFactor
+    const deviceScaleFactor = window.devicePixelRatio / pageZoomFactor;
+    // if user use --force-device-scale-factor, the desktopScaleFactor != deviceScaleFactor
+    // by default, assume the desktopScaleFactor = deviceScaleFactor
+    desktopScaleFactor = desktopScaleFactor ?? deviceScaleFactor;
 
-    if (!Utils.isNullOrUndefined(paddingPixels)
-      && !Utils.isNullOrUndefined(borderPixels)
-      && !Utils.isNullOrUndefined(screenX_maximized_browser)) {
-      screenX_maximized_browser = 0 - screenX_maximized_browser;
+    if (isMaximized === undefined || isMaximized === null) {
+      isMaximized = CoodinateUtils.isMaximized();
     }
-    else {
-      paddingPixels = 0; // 0 by default
-      borderPixels = 0; // 0 by default
-      screenX_maximized_browser = -8; //-8 by default
-      let deltaWidth = window.outerWidth * deviceScaleFactor - window.innerWidth * devicePixelRatio;
-      if (deltaWidth < 0) {
-        deltaWidth = 0;
-      }
-      // assume no sidebar in left and right
-      borderPixels = deltaWidth / 2;
-    }
-    // user interactive mode: user action help us to fix the offset issue
-    if (!Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetX) && !Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetY)) {
-      pageRect.left = window.screenX * deviceScaleFactor + CoodinateUtils.pageWindowOffsetX;
+    const paddingPixels = CoodinateUtils.calculatePagePadding(deviceScaleFactor);
+    const borderPixels = CoodinateUtils.calculatePageBorder(deviceScaleFactor);
+    const screenX_maximized_browser = 0 - CoodinateUtils.calculatePageBorder(desktopScaleFactor);
+
+    if (isMaximized) {
+      pageRect.left = screenX_maximized_browser + borderPixels + paddingPixels;
     } else {
-      if (isMaximized) {
-        pageRect.left = screenX_maximized_browser + borderPixels + paddingPixels;
-      } else {
-        pageRect.left = window.screenX * deviceScaleFactor + borderPixels + paddingPixels;
-      }
+      pageRect.left = window.screenX * deviceScaleFactor + borderPixels + paddingPixels;
     }
 
-    // user interactive mode: user action help us to fix the offset issue
-    if (!Utils.isNullOrUndefined(CoodinateUtils.pageWindowOffsetY) && CoodinateUtils.pageWindowOffsetY > 0) {
-      pageRect.top = window.screenY * deviceScaleFactor + CoodinateUtils.pageWindowOffsetY;
+    let deltaHeight = window.outerHeight * deviceScaleFactor - window.innerHeight * devicePixelRatio;
+    if (deltaHeight < 0) {
+      deltaHeight = 0;
+    }
+    // outerHeight = innerHeight + banner + border*2 + padding*2
+    // deltaHeight = outerHeight - innerHeight = banner + border*2 + padding*2
+    // top = screenY + border + banner + padding = screenY + deltaHeight - border - padding
+    if (isMaximized) {
+      const adjustedBorderPixels = screenX_maximized_browser + borderPixels;
+      pageRect.top = window.screenY * deviceScaleFactor + deltaHeight - adjustedBorderPixels - paddingPixels;
     } else {
-      let deltaHeight = window.outerHeight * deviceScaleFactor - window.innerHeight * devicePixelRatio;
-      if (deltaHeight < 0) {
-        deltaHeight = 0;
-      }
-
-      // outerHeight = innerHeight + banner + border*2 + padding*2
-      // deltaHeight = outerHeight - innerHeight = banner + border*2 + padding*2
-      // top = screenY + border + banner + padding = screenY + deltaHeight - border - padding
-      if (isMaximized) {
-        let adjustedBorderPixels = screenX_maximized_browser + borderPixels;
-        pageRect.top = window.screenY * deviceScaleFactor + deltaHeight - adjustedBorderPixels - paddingPixels;
-      } else {
-        pageRect.top = window.screenY * deviceScaleFactor + deltaHeight - borderPixels - paddingPixels;
-      }
+      pageRect.top = window.screenY * deviceScaleFactor + deltaHeight - borderPixels - paddingPixels;
     }
 
     pageRect.right = pageRect.left + window.innerWidth * devicePixelRatio;

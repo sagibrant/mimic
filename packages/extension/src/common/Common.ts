@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Common.ts
  * @description 
@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import { RectInfo } from "@/types/api";
-import { Action, AODesc, ContextType, Message, MessageData, MessageDataType, Rtid } from "@/types/message";
+import { RectInfo } from "@/types/types";
+import { Action, ActionName, AODesc, ContextType, Message, MessageData, MessageDataType, MessageType, RegExpSpec, Rtid } from "@/types/protocol";
 
 /**
  * Browser detection result interface
@@ -35,11 +35,9 @@ export interface BrowserInfo {
 /**
  * Represents a key-value pair, optionally typed.
  */
-export class NameValuePair<T = unknown> {
-  constructor(
-    _name: string | null = null,
-    _value: T | null = null
-  ) { }
+export interface NameValuePair {
+  name: string;
+  value?: unknown;
 }
 
 /**
@@ -143,7 +141,39 @@ export class Utils {
   }
 
   /**
-   * Get the last chromium api error
+   * Checks if the provided value is `RegExpSpec`
+   * @param value The value to check
+   * @returns 
+   */
+  static isRegExpSpec(value: unknown): value is RegExpSpec {
+    if (typeof value !== 'object') {
+      return false;
+    }
+    const regExp = value as RegExpSpec;
+    const checks = [
+      typeof regExp.pattern === 'string',
+      typeof regExp.flags === 'string' || regExp.flags === undefined
+    ];
+    if (checks.some(c => !c)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Convert the RegExp to RegExpSpec
+   * @param value The value of RegExp type
+   * @returns 
+   */
+  static toRegExpSpec(value: RegExp): RegExpSpec {
+    return {
+      pattern: value.source,
+      flags: value.flags
+    };
+  }
+
+  /**
+   * Get the last chrome api error
    * @returns last chrome api error
    */
   static getLastError(): chrome.runtime.LastError | chrome.extension.LastError | undefined {
@@ -274,6 +304,69 @@ export class Utils {
   }
 
   /**
+   * check if the url is an internal url
+   * @param url url string
+   * @returns 
+   */
+  static isInternalUrl(url: string): boolean {
+    const schemes = [
+      'chrome:',     // Chrome internal pages (e.g., chrome://extensions)
+      'edge:',       // Edge internal pages
+      'about:',      // Browser about pages (e.g., about:blank)
+      'opera:',      // Opera internal pages
+      'brave:',      // Brave browser internal pages
+      'chrome-extension:', // Extension internal pages (chrome)
+      'extension:',  // Extension internal pages (edge)
+      'moz-extension:'    // Firefox extension pages (for cross-browser compatibility)
+    ];
+    try {
+      const urlObj = new URL(url);
+      return schemes.includes(urlObj.protocol);
+    }
+    catch {
+      return false;
+    }
+  }
+
+  /**
+   * check if the url is a file url
+   * @param url url string
+   * @returns 
+   */
+  static isFileUrl(url: string): boolean {
+    const schemes = [
+      'file:',       // Local files
+    ];
+    try {
+      const urlObj = new URL(url);
+      return schemes.includes(urlObj.protocol);
+    }
+    catch {
+      return false;
+    }
+  }
+
+  /**
+   * check if the url is a extension url
+   * @param url url string
+   * @returns 
+   */
+  static isExtensionUrl(url: string): boolean {
+    const schemes = [
+      'chrome-extension:', // Extension internal pages (chrome)
+      'extension:',  // Extension internal pages (edge)
+      'moz-extension:'    // Firefox extension pages (for cross-browser compatibility)
+    ];
+    try {
+      const urlObj = new URL(url);
+      return schemes.includes(urlObj.protocol);
+    }
+    catch {
+      return false;
+    }
+  }
+
+  /**
    * Returns all combinations of size k from the input array.
    * 
    * @template T - The type of elements in the array
@@ -281,7 +374,7 @@ export class Utils {
    * @param k - Size of combinations to generate
    * @returns Array of all combinations of size k
    */
-  static get_combinations<T>(arr: T[], k: number): T[][] {
+  static getCombinations<T>(arr: T[], k: number): T[][] {
     // Handle edge cases
     if (k === 0) return [[]];
     if (k > arr.length) return [];
@@ -324,58 +417,41 @@ export class Utils {
   }
 
   /**
+   * wait 
+   * @param ms timeout
+   * @returns 
+   */
+  static async wait(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
    * wait for the checkFunc to be checked
    * @param checkFunc the check function to validate the requirements
    * @param timeout timeout
    * @param delay delay for each check
    * @returns property value match the expected value
    */
-  static async wait(checkFunc: () => Promise<boolean>, timeout: number = 5000, delay: number = 500): Promise<boolean> {
+  static async waitChecked(checkFunc: () => Promise<boolean>, timeout: number = 5000, delay: number = 500): Promise<boolean> {
     const end_time = performance.now() + timeout;
-    return new Promise((resolve, reject) => {
-      // Timer Ids
-      let intervalId: any = undefined;
-      let timeoutId: any = undefined;
-      // Cleanup function to stop timers
-      const cleanup = () => {
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
-      };
-      // Timeout: abort after `timeout` ms
-      timeoutId = setTimeout(() => {
-        cleanup();
-        resolve(false);
-      }, timeout);
-      // Interval check: run every `delay` ms
-      // also need to check if timeout, return asap
-      intervalId = setInterval(async () => {
-        if (performance.now() > end_time) {
-          resolve(false);
-          return;
-        }
-        const isMatch = await checkFunc();
-        if (isMatch) {
-          cleanup();
-          resolve(true);
-        }
-        else if (performance.now() > end_time) {
-          cleanup();
-          resolve(false);
-        }
-      }, delay);
-      // First check (handled asynchronously without await in the executor)
-      checkFunc().then(firstCheck => {
-        if (firstCheck) {
-          cleanup();
-          resolve(true);
-        } else if (performance.now() > end_time) {
-          cleanup();
-          resolve(false);
-        }
-      }).catch(() => {
-        // ignore the errors in the check function
-      });
-    });
+    let count = 0;
+    const noWaitRetryNum = 0;
+    while (performance.now() < end_time) {
+      const isMatch = await checkFunc();
+      if (isMatch) {
+        return true;
+      }
+      else if (performance.now() > end_time) {
+        return false;
+      }
+      count++;
+      // let's first try ${noWaitRetryNum} times incase the js wait is not stable and low priority cause long timeout than expected
+      // if still failed, we try to wait
+      if (count > noWaitRetryNum) {
+        await Utils.wait(delay);
+      }
+    }
+    return false;
   }
 
   /**
@@ -386,7 +462,7 @@ export class Utils {
    * @param delay delay for each check
    * @returns property value match the expected value
    */
-  static async rafWait(checkFunc: () => Promise<boolean>, timeout: number = 5000, delay: number = 500): Promise<boolean> {
+  static async rafWaitChecked(checkFunc: () => Promise<boolean>, timeout: number = 5000, delay: number = 100): Promise<boolean> {
     if (typeof requestAnimationFrame !== 'function') {
       throw new Error('requestAnimationFrame is not a valid function');
     }
@@ -414,11 +490,34 @@ export class Utils {
               return;
             }
           }
-        }
-        catch { }
+        } catch { }
         requestAnimationFrame(rafFunc);
       };
       requestAnimationFrame(rafFunc);
+    });
+  }
+
+  /**
+   * wait for the function result within timeout duration
+   * @param func the function to wait for
+   * @param timeout the timeout
+   * @returns the function run result
+   */
+  static async waitResult<T>(func: () => Promise<T>, timeout: number = 5000): Promise<T> {
+    if (timeout <= 0) {
+      return await func();
+    }
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`timeout after ${timeout}ms`));
+      }, timeout);
+      func().then((result) => {
+        clearTimeout(timeoutId);
+        return resolve(result);
+      }).catch((error) => {
+        clearTimeout(timeoutId);
+        return reject(error);
+      });
     });
   }
 
@@ -448,12 +547,26 @@ export class Utils {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
 
+  static fillWithDefaultValues<T extends object>(source: Partial<T>, defaults: T): void {
+    for (const key in defaults) {
+      if (!defaults.hasOwnProperty(key)) continue;
+
+      if (source[key] === undefined) {
+        source[key] = defaults[key];
+      }
+      else if (typeof defaults[key] === 'object' && defaults[key] !== null &&
+        typeof source[key] === 'object' && source[key] !== null) {
+        Utils.fillWithDefaultValues(source[key] as Partial<any>, defaults[key]);
+      }
+    }
+  }
 }
 
-export class MsgUtil {
+export class MsgUtils {
 
   static createMessageData(type: MessageDataType, dest: Rtid, action: Action, target?: AODesc) {
-    return { type, dest, action, target } as MessageData;
+    const msgData: MessageData = { type, dest, action, target };
+    return msgData;
   }
 
   static createEvent(data: MessageData, correlationId?: string): Message {
@@ -491,20 +604,73 @@ export class MsgUtil {
 
   static cloneMessage(msg: Message): Message | undefined {
     if (msg.type === 'event') {
-      return MsgUtil.createEvent(msg.data, msg.correlationId);
+      return MsgUtils.createEvent(msg.data, msg.correlationId);
     }
     if (msg.type === 'request') {
-      return MsgUtil.createRequest(msg.data, msg.correlationId);
+      return MsgUtils.createRequest(msg.data, msg.correlationId);
     }
     if (msg.type === 'response') {
-      return MsgUtil.createResponse(msg.data, msg.syncId!, msg.correlationId);
+      return MsgUtils.createResponse(msg.data, msg.syncId!, msg.correlationId);
     }
     return undefined;
   }
 
+  static isMessage(value: unknown): value is Message {
+    if (typeof value !== 'object' || Utils.isNullOrUndefined(value)) {
+      return false;
+    }
+    const msg = value as Message;
+
+    const isMessageType = (value: unknown): value is MessageType => {
+      return typeof value === 'string' && ['event', 'request', 'response'].includes(value);
+    };
+
+    if (!isMessageType(msg.type)) {
+      return false;
+    }
+    if (typeof msg.uid !== 'string' || msg.uid.trim() === '') {
+      return false;
+    }
+    if (typeof msg.timestamp !== 'number' || msg.timestamp < 0) {
+      return false;
+    }
+    if (typeof msg.data !== 'object' || Utils.isNullOrUndefined(msg.data)) {
+      return false;
+    }
+
+    const data = msg.data as MessageData;
+    const isMessageDataType = (value: unknown): value is MessageDataType => {
+      return typeof value === 'string' && ['query', 'record', 'command', 'config'].includes(value);
+    }
+    if (!isMessageDataType(data.type)) {
+      return false;
+    }
+    if (!RtidUtils.isRtid(data.dest)) {
+      return false;
+    }
+    const isActionName = (value: unknown): value is ActionName => {
+      return typeof value === 'string' && ['set', 'get', 'query_objects', 'query_object', 'query_property', 'query_properties', 'invoke', 'record_step'].includes(value);
+    }
+    const isValidAction = (value: unknown): value is Action => {
+      if (typeof value !== 'object' || Utils.isNullOrUndefined(value)) {
+        return false;
+      }
+      const action = value as Action;
+      if (!isActionName(action.name)) {
+        return false;
+      }
+      return true;
+    }
+    if (!isValidAction(data.action)) {
+      return false;
+    }
+
+    return true;
+  }
+
 }
 
-export class RtidUtil {
+export class RtidUtils {
 
   /**
    * Determines whether an object is an instance of `Rtid` or a compatible shape.
@@ -528,8 +694,8 @@ export class RtidUtil {
    */
   static isRtidEqual(a: unknown, b: unknown): boolean {
     return (
-      RtidUtil.isRtid(a) &&
-      RtidUtil.isRtid(b) &&
+      RtidUtils.isRtid(a) &&
+      RtidUtils.isRtid(b) &&
       a.object === b.object &&
       a.frame === b.frame &&
       a.tab === b.tab &&
@@ -562,10 +728,10 @@ export class RtidUtil {
     } as Rtid;
   }
 
-  static getWindowRtid(windowId: number): Rtid {
+  static getWindowRtid(windowId: number, browserId: number = 0): Rtid {
     return {
       context: 'background',
-      browser: 0,
+      browser: browserId,
       window: windowId,
       tab: -1,
       frame: -1,
@@ -573,14 +739,36 @@ export class RtidUtil {
     } as Rtid;
   }
 
-  static getTabRtid(tabId: number, windowId: number): Rtid {
+  static getTabRtid(tabId: number, windowId: number = -1, browserId: number = 0): Rtid {
     return {
       context: 'background',
-      browser: 0,
+      browser: browserId,
       window: windowId,
       tab: tabId,
       frame: -1,
       object: -1
+    } as Rtid;
+  }
+
+  static getFrameRtid(frameId: number, tabId: number, windowId: number = -1, browserId: number = 0): Rtid {
+    return {
+      context: 'content',
+      browser: browserId,
+      window: windowId,
+      tab: tabId,
+      frame: frameId,
+      object: -1
+    } as Rtid;
+  }
+
+  static getObjectRtid(objectId: number, frameId: number, tabId: number, windowId: number = -1, browserId: number = 0): Rtid {
+    return {
+      context: 'content',
+      browser: browserId,
+      window: windowId,
+      tab: tabId,
+      frame: frameId,
+      object: objectId
     } as Rtid;
   }
 
@@ -649,60 +837,96 @@ export class BrowserUtils {
     const userAgent = navigator.userAgent.toLowerCase();
     const vendor = navigator.vendor?.toLowerCase() || '';
 
-    // 1. Detect Firefox first
-    // Example UA: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0"
+    // Helper to extract major version from a version string
+    const getMajorVersion = (versionStr: string): number => {
+      if (!versionStr || versionStr === 'unknown') return 0;
+      const majorStr = versionStr.split('.')[0];
+      return parseInt(majorStr, 10) || 0;
+    };
+
+    // 1. Detect Firefox (fixed regex for full version)
     if (userAgent.includes('firefox')) {
       result.name = 'firefox';
-      const match = userAgent.match(/firefox\/(\d+\.\d+)/); // Extracts "129.0"
+      // Regex: Capture "129", "129.0", or "129.0.1" (no mandatory dot)
+      const match = userAgent.match(/firefox\/(\d+(?:\.\d+)*)/);
       if (match?.[1]) {
         result.version = match[1];
+        result.majorVersion = getMajorVersion(result.version);
       }
       return result;
     }
 
-    // 2. Detect Edge next
-    // New Edge example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.2739.50"
-    // Legacy Edge example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586"
+    // 2. Detect Edge (simplified regex + unified version capture)
     if (userAgent.includes('edg') || userAgent.includes('edge')) {
       result.name = 'edge';
-      // Matches "Edg/128.0.2739.50" or "edge/13.10586"
-      const match = userAgent.match(/edg(\/| )(\d+\.\d+)/) ||
-        userAgent.match(/edge\/(\d+\.\d+)/);
-      if (match?.[2]) {
-        result.version = match[2]; // For new Edge: "128.0.2739.50"
-      } else if (match?.[1]) {
-        result.version = match[1]; // For legacy Edge: "13.10586"
+      // New Edge: Matches "edg/128.0.2739.50" (no space check)
+      const newEdgeMatch = userAgent.match(/edg\/(\d+(?:\.\d+)*)/);
+      // Legacy Edge: Matches "edge/13.10586"
+      const legacyEdgeMatch = userAgent.match(/edge\/(\d+(?:\.\d+)*)/);
+      // Use new Edge first, fall back to legacy
+      const match = newEdgeMatch || legacyEdgeMatch;
+
+      if (match?.[1]) {
+        result.version = match[1]; // Unified capture group (group 1 for both)
+        result.majorVersion = getMajorVersion(result.version);
       }
       return result;
     }
 
-    // 3. Detect Safari
-    // Example UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"
+    // 3. Detect Safari (fixed regex for full version)
     if (vendor.includes('apple') && userAgent.includes('safari') && !userAgent.includes('chrome')) {
       result.name = 'safari';
-      const match = userAgent.match(/version\/(\d+\.\d+)/); // Extracts "17.6"
+      // Regex: Capture "17", "17.6", or "17.6.1"
+      const match = userAgent.match(/version\/(\d+(?:\.\d+)*)/);
       if (match?.[1]) {
         result.version = match[1];
+        result.majorVersion = getMajorVersion(result.version);
       }
       return result;
     }
 
-    // 4. Finally detect Chrome
-    // Example UA: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    // 4. Detect Chrome (fixed regex for full version)
     if (userAgent.includes('chrome') && vendor.includes('google')) {
       result.name = 'chrome';
-      const match = userAgent.match(/chrome\/(\d+\.\d+)/); // Extracts "128.0.0.0"
+      // Regex: Capture "128", "128.0", or "128.0.0.0"
+      const match = userAgent.match(/chrome\/(\d+(?:\.\d+)*)/);
       if (match?.[1]) {
         result.version = match[1];
+        result.majorVersion = getMajorVersion(result.version);
       }
       return result;
     }
 
-    // Extract major version
+    // Extract major version (robust to edge cases)
     if (result.version !== 'unknown') {
-      result.majorVersion = parseInt(result.version.split('.')[0], 10) || 0;
+      result.majorVersion = getMajorVersion(result.version);
     }
 
     return result;
+  }
+
+  static isWindows(): boolean {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const platform = navigator.platform.toLowerCase();
+
+    // Common Windows identifiers in userAgent or platform
+    return (
+      userAgent.includes('windows') ||
+      platform.includes('win32') ||
+      platform.includes('win64')
+    );
+  }
+
+  // Check if the platform is macOS
+  static isMacOS(): boolean {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const platform = navigator.platform.toLowerCase();
+
+    // Common macOS identifiers in userAgent or platform
+    return (
+      userAgent.includes('macintosh') ||
+      userAgent.includes('mac os x') ||
+      platform.includes('mac')
+    );
   }
 }

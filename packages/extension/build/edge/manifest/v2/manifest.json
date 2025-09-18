@@ -1,24 +1,24 @@
 {
 	"name": "Gogogo",
 	"version": "2025.4.8.1",
-	"description": "Automate your browser with AI",
+	"description": "Automate your browser with AI assistance",
 	"manifest_version": 2,
 	"default_locale": "en",
 	"icons": {
-		"16": "assets/icons/icon_color_16x16.png",
-		"32": "assets/icons/icon_color_32x32.png",
-		"48": "assets/icons/icon_color_48x48.png",
-		"128": "assets/icons/icon_color_128x128.png"
+		"16": "assets/icons/icon_16x16.png",
+		"32": "assets/icons/icon_32x32.png",
+		"48": "assets/icons/icon_48x48.png",
+		"128": "assets/icons/icon_128x128.png"
 	},
 	"browser_action": {
-		"default_icon": "assets/icons/icon_color_16x16.png",
+		"default_icon": "assets/icons/icon_16x16.png",
 		"default_popup": "ui/action/index.html"
 	},
 	"options_ui": {
 		"page": "ui/options/index.html"
 	},
 	"background": {
-		"page": "resources/bg-loader.html",
+		"page": "bg-loader.html",
 		"persistent": true
 	},
 	"content_scripts": [
@@ -40,13 +40,11 @@
 		"scripting",
 		"cookies",
 		"storage",
+		"unlimited_storage",
 		"webNavigation",
-		"desktopCapture",
-		"nativeMessaging",
 		"notifications"
 	],
 	"web_accessible_resources": [
-		"resources/*.*",
 		"assets/**/*.*",
 		"ui/**/*.*"
 	]

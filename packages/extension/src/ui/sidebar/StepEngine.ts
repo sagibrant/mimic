@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file StepEngine.ts
  * @description 
@@ -20,10 +20,11 @@
  * limitations under the License.
  */
 
-import { MsgUtil, RtidUtil, Utils } from "@/common/Common";
-import { AODesc, InvokeAction, Rtid } from "@/types/message";
+import { MsgUtils, RtidUtils, Utils } from "@/common/Common";
+import { AODesc, AutomationObject, InvokeAction, Rtid } from "@/types/protocol";
 import { SidebarDispatcher } from "./SidebarDispatcher";
 import { Logger } from "@/common/Logger";
+import { SettingUtils } from "@/common/Settings";
 
 
 export class StepEngine {
@@ -32,55 +33,154 @@ export class StepEngine {
 
   constructor(dispatcher: SidebarDispatcher) {
     this._dispatcher = dispatcher;
-    const prefix = Utils.isEmpty(this.constructor?.name) ? "Dispatcher" : this.constructor?.name;
+    const prefix = Utils.isEmpty(this.constructor?.name) ? "StepEngine" : this.constructor?.name;
     this._logger = new Logger(prefix);
   }
 
-  async inspect(tabRtid: Rtid): Promise<void> {
-    const msgData = MsgUtil.createMessageData('command', tabRtid, {
-      name: 'invoke',
-      params: {
-        name: 'inspect'
-      }
-    } as InvokeAction);
-    await this._dispatcher.sendEvent(msgData);
-    return;
+  async isDebuggerAttached(): Promise<boolean> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    const result = await this.getConfig(browserRtid, 'attachDebugger') as boolean;
+    return result;
   }
 
-  async highlight(tabRtid: Rtid, desc: AODesc): Promise<boolean> {
-    const msgData = MsgUtil.createMessageData('command', tabRtid, {
-      name: 'invoke',
-      params: {
-        name: 'highlight'
-      }
-    } as InvokeAction, desc);
-    const resMsgData = await this._dispatcher.sendRequest(msgData);
-    if (resMsgData.status === 'OK') {
-      return true;
-    }
-    return false;
+  async isRecording(): Promise<boolean> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    const result = await this.getConfig(browserRtid, 'isRecording') as boolean;
+    return result;
+  }
+
+  async attachDebugger(): Promise<void> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    await this.invokeFunction(browserRtid, 'attachDebugger', []);
+  }
+
+  async detachDebugger(): Promise<void> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    await this.invokeFunction(browserRtid, 'detachDebugger', []);
+  }
+
+  async startRecording(): Promise<void> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    await this.invokeFunction(browserRtid, 'startRecording', []);
+  }
+
+  async stopRecording(): Promise<void> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    await this.invokeFunction(browserRtid, 'stopRecording', []);
+  }
+
+  async getPageUrl(): Promise<string> {
+    const tabRtid = await this.activePageRtid();
+    const content = await this.queryProperty(tabRtid, 'url') as string;
+    return content;
+  }
+
+  async getPageHtml(): Promise<string> {
+    const tabRtid = await this.activePageRtid();
+    const content = await this.queryProperty(tabRtid, 'content') as string;
+    return content;
+  }
+
+  async toggleInspectMode(): Promise<void> {
+    const tabRtid = await this.activePageRtid();
+    await this.invokeFunction(tabRtid, 'toggleInspectMode', []);
+  }
+
+  async highlight(desc: AODesc): Promise<boolean> {
+    const tabRtid = await this.activePageRtid();
+    await this.invokeFunction(tabRtid, 'highlight', []);
+    this._logger.warn('highlight Not supported');
+    return true;
   }
 
   async runScript(script: string, isolated: boolean = true, timeout: number = 60000): Promise<any> {
-    const rtid = RtidUtil.getAgentRtid();
+    const rtid = RtidUtils.getAgentRtid();
     rtid.context = 'external';
-    rtid.external = 'runScipt-sandbox';
-    const msgData = MsgUtil.createMessageData('command', rtid, {
-      name: 'invoke',
-      params: {
-        name: 'runScript',
-        args: [script, isolated]
-      }
-    } as InvokeAction);
+    rtid.external = 'sandbox-handler';
+    const result = await this.invokeFunction(rtid, 'runScript', [script, isolated], undefined, timeout);
+    return result;
+  }
 
-    this._logger.debug('runScript ==>', script, isolated);
-    const resMsg = await this._dispatcher.sendRequest(msgData, timeout);
-    this._logger.debug('runScript <==', script, isolated, resMsg);
-    if (resMsg.status === 'OK') {
-      return resMsg.result || undefined;
+  async updateSettings(): Promise<void> {
+    const rtid = RtidUtils.getAgentRtid();
+    rtid.context = 'external';
+    rtid.external = 'sandbox-handler';
+    const settings = SettingUtils.getSettings();
+    await this.invokeFunction(rtid, 'updateSettings', [settings]);
+  }
+
+  /** ==================================================================================================================== */
+  /** ===================================================== methods ====================================================== */
+  /** ==================================================================================================================== */
+
+  async activePageRtid(): Promise<Rtid> {
+    const browserRtid = RtidUtils.getBrowserRtid();
+    const aos = await this.queryObjects(browserRtid, {
+      type: 'tab',
+      queryInfo: {
+        primary: [
+          { name: 'active', value: true, type: 'property', match: 'exact' },
+          { name: 'lastFocusedWindow', value: true, type: 'property', match: 'exact' }
+        ]
+      }
+    });
+    if (aos.length === 1) {
+      return aos[0].rtid;
     }
     else {
-      throw new Error(resMsg.error ?? 'run script failed');
+      throw new Error('No valid active page');
+    }
+  }
+
+  async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<unknown> {
+    const reqMsgData = MsgUtils.createMessageData('config', rtid, { name: 'get', params: { name: propName } });
+    const resMsgData = await this._dispatcher.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      const propValue = Utils.getItem(propName, resMsgData.result as Record<string, unknown>);
+      return propValue;
+    }
+    else {
+      throw new Error(resMsgData.error || `get config value of ${propName} failed`);
+    }
+  }
+
+  async queryProperty(rtid: Rtid, propName: string, timeout?: number): Promise<unknown> {
+    const reqMsgData = MsgUtils.createMessageData('query', rtid, { name: 'query_property', params: { name: propName } });
+    const resMsgData = await this._dispatcher.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      const propValue = Utils.getItem(propName, resMsgData.result as Record<string, unknown>);
+      return propValue;
+    }
+    else {
+      throw new Error(resMsgData.error || 'query property failed');
+    }
+  }
+
+  async queryObjects(rtid: Rtid, desc: AODesc, timeout?: number): Promise<AutomationObject[]> {
+    const reqMsgData = MsgUtils.createMessageData('query', rtid, { name: 'query_objects' }, desc);
+    const resMsgData = await this._dispatcher.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      return resMsgData.objects || [];
+    }
+    else {
+      throw new Error(resMsgData.error || 'query objects failed');
+    }
+  }
+
+  async invokeFunction(rtid: Rtid, funcName: string, args: unknown[], target?: AODesc, timeout?: number): Promise<unknown> {
+    const reqMsgData = MsgUtils.createMessageData('command', rtid, {
+      name: 'invoke',
+      params: {
+        name: funcName,
+        args: args
+      }
+    } as InvokeAction, target);
+    const resMsgData = await this._dispatcher.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      return resMsgData.result;
+    }
+    else {
+      throw new Error(resMsgData.error || `${funcName} failed`);
     }
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file PostMessageChannel.ts
  * @description 
@@ -21,82 +21,96 @@
  */
 
 import { ChannelBase, ChannelStatus } from '../ChannelBase';
-import { Message } from '../../../types/message';
+import { Message } from '../../../types/protocol';
+import { Utils } from '@/common/Common';
 
 /**
- * The channel based on the extension port
+ * The channel based on the window.postMessage
  */
 export class PostMessageChannel extends ChannelBase {
   /**
-   * the listenerWrapper for events
+   * the listenerWrapper for message events
    */
-  private readonly _onMessageListenerWrapper: (ev: MessageEvent<any>) => void;
+  private _listener?: (ev: MessageEvent<any>) => void;
   /**
    * the window for communication
    */
   private readonly _window: Window;
 
-  constructor(frameId?: string, win?: Window, listen: boolean = true) {
+  constructor(win: Window) {
     super();
 
     if (win) {
       this._window = win;
     }
-    else if (frameId) {
-      const frame = document.getElementById(frameId);
-      if (frame && 'contentWindow' in frame) {
-        this._window = frame.contentWindow as Window;
-      }
-      else {
-        throw new Error(`PostMessageChannel init failed in getElementById - ${frameId}`);
-      }
-    }
     else {
       throw new Error(`PostMessageChannel init failed. missing frameId or window`);
     }
 
-
     this._status = ChannelStatus.CONNECTED;
-    this._onMessageListenerWrapper = this.onMessage.bind(this);
-
-    if (listen) {
-      window.addEventListener('message', this._onMessageListenerWrapper);
-    }
   }
 
-  send(msg: Message): void {
-    if (this._status != ChannelStatus.CONNECTED) {
-      this.logger.warn('send: failed to send message because the port status is not connected');
+  startListening() {
+    if (this._listener) {
       return;
     }
-    try {
-      this.logger.debug('send: ==>> msg=', msg);
+    this._listener = this.onMessage.bind(this);
+    window.addEventListener('message', this._listener);
+  }
 
-      this._window.postMessage(msg, '*');
+  stopListening() {
+    if (Utils.isNullOrUndefined(this._listener)) {
+      return;
     }
-    catch (error) {
-      this.logger.error('send:', error);
+    window.removeEventListener('message', this._listener);
+    this._listener = undefined;
+  }
+
+
+  postMessage(msg: Message): void {
+    if (this._status != ChannelStatus.CONNECTED) {
+      throw new Error('Unexpected Error: failed to post message because the status is not connected');
     }
+    this.logger.debug('postMessage: >>>>>> msg=', msg);
+
+    this._window.postMessage(msg, '*');
+
+    this.logger.debug('postMessage: <<<<<< msg=', msg);
+  }
+
+  async sendEvent(msg: Message): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async sendRequest(msg: Message): Promise<Message> {
+    throw new Error("Method not implemented.");
   }
 
   disconnect(_reason?: string): void {
     if (this._status != ChannelStatus.CONNECTED) {
-      this.logger.warn('disconnect: failed to disconnect because the port status is not connected');
+      this.logger.warn('disconnect: failed to disconnect because the status is not connected');
       return;
     }
+    this.stopListening();
     this._status = ChannelStatus.DISCONNECTED;
-    window.removeEventListener('message', this._onMessageListenerWrapper);
   }
 
   private onMessage(ev: MessageEvent<any>): void {
-    this.logger.debug('onMessage: ==>> ev=', ev);
+    this.logger.debug('onMessage: >>>> ev=', ev);
 
     if (ev.source !== this._window) {
       return;
     }
     if (['event', 'request', 'response'].includes(ev.data.type)) {
       const msg = ev.data as Message;
-      this.emit('message', { msg: msg });
+      this.emit('message', {
+        msg: msg,
+        sender: ev.source,
+        responseCallback: (response) => {
+          this.postMessage(response);
+          this.logger.debug('onMessage: <<<< msg=', msg, ' response:', response);
+        }
+      });
     }
   }
 }

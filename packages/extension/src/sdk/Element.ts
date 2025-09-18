@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Element.ts
  * @description 
@@ -20,28 +20,39 @@
  * limitations under the License.
  */
 
-import { Utils } from "@/common/Common";
-import { Logger } from "@/common/Logger";
-import * as api from "@/types/api";
-import { Rtid } from "@/types/message";
-import { IMsgChannel } from "./Channel";
+import * as api from "@/types/types";
+import { Rtid } from "@/types/protocol";
+import { RtidUtils, Utils } from "@/common/Common";
+import { Frame } from "./Frame";
+import { ElementLocator } from "./ElementLocator";
+import { TextLocator } from "./TextLocator";
+import { Node } from "./Node";
+import { SettingUtils } from "@/common/Settings";
 
-export class Element implements api.Element {
-  protected readonly logger: Logger;
-  private readonly _browser: api.Browser;
-  private readonly _page: api.Page;
-  private readonly _frame: api.Frame;
-  private readonly _rtid: Rtid;
-  private readonly _channel: IMsgChannel;
+export class Element extends Node implements api.Element {
 
-  constructor(browser: api.Browser, page: api.Page, frame: api.Frame, channel: IMsgChannel, rtid: Rtid) {
-    const prefix = Utils.isEmpty(this.constructor?.name) ? "Frame" : this.constructor?.name;
-    this.logger = new Logger(prefix);
-    this._browser = browser;
-    this._page = page;
-    this._frame = frame;
-    this._channel = channel;
-    this._rtid = rtid;
+  constructor(rtid: Rtid) {
+    super(rtid);
+  }
+
+  /** ==================================================================================================================== */
+  /** ===================================================== locator ====================================================== */
+  /** ==================================================================================================================== */
+
+  element(selector?: api.ElementLocatorOptions | string): api.ElementLocator {
+    const elementLocator = new ElementLocator();
+    elementLocator.resolve([this]);
+    const options = typeof selector === 'string' ? { selector: selector } : selector;
+    const locator = new ElementLocator(elementLocator, options);
+    return locator;
+  }
+
+  text(selector?: api.TextLocatorOptions | string | RegExp): api.TextLocator {
+    const elementLocator = new ElementLocator();
+    elementLocator.resolve([this]);
+    const options = (typeof selector === 'string' || selector instanceof RegExp) ? { text: selector } : selector;
+    const locator = new TextLocator(elementLocator, options);
+    return locator;
   }
 
   /** ==================================================================================================================== */
@@ -51,144 +62,301 @@ export class Element implements api.Element {
     return this._rtid;
   }
 
-  page(): api.Page {
-    return this._page;
+  async ownerFrame(): Promise<api.Frame> {
+    return await super.ownerFrame();
   }
 
-  contentFrame(): api.Frame {
-    throw new Error("Method not implemented.");
-  }
-  value(): Promise<string> {
-    throw new Error("Method not implemented.");
-  }
-  innerHTML(): Promise<string> {
-    throw new Error("Method not implemented.");
-  }
-  outerHTML(): Promise<string> {
-    throw new Error("Method not implemented.");
-  }
-  innerText(): Promise<string> {
-    throw new Error("Method not implemented.");
-  }
-  textContent(): Promise<string> {
-    throw new Error("Method not implemented.");
-  }
-  boundingBox(): Promise<api.RectInfo> {
-    throw new Error("Method not implemented.");
+  async contentFrame(): Promise<api.Frame | null> {
+    const tabRtid = RtidUtils.getTabRtid(this._rtid.tab);
+    await this.invokeFunction(tabRtid, 'updateFrameInfos', []);
+
+    const frameRtid = (this._frame as Frame).rtid();
+    const contentFrameRtid = await this.invokeFunction(frameRtid, 'getContentFrameRtid', [this._rtid]) as Rtid;
+    if (Utils.isNullOrUndefined(contentFrameRtid) || !RtidUtils.isRtid(contentFrameRtid)) {
+      return null;
+    }
+    const contentFrame = this.repo.getFrame(contentFrameRtid);
+    return contentFrame;
   }
 
+  async tagName(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'tagName', []);
+    return result as string;
+  }
+  async id(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'id', []);
+    return result as string;
+  }
+  async innerHTML(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'innerHTML', []);
+    return result as string;
+  }
+  async outerHTML(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'outerHTML', []);
+    return result as string;
+  }
+  async innerText(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'innerText', []);
+    return result as string;
+  }
+  async outerText(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'outerText', []);
+    return result as string;
+  }
+  async title(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'title', []);
+    return result as string;
+  }
+  async accessKey(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'accessKey', []);
+    return result as string;
+  }
+  async hidden(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'hidden', []);
+    return result as boolean;
+  }
 
-  /** ==================================================================================================================== */
-  /** ====================================================== methods ===================================================== */
-  /** ==================================================================================================================== */
+  async name(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'name', []);
+    return result as string;
+  }
+  async value(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'value', []);
+    return result as string;
+  }
+  async type(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'type', []);
+    return result as string;
+  }
+  async alt(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'alt', []);
+    return result as string;
+  }
+  async accept(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'accept', []);
+    return result as string;
+  }
+  async placeholder(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'placeholder', []);
+    return result as string;
+  }
+  async src(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'src', []);
+    return result as string;
+  }
+  async disabled(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'disabled', []);
+    return result as boolean;
+  }
+  async readOnly(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'readOnly', []);
+    return result as boolean;
+  }
+  async required(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'required', []);
+    return result as boolean;
+  }
+  async checked(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'checked', []);
+    return result as boolean;
+  }
 
+  async label(): Promise<string> {
+    const result = await this.invokeFunction(this._rtid, 'label', []);
+    return result as string;
+  }
+  async selected(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'selected', []);
+    return result as boolean;
+  }
 
-  getAttribute(): Promise<string | null> {
-    throw new Error("Method not implemented.");
+  async multiple(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'multiple', []);
+    return result as boolean;
   }
-  getAttributes(): Promise<Record<string, unknown>> {
-    throw new Error("Method not implemented.");
-  }
-  setAttribute(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  hasAttribute(): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  async querySelectorAll(selector: string): Promise<api.Element[]> {
-    const aos = await this._channel.queryObjects(this._rtid, {
-      type: 'element',
-      queryInfo: {
-        primary: [
-          { name: '#css', value: selector, type: 'property', match: 'exact' }
-        ]
-      }
-    });
+  async options(): Promise<api.Element[]> {
+    const rtids = await this.invokeFunction(this._rtid, 'options', []) as Rtid[];
     const results: api.Element[] = [];
-    for (const ao of aos) {
-      const elem = new Element(this._browser, this._page, this._frame, this._channel, ao.rtid);
+    for (const rtid of rtids) {
+      if (!RtidUtils.isRtid(rtid)) {
+        continue;
+      }
+      const elem = this.repo.getElement(rtid);
+      results.push(elem);
+    }
+    return results;
+  }
+  async selectedIndex(): Promise<number> {
+    const result = await this.invokeFunction(this._rtid, 'selectedIndex', []);
+    return result as number;
+  }
+  async selectedOptions(): Promise<api.Element[]> {
+    const rtids = await this.invokeFunction(this._rtid, 'selectedOptions', []) as Rtid[];
+    const results: api.Element[] = [];
+    for (const rtid of rtids) {
+      if (!RtidUtils.isRtid(rtid)) {
+        continue;
+      }
+      const elem = this.repo.getElement(rtid);
       results.push(elem);
     }
     return results;
   }
 
-  click(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  dblClick(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  focus(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  hover(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  blur(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  check(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  uncheck(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  clear(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  select(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  tap(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  dragTo(target: api.Element, options: { sourcePosition: api.Point; targetPosition: api.Point; }): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  scrollIntoViewIfNeeded(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  dispatchEvent(type: string, options?: object): Promise<void> {
-    throw new Error("Method not implemented.");
+  async visible(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'visible', []);
+    return result as boolean;
   }
 
-  async clickEx(options?: {
-    mode?: 'event' | 'cdp';
-    button?: "left" | "right" | "middle";
-    clickCount?: number;
-    moveBeforeClick?: number;
-    delayBeforeClick?: number;
-    delayBetweenUpDown?: number;
-    delayBetweenClick?: number;
-    modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
-    position?: {
-      x: number;
-      y: number;
-    };
-  }): Promise<void> {
-    throw new Error("Method not implemented.");
+  async boundingBox(): Promise<api.RectInfo | null> {
+    return await super.boundingBox();
   }
+  /** ==================================================================================================================== */
+  /** ====================================================== methods ===================================================== */
+  /** ==================================================================================================================== */
 
-  async setTextEx(text: string,
-    options?: {
-      mode?: 'event' | 'cdp';
-      clickBeforeSet?: boolean;
-      delayBeforeSet?: number;
-      delayBetweenUpDown?: number;
-      delayBetweenChar?: number;
-      commitAfterSet?: boolean;
-      delayBeforeCommit?: number;
-      modifiers?: Array<"Alt" | "Control" | "ControlOrMeta" | "Meta" | "Shift">;
+  /** ==================================================================================================================== */
+  /** ====================================================== native ====================================================== */
+  /** ==================================================================================================================== */
+  async getAttribute(name: string): Promise<string | null> {
+    const result = await this.invokeFunction(this._rtid, 'getAttribute', [name]);
+    return result as string | null;
+  }
+  async getAttributes(): Promise<Record<string, unknown>> {
+    const result = await this.invokeFunction(this._rtid, 'getAttributes', []);
+    return result as Record<string, unknown>;
+  }
+  async setAttribute(name: string, value: string): Promise<void> {
+    await this.invokeFunction(this._rtid, 'setAttribute', [name, value]);
+  }
+  async hasAttribute(name: string): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'hasAttribute', [name]);
+    return result as boolean;
+  }
+  async toggleAttribute(name: string, force?: boolean): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'toggleAttribute', [name, force]);
+    return result as boolean;
+  }
+  async querySelectorAll(selector: string): Promise<api.Element[]> {
+    const rtids = await this.invokeFunction(this._rtid, 'querySelectorAll', [selector]) as Rtid[];
+    const results: api.Element[] = [];
+    for (const rtid of rtids) {
+      if (!RtidUtils.isRtid(rtid)) {
+        continue;
+      }
+      const elem = this.repo.getElement(rtid);
+      results.push(elem);
     }
-  ): Promise<void> {
-    throw new Error("Method not implemented.");
+    return results;
+  }
+  async getBoundingClientRect(): Promise<api.RectInfo> {
+    return await super.getBoundingClientRect();
+  }
+  async checkValidity(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'checkValidity', []);
+    return result as boolean;
+  }
+  async checkVisibility(options?: object): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'checkVisibility', [options]);
+    return result as boolean;
+  }
+
+  async focus(): Promise<void> {
+    await this.invokeFunction(this._rtid, 'focus', []);
+  }
+  async blur(): Promise<void> {
+    await this.invokeFunction(this._rtid, 'blur', []);
+  }
+  async scrollIntoViewIfNeeded(): Promise<void> {
+    await this.invokeFunction(this._rtid, 'scrollIntoViewIfNeeded', []);
+  }
+  async check(options?: api.ActionOptions): Promise<void> {
+    const mode = options?.mode ?? await this.getDefaultInputMode();
+    const force = options?.force ?? false;
+    if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
+      await this.checkStates(mode === 'cdp' ? ['visible', 'enabled'] : ['enabled']);
+    }
+
+    if (mode === 'cdp') {
+      let checked = await this.checked();
+      if (checked) {
+        return;
+      }
+      await this.click(options);
+      checked = await this.checked();
+      if (checked) {
+        return;
+      }
+      const rect = await this.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        await this.invokeFunction(this._rtid, 'check', []);
+        checked = await this.checked();
+        if (checked) {
+          return;
+        }
+      }
+      await this.setProperty('checked', true);
+    }
+    else {
+      await this.invokeFunction(this._rtid, 'check', []);
+    }
+  }
+  async uncheck(options?: api.ActionOptions): Promise<void> {
+    const mode = options?.mode ?? await this.getDefaultInputMode();
+    const force = options?.force ?? false;
+    if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
+      await this.checkStates(mode === 'cdp' ? ['visible', 'enabled'] : ['enabled']);
+    }
+
+    if (mode === 'cdp') {
+      let checked = await this.checked();
+      if (!checked) {
+        return;
+      }
+      await this.click(options);
+      checked = await this.checked();
+      if (!checked) {
+        return;
+      }
+      const rect = await this.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        await this.invokeFunction(this._rtid, 'uncheck', []);
+        checked = await this.checked();
+        if (!checked) {
+          return;
+        }
+      }
+      await this.setProperty('checked', false);
+    }
+    else {
+      await this.invokeFunction(this._rtid, 'uncheck', []);
+    }
+  }
+  async selectOption(values: string | string[] | number | number[] | api.Element | api.Element[]): Promise<void> {
+    const elems = Array.isArray(values) ? values : [values];
+    let options = [];
+    for (const elem of elems) {
+      if (elem instanceof Element && Utils.isFunction(elem.rtid)) {
+        const rtid = elem.rtid();
+        if (RtidUtils.isRtid(rtid)) {
+          options.push(rtid);
+        }
+      }
+      else {
+        options.push(elem);
+      }
+    }
+    await this.invokeFunction(this._rtid, 'selectOption', [options]);
+  }
+  async setFileInputFiles(files: string | string[]): Promise<void> {
+    const inputFiles = Array.isArray(files) ? files : [files];
+    await this.invokeFunction(this._rtid, 'setFileInputFiles', [inputFiles]);
   }
 
   /** ==================================================================================================================== */
   /** ==================================================== DOM Object ==================================================== */
   /** ==================================================================================================================== */
-
-  $0(): any {
+  async $0(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
       get: async (target, prop) => {
         //console.log(`getting ${prop} from ${target}`);
@@ -200,7 +368,6 @@ export class Element implements api.Element {
       },
     });
 
-    return rawObj;
+    return rawObj as any;
   }
-
 }

@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file main.ts
  * @description 
@@ -27,20 +27,19 @@ import { SidebarDispatcher } from './SidebarDispatcher';
 import { SidebarHandler } from './SidebarHandler';
 import { StepEngine } from './StepEngine';
 import { SettingUtils } from '@/common/Settings';
-
-// Create and mount the Vue application
-const app = createApp(Sidebar);
-app.mount('#app');
+import { SidebarUtils } from './SidebarUtils';
 
 await SettingUtils.init();
 const dispatcher = new SidebarDispatcher();
 const handler = new SidebarHandler();
 dispatcher.addHandler(handler);
-const engine = new StepEngine(dispatcher, );
-(window as any).engine = engine;
-// handler.on('objectInspected')
-// handler.on('stepRecorded')
-dispatcher.init(handler);
+const engine = new StepEngine(dispatcher);
+SidebarUtils.engine = engine;
+SidebarUtils.dispatcher = dispatcher;
+SidebarUtils.handler = handler;
+await dispatcher.init();
 
-// Log initialization for debugging
-console.log('Sidebar component initialized');
+// Create and mount the Vue application
+const app = createApp(Sidebar);
+app.mount('#app');
+

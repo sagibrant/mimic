@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file SidebarHandler.ts
  * @description 
@@ -20,43 +20,61 @@
  * limitations under the License.
  */
 
-import { RtidUtil } from "@/common/Common";
+import { MsgUtils, RtidUtils } from "@/common/Common";
 import { MsgDataHandlerBase } from "@/common/Messaging/MsgDataHandler";
-import { Action, AODesc, AutomationObject, MessageData } from "@/types/message";
+import { AODesc, AutomationObject, DOMElementDescription, InvokeAction, RecordedStep } from "@/types/protocol";
+import { SidebarUtils } from "./SidebarUtils";
 
 interface SidebarEvents {
-  objectInspected: { ao: AutomationObject };
-  stepRecorded: { ao: AutomationObject, action: Action };
+  nodeInspected: { details: DOMElementDescription };
+  stepRecorded: { step: RecordedStep };
 }
 
 export class SidebarHandler extends MsgDataHandlerBase<SidebarEvents> {
 
   constructor() {
-    const rtid = RtidUtil.getAgentRtid();
-    rtid.external = '';
+    const rtid = RtidUtils.getAgentRtid();
+    rtid.context = 'external';
+    rtid.external = 'sidebar';
     super(rtid);
   }
-
-  async queryProperty(propName: string): Promise<unknown> {
-    throw new Error("Method not implemented.");
-  }
-
-  async queryObjects(desc: AODesc): Promise<AutomationObject[]> {
-    throw new Error("Method not implemented.");
-  }
-
-  protected async _handleCommandActions(data: MessageData): Promise<MessageData | undefined> {
-    throw new Error("Method not implemented.");
-  }
-
-  protected async _handleRecordActions(data: MessageData): Promise<MessageData | undefined> {
-    const { type, action } = data;
-
-    if (type != 'record') {
-      throw new Error(`_handleRecordActions: unexpected MessageData.type - ${type}`);
+  /** ==================================================================================================================== **/
+  /** ===================================================== command ====================================================== **/
+  /** ==================================================================================================================== **/
+  async onEvent(event: string, data: any): Promise<void> {
+    if (event === 'nodeInspected') {
+      const details = data as DOMElementDescription;
+      this.emit('nodeInspected', { details });
+      return;
     }
+    if (event === 'stepRecorded') {
+      const step = data as RecordedStep;
+      this.emit('stepRecorded', { step });
+      return;
+    }
+    const rtid = RtidUtils.getAgentRtid();
+    rtid.context = 'external';
+    rtid.external = 'sandbox-handler';
+    const msgData = MsgUtils.createMessageData('command', rtid, {
+      name: 'invoke',
+      params: {
+        name: 'onEvent',
+        args: [event, data]
+      }
+    } as InvokeAction);
 
-    throw new Error(`_handleRecordActions: failed to handle action ${action.name}`);
+    await SidebarUtils.dispatcher.sendEvent(msgData);
+  }
+
+  /** ==================================================================================================================== **/
+  /** ====================================================== query ======================================================= **/
+  /** ==================================================================================================================== **/
+  protected override async queryProperty(propName: string): Promise<unknown> {
+    throw new Error("Method not implemented.");
+  }
+
+  protected override async queryObjects(desc: AODesc): Promise<AutomationObject[]> {
+    throw new Error("Method not implemented.");
   }
 
 }

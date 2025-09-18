@@ -1,0 +1,560 @@
+<html>
+
+<head>
+  <title>mouse test</title>
+  <link rel="stylesheet" type="text/css" href="table-styles.css">
+  <link rel="stylesheet" type="text/css" href="form-styles.css">
+</head>
+
+<body>
+  <table>
+    <caption>
+      <div>
+        <input type="button" id="btn_start_monitor" value="start monitor" />
+        &nbsp;&nbsp; test mouse events &nbsp;&nbsp;&nbsp;
+        <input type="button" id="btn_stop_monitor" value="stop monitor" />
+      </div>
+    </caption>
+    <thead>
+      <tr>
+        <th>Events</th>
+        <th scope="col">Item</th>
+        <th scope="col">Location</th>
+        <th scope="col">Outputs</th>
+        <th scope="col">Expected</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">mouseMoved</th>
+        <td>
+          <button id="btn_mousemoved">Move mouse to me!</button>
+        </td>
+        <td>
+          <div id="location_mousemoved" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_mousemoved" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousemove</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mousePressed/mouseDown</th>
+        <td>
+          <button id="btn_mousedown">Press mouse on me!</button>
+        </td>
+        <td>
+          <div id="location_mousedown" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_mousedown" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousedown</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseReleased/mouseUp</th>
+        <td>
+          <button id="btn_mouseup">Release mouse to me!</button>
+        </td>
+        <td>
+          <div id="location_mouseup" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_mouseup" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mouseup</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseWheel</th>
+        <td>
+          <div>
+            <button id="btn_wheel">Mouse wheel on me!</button>
+          </div>
+        </td>
+        <td>
+          <div id="location_wheel" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_wheel" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-wheel</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseClick</th>
+        <td>
+          <button id="btn_click">Mouse Left Click on me!</button>
+        </td>
+        <td>
+          <div id="location_click" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_click" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousedown,mouseup,click</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseDblClick</th>
+        <td>
+          <button id="btn_dblclick">Mouse Left DblClick on me!</button>
+        </td>
+        <td>
+          <div id="location_dblclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_dblclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousedown,mouseup,click,dblclick</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseRightClick</th>
+        <td>
+          <button id="btn_middleclick">Mouse Middle Click on me!</button>
+        </td>
+        <td>
+          <div id="location_middleclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_middleclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousedown,mouseup,auxclick</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">mouseRightClick</th>
+        <td>
+          <button id="btn_rightclick">Mouse Right Click on me!</button>
+        </td>
+        <td>
+          <div id="location_rightclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_rightclick" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mousedown,mouseup,auxclick,contextmenu</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">focus</th>
+        <td>
+          <div>
+            <button id="btn_focus">Mouse focus on me!</button>
+          </div>
+        </td>
+        <td>
+          <div id="location_focus" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_focus" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-focus</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">hover</th>
+        <td>
+          <div>
+            <button id="btn_hover">Mouse hover on me!</button>
+          </div>
+        </td>
+        <td>
+          <div id="location_hover" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_hover" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-mouseover,mouseenter</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">tap</th>
+        <td>
+          <div>
+            <button id="btn_tap">Tap on me!</button>
+          </div>
+        </td>
+        <td>
+          <div id="location_tap" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_tap" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-touchstart,touchend</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">blur</th>
+        <td>
+          <div>
+            <button id="btn_blur">Blur on me!</button>
+          </div>
+        </td>
+        <td>
+          <div id="location_blur" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_blur" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-blur</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">drag drop</th>
+        <td>
+          <button id="btn_drag">Drag on me!</button>
+          <br />
+          <button id="btn_drag_drop_middle">I do nothing</button>
+          <br />
+          <button id="btn_drop">Drop on me!</button>
+        </td>
+        <td>
+          <div id="location_drag_drop" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_drag_drop" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-
+            dragstart,drag,dragenter,
+            dragover,drag,
+            dragleave(src),dragenter(target),
+            dragover(target),drag(src),
+            drop(target),dragend(src)
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">checkbox</th>
+        <td>
+          <input type="checkbox" name="checkbox" id="checkbox" value="checkbox value" title="checkbox title" />
+          <label for="checkbox">checkbox</label>
+        </td>
+        <td>
+          <div id="location_checkbox" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_checkbox" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">radio</th>
+        <td>
+          <div>
+            <fieldset>
+              <legend>Select a maintenance drone:</legend>
+              <div>
+                <input type="radio" id="huey" name="drone" value="huey" checked />
+                <label for="huey">Huey</label>
+              </div>
+              <div>
+                <input type="radio" id="dewey" name="drone" value="dewey" />
+                <label for="dewey">Dewey</label>
+              </div>
+              <div>
+                <input type="radio" id="louie" name="drone" value="louie" />
+                <label for="louie">Louie</label>
+              </div>
+            </fieldset>
+          </div>
+        </td>
+        <td>
+          <div id="location_radio" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_radio" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">select</th>
+        <td>
+          <select id="select">
+            <option value="">--Please choose an option--</option>
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+            <option value="hamster">Hamster</option>
+            <option value="parrot">Parrot</option>
+            <option value="spider">Spider</option>
+            <option value="goldfish">Goldfish</option>
+          </select>
+        </td>
+        <td>
+          <div id="location_select" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_select" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="5">
+
+        </th>
+      </tr>
+    </tfoot>
+
+  </table>
+</body>
+<script>
+  const outputEventInfo = (elem, output, ev) => {
+    let eventList = [];
+    if (typeof output.eventList !== "undefined") {
+      eventList = output.eventList;
+    }
+    eventList.push(ev);
+    if (eventList.length > 1000) {
+      eventList.shift();
+    }
+    // compress the mousemove
+    const logEventList = [];
+    for (const event of eventList) {
+      if (event.type === 'mousemove' && elem.id !== 'btn_mousemoved'
+        && logEventList.length >= 1 && logEventList[logEventList.length - 1].type === 'mousemove') {
+        continue;
+      }
+      logEventList.push(event);
+    }
+    while (logEventList.length > 1000) {
+      logEventList.shift();
+    }
+    let eventLog = "";
+    for (const event of logEventList) {
+      if (elem.id.indexOf('drag') >= 0 || elem.id.indexOf('drop') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>target:${event.target.id}</span>`;
+      }
+      else if (elem.id.indexOf('wheel') >= 0 && event.type.indexOf('wheel') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>deltaX:${event.deltaX}</span>`;
+        eventLog = eventLog + `<br/><span>deltaY:${event.deltaY}</span>`;
+      }
+      else {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+      }
+    }
+    output.innerHTML = eventLog;
+    output.eventList = eventList;
+  }
+  const mouseEvents = ["mousedown", "mouseup", "mousemove", "mouseenter", "mouseover", "mouseleave", "mouseout",
+    "mousewheel", 'wheel',
+    "click", "dblclick", 'auxclick', 'contextmenu',
+    "touchstart", "touchmove", "touchend", "touchcancel",
+    'focus', "focusin", "focusout", 'blur',
+    'change', 'input',
+    'dragstart', 'dragenter', 'drag', 'dragover', 'drop', 'dragend', 'dragleave'
+  ];
+  const addMouseEventListener = (elem, output) => {
+    if (elem.testEventListener) {
+      return;
+    }
+    const eventListener = (ev) => {
+      outputEventInfo(elem, output, ev);
+    };
+    elem.testEventListener = eventListener;
+    mouseEvents.forEach(function (mouseEvent) {
+      elem.addEventListener(mouseEvent, elem.testEventListener, true);
+    }.bind(this));
+  }
+  const startMonitor = (elemId, locationId, outputId) => {
+    let elem = document.getElementById(elemId);
+    let locationElem = document.getElementById(locationId);
+    let elemRect = elem.getBoundingClientRect();
+    let rectHtml = "x:" + elemRect.x + "<br/>";
+    rectHtml += "y:" + elemRect.y + "<br/>";
+    rectHtml += "width:" + elemRect.width + "<br/>";
+    rectHtml += "height:" + elemRect.height + "<br/>";
+    rectHtml += "center: (" + (elemRect.x + (elemRect.width / 2)) + "," + (elemRect.y + (elemRect.height / 2)) + ")";
+    locationElem.innerHTML = "<span>" + rectHtml + "</span>";
+    let outputElem = document.getElementById(outputId);
+    addMouseEventListener(elem, outputElem);
+  };
+  const stopMonitor = (elemId) => {
+    let elem = document.getElementById(elemId);
+    if (elem.testEventListener) {
+      mouseEvents.forEach(function (mouseEvent) {
+        elem.removeEventListener(mouseEvent, elem.testEventListener, true);
+      }.bind(this));
+      elem.testEventListener = undefined;
+    }
+  }
+
+  const btn_start_monitor = document.getElementById('btn_start_monitor');
+  btn_start_monitor.addEventListener('click', (ev) => {
+    // elments
+    startMonitor("btn_mousemoved", "location_mousemoved", "output_mousemoved");
+    startMonitor("btn_mousedown", "location_mousedown", "output_mousedown");
+    startMonitor("btn_mouseup", "location_mouseup", "output_mouseup");
+    startMonitor("btn_wheel", "location_wheel", "output_wheel");
+    startMonitor("btn_click", "location_click", "output_click");
+    startMonitor("btn_dblclick", "location_dblclick", "output_dblclick");
+    startMonitor("btn_middleclick", "location_middleclick", "output_middleclick");
+    startMonitor("btn_rightclick", "location_rightclick", "output_rightclick");
+    startMonitor("btn_focus", "location_focus", "output_focus");
+    startMonitor("btn_hover", "location_hover", "output_hover");
+    startMonitor("btn_tap", "location_tap", "output_tap");
+    startMonitor("btn_blur", "location_blur", "output_blur");
+    startMonitor("btn_drag", "location_drag_drop", "output_drag_drop");
+    startMonitor("btn_drop", "location_drag_drop", "output_drag_drop");
+    startMonitor("checkbox", "location_checkbox", "output_checkbox");
+    let radio_inputs = document.querySelectorAll('input[name="drone"]');
+    for (let i = 0; i < radio_inputs.length; ++i) {
+      startMonitor(radio_inputs[i].id, "location_radio", "output_radio");
+    }
+    startMonitor("select", "location_select", "output_select");
+  });
+  const btn_stop_monitor = document.getElementById('btn_stop_monitor');
+  btn_stop_monitor.addEventListener('click', (ev) => {
+    // elments
+    stopMonitor("btn_mousemoved");
+    stopMonitor("btn_mousedown");
+    stopMonitor("btn_mouseup");
+    stopMonitor("btn_wheel");
+    stopMonitor("btn_click");
+    stopMonitor("btn_dblclick");
+    stopMonitor("btn_middleclick");
+    stopMonitor("btn_rightclick");
+    stopMonitor("btn_focus");
+    stopMonitor("btn_hover");
+    stopMonitor("btn_tap");
+    stopMonitor("btn_blur");
+    stopMonitor("btn_drag");
+    stopMonitor("btn_drop");
+    stopMonitor("checkbox");
+    let radio_inputs = document.querySelectorAll('input[name="drone"]');
+    for (let i = 0; i < radio_inputs.length; ++i) {
+      stopMonitor(radio_inputs[i].id);
+    }
+    stopMonitor("select");
+  });
+
+</script>
+<script>
+  const btn_wheel = document.getElementById('btn_wheel');
+  btn_wheel.addEventListener("wheel", (ev) => {
+    let scale = 1;
+    if (typeof btn_wheel.scale !== "undefined") {
+      scale = btn_wheel.scale;
+    }
+    scale += ev.deltaY * -0.01;
+    // Restrict scale
+    scale = Math.min(Math.max(.125, scale), 6);
+    console.log(`ev.deltaYv= ${ev.deltaY}, scale = ${scale}`);
+    // Apply scale transform
+    btn_wheel.style.transform = `scale(${scale})`;
+    btn_wheel.scale = scale;
+  }, true);
+</script>
+<script>
+  // Get references to both buttons
+  const btn_drag = document.getElementById('btn_drag');
+  const btn_drop = document.getElementById('btn_drop');
+
+  // Make btn_drag draggable
+  btn_drag.setAttribute('draggable', 'true');
+
+  // Add dragstart event listener to btn_drag
+  btn_drag.addEventListener('dragstart', (e) => {
+    // Store some data to identify what's being dragged
+    e.dataTransfer.setData('text/plain', 'btn_drag');
+    // Optional: Add visual feedback
+    btn_drag.classList.add('dragging');
+  });
+
+  // Remove visual feedback when drag ends
+  btn_drag.addEventListener('dragend', () => {
+    btn_drag.classList.remove('dragging');
+  });
+
+  // Add dragover event listener to btn_drop to allow drop
+  btn_drop.addEventListener('dragover', (e) => {
+    e.preventDefault(); // This is necessary to allow drop
+    // Optional: Add visual feedback for drop target
+    btn_drop.classList.add('drop-target');
+  });
+
+  // Remove visual feedback when drag leaves btn_drop
+  btn_drop.addEventListener('dragleave', () => {
+    btn_drop.classList.remove('drop-target');
+  });
+
+  // Add drop event listener to btn_drop
+  btn_drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    // Remove visual feedback
+    btn_drop.classList.remove('drop-target');
+
+    // Get the data we stored during dragstart
+    const draggedId = e.dataTransfer.getData('text/plain');
+
+    if (draggedId === 'btn_drag') {
+      // Get parent container
+      const parent = btn_drag.parentNode;
+
+      // Get the line break after btn_drag
+      const brAfterbtn_drag = btn_drag.nextElementSibling;
+
+      // Insert btn_drag after btn_drop, maintaining the line break structure
+      if (btn_drop.nextElementSibling) {
+        parent.insertBefore(btn_drag, btn_drop.nextElementSibling);
+      } else {
+        parent.appendChild(btn_drag);
+      }
+
+      // Insert a new line break after the moved btn_drag
+      const newBr = document.createElement('br');
+      parent.insertBefore(newBr, btn_drag.nextElementSibling);
+
+      // Remove the original line break after btn_drag
+      if (brAfterbtn_drag && brAfterbtn_drag.tagName === 'BR') {
+        parent.removeChild(brAfterbtn_drag);
+      }
+    }
+  });
+
+  // Add some basic CSS for visual feedback
+  const style = document.createElement('style');
+  style.textContent = `
+    .dragging {
+        opacity: 0.5;
+        border: 2px dashed #666;
+    }
+    .drop-target {
+        background-color: #e0f0ff;
+        border: 2px solid #4a90e2;
+    }
+    button {
+        padding: 8px 16px;
+        margin: 4px;
+        cursor: pointer;
+    }
+`;
+  document.head.appendChild(style);
+</script>
+
+</html>

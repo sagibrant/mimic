@@ -4,13 +4,17 @@
 
 build extension from source:
 - src
+  -- _locales/**			# mlu files
+  -- assets/**  		# css & icons
+  -- common/**			# common libs
   -- background.js
   -- background/**		# import by the background.js
   -- content.js
   -- content/**			# import by the content.js
-  -- common/**			# import by the content.js & background.js
-  -- resources/**  		# static resources: images, CSS, htmls for option page, action page, etc
-  -- thirdparty/**		# 3rd party libs
+  -- execution/**		# files for task execution (replay/record)
+  -- sdk/**		      # the user sdk
+  -- types/**		    # the user sdk types
+  -- ui/**		      # the extension ui
 - build
   -- chrome | edge | firefox
     --- manifest
@@ -70,10 +74,12 @@ const timestamp = () => new Date().toISOString().replace(/T/, '-').replace(/:/g,
 
 // Generate default version: year.month.day.0
 const now = new Date();
-const defaultVersion = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.0`;
+const defaultVersion = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.${now.getHours()}`;
 
 module.exports = (env) => {
-  console.log(`${timestamp()} webpack.config.js:: start - env: ${JSON.stringify(env)}`);
+  console.log(`${timestamp()} webpack.config.js:: ==>`);
+  console.log(`${timestamp()} env: ${JSON.stringify(env)}`);
+  console.log(`${timestamp()} args: ${JSON.stringify(process.argv)}`);
 
   const browser = env.browser; // 'chrome', 'edge', 'firefox'
   const manifestVersion = env.manifestVersion; // 'v2', 'v3'
@@ -102,7 +108,7 @@ module.exports = (env) => {
     // devtool: 'inline-source-map',
     // Disable source maps in all environments to prevent eval usage
     // Source maps can introduce eval() calls which violate CSP
-    devtool: 'source-map',
+    devtool: target === 'unpacked' ? 'inline-source-map' : false,
     /**
      * Target environment
      * Specifies the environment Webpack should compile for
@@ -232,11 +238,6 @@ module.exports = (env) => {
             },
           },
           {
-            from: path.resolve(rootDir, 'src/resources'),
-            to: 'resources/',
-            noErrorOnMissing: true,
-          },
-          {
             from: path.resolve(rootDir, 'src/assets'),
             to: 'assets/',
             noErrorOnMissing: true,
@@ -344,7 +345,7 @@ module.exports = (env) => {
       // Ensures eval override scripts aren't optimized away
       concatenateModules: false,
       // Minimize output only in production environment
-      minimize: process.env.NODE_ENV === 'production',
+      minimize: true,
       // Configure minification process
       minimizer: [
         // Override default Terser configuration
@@ -386,6 +387,6 @@ module.exports = (env) => {
     },
   });
 
-  console.log(`${timestamp()} webpack.config.js:: end`);
+  console.log(`${timestamp()} webpack.config.js:: <==`);
   return config;
 };

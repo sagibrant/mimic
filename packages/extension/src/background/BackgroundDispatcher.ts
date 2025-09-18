@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file BackgroundDispatcher.ts
  * @description 
@@ -20,132 +20,127 @@
  * limitations under the License.
  */
 
-import { MsgUtil, RtidUtil, Utils } from "../common/Common";
-import { IChannel } from "../common/Messaging/ChannelBase";
-import { ExtensionChannelClient, ExtensionChannelHost, ExtensionClientInfo } from "../common/Messaging/ComChannels/ExtensionChannel";
+import { ExtensionRuntimeChannel } from "@/common/Messaging/ComChannels/ExtensionRuntimeChannel";
+import { MsgUtils, RtidUtils, Utils } from "../common/Common";
+import { ChannelBase, ClientChannel, ClientInfo, IChannel } from "../common/Messaging/ChannelBase";
 import { Dispatcher } from "../common/Messaging/Dispatcher";
-import { InvokeAction, Message } from "../types/message";
+import { ContextType, Message, MessageData } from "../types/protocol";
+import { ExtensionFrameChannel } from "@/common/Messaging/ComChannels/ExtensionFrameChannel";
+
+class BackgroundListeningChannel extends ExtensionRuntimeChannel { }
+class BackgroundToFrameChannel extends ExtensionFrameChannel { }
 
 export class BackgroundDispatcher extends Dispatcher {
 
-  private readonly _extensionChannelHost: ExtensionChannelHost;
-  private readonly _extensionNativeChannelClient: ExtensionChannelClient;
+  private readonly _backgroundListeningChannel: BackgroundListeningChannel;
+  private readonly _backgroundToFrameChannel: BackgroundToFrameChannel;
+  protected readonly routingMap: Record<ContextType, ClientChannel[]> = {
+    MAIN: [],
+    content: [],
+    background: [],
+    external: []
+  };
 
   constructor() {
     super('background');
-
-    // listening for content and extension connections
-    this._extensionChannelHost = new ExtensionChannelHost();
-    this._extensionChannelHost.on('connected', ({ client, channel }) => {
-      if (client.type === 'content') {
-        this.addRoutingChannel('content', client, channel);
-        // send msg to frame to notify the connection
-        const tabId = (client as ExtensionClientInfo).info?.tab?.id;
-        const frameId = (client as ExtensionClientInfo).info?.frameId;
-        if (!Utils.isNullOrUndefined(tabId) && !Utils.isNullOrUndefined(frameId)) {
-          this.updateFrameConnectionStatus(tabId, frameId, true);
-        }
+    this._backgroundListeningChannel = new BackgroundListeningChannel();
+    this._backgroundListeningChannel.on('message', ({ msg, sender, responseCallback }) => {
+      if (!MsgUtils.isMessage(msg)) {
+        this.logger.error('Invalid message format: msg:', msg, ' sender:', sender);
+        return;
       }
-      else if (client.type === 'background') {
-        this.addRoutingChannel('background', client, channel);
+      if (msg.data.dest.external === 'sidebar') {
+        this.logger.error('sidebar message format: msg:', msg, ' sender:', sender);
+        return;
       }
-      else if (client.type === 'external') {
-        this.addRoutingChannel('external', client, channel);
-      }
+      this.onMessage(msg, sender, responseCallback);
     });
-    this._extensionChannelHost.on('disconnected', ({ client, channel }) => {
-      if (client.type === 'content') {
-        this.removeRoutingChannel('content', client, channel);
-
-        // send msg to frame to notify the connection
-        const tabId = (client as ExtensionClientInfo).info?.tab?.id;
-        const frameId = (client as ExtensionClientInfo).info?.frameId;
-        if (!Utils.isNullOrUndefined(tabId) && !Utils.isNullOrUndefined(frameId)) {
-          this.updateFrameConnectionStatus(tabId, frameId, false);
-        }
-      }
-      else if (client.type === 'background') {
-        this.removeRoutingChannel('background', client, channel);
-      }
-      else if (client.type === 'external') {
-        this.removeRoutingChannel('external', client, channel);
-      }
-    });
-
-    // connect to native (native messaging)
-    this._extensionNativeChannelClient = new ExtensionChannelClient('native', 'mock_native_app');
-    this._extensionNativeChannelClient.on('connected', ({ client, channel }) => {
-      if (client.type === 'external') {
-        this.addRoutingChannel('external', client, channel);
-      }
-    });
-    this._extensionNativeChannelClient.on('disconnected', ({ client, channel }) => {
-      if (client.type === 'external') {
-        this.removeRoutingChannel('external', client, channel);
-      }
-    });
+    this._backgroundToFrameChannel = new BackgroundToFrameChannel();
   }
 
   async init() {
-    this._extensionChannelHost.start();
-    this._extensionNativeChannelClient.connect();
-    // todo: connect to server using ws channel
+    this._backgroundListeningChannel.startListening(true, true);
   }
 
-  protected override getRoutingChannels(msg: Message): IChannel[] {
-
-    const dest = msg.data.dest;
-    let channels: IChannel[] = [];
-
-    let routingKey = RtidUtil.getRtidContextType(dest);
-    if (Utils.isNullOrUndefined(routingKey)) {
-      return [];
-    }
-    // we need to forward the message to content channel and content will forward to MAIN
-    if (routingKey === 'MAIN') {
-      routingKey = 'content';
-    }
-
-    const clientChannels = this.routingMap[routingKey];
-    if (Utils.isEmpty(clientChannels)) {
-      return [];
-    }
-
-    if (routingKey === 'external' || routingKey === 'background') {
-      clientChannels.forEach((clientChannel) => {
-        const [client, channel] = clientChannel;
-        // require exact match
-        if (client.type === routingKey && client.id === dest.external) {
-          channels.push(channel);
-        }
-      });
-    }
-    else if (routingKey === 'content') {
-      clientChannels.forEach((clientChannel) => {
-        const [client, channel] = clientChannel;
-        // require exact match in background
-        if (client.type === 'content'
-          && (dest.tab === (client as ExtensionClientInfo).info?.tab?.id && dest.frame === (client as ExtensionClientInfo).info?.frameId)) {
-          channels.push(channel);
-        }
-      });
+  override onMessage(msg: Message, sender?: any, responseCallback?: (response: Message) => void): void {
+    // handle the frame register message
+    // const reqMsgData = MsgUtils.createMessageData('config', RtidUtils.getAgentRtid(), { name: 'get', params: { name: 'sender' } });
+    if (msg.type === 'request' && RtidUtils.isRtidEqual(RtidUtils.getAgentRtid(), msg.data.dest) && responseCallback
+      && msg.data.type === 'config' && msg.data.action.name === 'get' && msg.data.action.params?.name === 'sender') {
+      const resData: MessageData = {
+        ...Utils.deepClone(msg.data),
+        status: 'OK',
+        result: { sender: sender }
+      };
+      const response = MsgUtils.createResponse(resData, msg.syncId!, msg.correlationId);
+      responseCallback(response);
     }
     else {
-      this.logger.warn(`getRoutingChannels: receive unexpected routingKey ${routingKey}`);
+      super.onMessage(msg, sender, responseCallback);
     }
-
-    return channels;
   }
 
-  private updateFrameConnectionStatus(tabId: number, frameId: number, connected: boolean): void {
-    const rtid = RtidUtil.getTabRtid(tabId, -1);
-    const msgData = MsgUtil.createMessageData('command', rtid, {
-      name: 'invoke',
-      params: {
-        name: 'updateFrameDetails',
-        args: [frameId, { connected: connected }]
+  protected override getChannel(msg: Message): IChannel {
+    const dest = msg.data.dest;
+    let contextType = RtidUtils.getRtidContextType(dest);
+    if (contextType === 'content' || contextType === 'MAIN') {
+      return this._backgroundToFrameChannel;
+    }
+    else if (contextType === 'external' && msg.data.dest.external === 'sidebar') {
+      return this._backgroundListeningChannel;
+    }
+    else {
+      throw new Error(`Unsupported context type ${contextType}`);
+    }
+  }
+
+  /**
+ * Remove a [client, channel]  from the routing map under a routing key.
+ * @param routingKey - the routing key: 'main' | 'content' | 'background' | 'external';
+ * @param client - the connected client 
+ * @param channel - the channel 
+ */
+  addRoutingChannel(routingKey: ContextType, client: ClientInfo, channel: IChannel): void {
+    // init if no routing key
+    if (!this.routingMap.hasOwnProperty(routingKey)) {
+      this.routingMap[routingKey] = [];
+    }
+
+    let i = this.routingMap[routingKey].findIndex((val) => {
+      let [cur_client, cur_channel] = val;
+      if (cur_channel.id === channel.id && cur_client.id === client.id) {
+        return true;
       }
-    } as InvokeAction);
-    this.sendEvent(msgData);
+      return false;
+    });
+    if (i >= 0) {
+      this.logger.warn('addRoutingChannel: find duplicated client & channel', routingKey, client, channel);
+      this.routingMap[routingKey][i] = [client, channel];
+    }
+    else {
+      this.routingMap[routingKey].push([client, channel]);
+    }
+
+    if (channel instanceof ChannelBase) {
+      channel.on('message', ({ msg, sender, responseCallback }) => {
+        this.onMessage(msg, sender, responseCallback);
+      });
+    }
+  }
+
+  /**
+   * Remove a [client, channel]  from the routing map under a routing key.
+   * @param routingKey - the routing key: 'page' | 'content' | 'background' | 'external' | 'native' | 'server'
+   * @param client - the connected client 
+   * @param channel - the channel 
+   */
+  removeRoutingChannel(routingKey: ContextType, client: ClientInfo, channel: IChannel): void {
+    if (!this.routingMap.hasOwnProperty(routingKey)) {
+      this.routingMap[routingKey] = [];
+    }
+
+    this.routingMap[routingKey] = this.routingMap[routingKey].filter(
+      ([cur_client, cur_channel]) => !(cur_channel.id === channel.id && cur_client.id === client.id)
+    );
   }
 }

@@ -2,41 +2,41 @@
 <template>
   <div class="result-tab content-panel">
     <div class="property-row">
-      <label class="property-label">{{ t('description') }}:</label>
+      <label class="property-label">{{ t('step_result_label_description') }}</label>
       <div class="property-value">{{ currentStepResult?.step_description || '' }}</div>
     </div>
 
     <div class="property-row">
-      <label class="property-label">{{ t('start_time') }}:</label>
+      <label class="property-label">{{ t('step_result_label_start_time') }}</label>
       <div class="property-value">{{ currentStepResult?.step_start_time || '' }}</div>
     </div>
 
     <div class="property-row">
-      <label class="property-label">{{ t('end_time') }}:</label>
+      <label class="property-label">{{ t('step_result_label_end_time') }}</label>
       <div class="property-value">{{ currentStepResult?.step_end_time || '' }}</div>
     </div>
 
     <div class="property-row">
-      <label class="property-label">{{ t('status') }}:</label>
+      <label class="property-label">{{ t('step_result_label_status') }}</label>
       <div class="property-value" :class="currentStepResult?.status">
-        {{ currentStepResult?.status === 'pass' ? t('pass') :
-          currentStepResult?.status === 'fail' ? t('fail') :
-            currentStepResult?.status === 'pending' ? t('pending') : t('none') }}
+        {{ currentStepResult?.status === 'passed' ? t('step_result_label_passed') :
+          currentStepResult?.status === 'failed' ? t('step_result_label_failed') :
+            currentStepResult?.status === 'pending' ? t('step_result_label_pending') : t('step_result_label_none') }}
       </div>
     </div>
 
     <div class="property-row">
-      <label class="property-label">{{ t('error') }}:</label>
+      <label class="property-label">{{ t('step_result_label_error') }}</label>
       <div class="property-value error-message">{{ currentStepResult?.error || '' }}</div>
     </div>
 
     <div class="property-row">
-      <label class="property-label">{{ t('screenshot') }}:</label>
+      <label class="property-label">{{ t('step_result_label_screenshot') }}</label>
       <div class="screenshot-container" v-if="currentStepResult?.screenshot">
         <img :src="currentStepResult.screenshot" alt="Step execution screenshot" class="screenshot-thumbnail"
           @click="showFullScreenshot">
       </div>
-      <div class="property-value" v-else>{{ t('noScreenshot') }}</div>
+      <div class="property-value" v-else>{{ t('step_result_label_noScreenshot') }}</div>
     </div>
   </div>
 </template>

@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Browser.ts
  * @description 
@@ -20,24 +20,36 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, RtidUtil, Utils } from "@/common/Common";
-import { Logger } from "@/common/Logger";
-import * as api from "@/types/api";
-import { IMsgChannel } from "./Channel";
-import { Window } from "./Window";
-import { Page } from "./Page";
-import { Rtid } from "@/types/message";
+import { BrowserUtils, RtidUtils, Utils } from "@/common/Common";
+import * as api from "@/types/types";
+import { Rtid } from "@/types/protocol";
+import { WindowLocator } from "./WindowLocator";
+import { PageLocator } from "./PageLocator";
+import { BrowserLocator } from "./BrowserLocator";
+import { AutomationObject, Listener } from "./AutomationObject";
 
-export class Browser implements api.Browser {
-  protected readonly logger: Logger;
-  private readonly _channel: IMsgChannel;
-  private readonly _rtid: Rtid;
+export class Browser extends AutomationObject implements api.Browser {
 
-  constructor(channel: IMsgChannel, rtid: Rtid) {
-    const prefix = Utils.isEmpty(this.constructor?.name) ? "Browser" : this.constructor?.name;
-    this.logger = new Logger(prefix);
-    this._channel = channel;
-    this._rtid = rtid;
+  constructor(rtid: Rtid) {
+    super(rtid);
+  }
+
+  /** ==================================================================================================================== */
+  /** ===================================================== locator ====================================================== */
+  /** ==================================================================================================================== */
+
+  window(selector?: api.WindowLocatorOptions): api.WindowLocator {
+    const browserLocator = new BrowserLocator();
+    browserLocator.resolve([this]);
+    const winLocator = new WindowLocator(browserLocator, selector);
+    return winLocator;
+  }
+
+  page(selector?: api.PageLocatorOptions): api.PageLocator {
+    const browserLocator = new BrowserLocator();
+    browserLocator.resolve([this]);
+    const pageLocator = new PageLocator(browserLocator, selector);
+    return pageLocator;
   }
 
   /** ==================================================================================================================== */
@@ -46,6 +58,40 @@ export class Browser implements api.Browser {
 
   rtid(): Rtid {
     return this._rtid;
+  }
+
+  async windows(): Promise<api.Window[]> {
+    const winLocator = this.window();
+    const locators = await winLocator.all();
+    const windows = [];
+    for (const locator of locators) {
+      const win = await locator.get();
+      windows.push(win);
+    }
+    return windows;
+  }
+
+  async pages(): Promise<api.Page[]> {
+    const pageLocator = this.page();
+    const locators = await pageLocator.all();
+    const pages = [];
+    for (const locator of locators) {
+      const page = await locator.get();
+      pages.push(page);
+    }
+    return pages;
+  }
+
+  async lastFocusedWindow(): Promise<api.Window> {
+    const winLocator = this.window({ lastFocused: true });
+    const window = await winLocator.get();
+    return window;
+  }
+
+  async lastActivePage(): Promise<api.Page> {
+    const pageLocator = this.page({ active: true, lastFocusedWindow: true });
+    const page = await pageLocator.get();
+    return page;
   }
 
   name(): string {
@@ -63,81 +109,64 @@ export class Browser implements api.Browser {
     return info.majorVersion;
   }
 
-  async windows(): Promise<api.Window[]> {
-    const result: api.Window[] = [];
-    const windowObjs = await this._channel.queryObjects(this._rtid, { type: 'window' });
-    for (const win of windowObjs) {
-      const window = new Window(this, this._channel, win.rtid);
-      result.push(window);
-    }
-    return result;
-  }
-
-  async pages(): Promise<api.Page[]> {
-    const result: api.Page[] = [];
-    const tabObjs = await this._channel.queryObjects(this._rtid, { type: 'tab' });
-    for (const tab of tabObjs) {
-      const page = new Page(this, this._channel, tab.rtid);
-      result.push(page);
-    }
-    return result;
-  }
-
-  async lastFocusedWindow(): Promise<api.Window> {
-    const windowObjs = await this._channel.queryObjects(this._rtid, {
-      type: 'window',
-      queryInfo: { primary: [{ name: 'lastFocused', value: true, type: 'property', match: 'exact' }] }
-    });
-    if (windowObjs.length === 1) {
-      const window = new Window(this, this._channel, windowObjs[0].rtid);
-      return window;
-    }
-    else {
-      throw new Error('Failed on query the last focused window.');
-    }
-  }
-
-  async lastActivePage(): Promise<api.Page> {
-    const tabs = await this._channel.queryObjects(this._rtid, {
-      type: 'tab',
-      queryInfo: {
-        primary: [
-          { name: 'active', value: true, type: 'property', match: 'exact' },
-          { name: 'lastFocusedWindow', value: true, type: 'property', match: 'exact' }]
-      }
-    });
-    if (tabs.length === 1) {
-      const page = new Page(this, this._channel, tabs[0].rtid);
-      return page;
-    }
-    else {
-      throw new Error('Failed on query the last active page.');
-    }
-  }
-
-
   /** ==================================================================================================================== */
   /** ====================================================== methods ===================================================== */
   /** ==================================================================================================================== */
 
-  async enableCDP(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'enableCDP', []);
+  async attachDebugger(): Promise<void> {
+    await this.invokeFunction(this._rtid, 'attachDebugger', []);
   }
 
-  async disableCDP(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'disableCDP', []);
+  async detachDebugger(): Promise<void> {
+    await this.invokeFunction(this._rtid, 'detachDebugger', []);
   }
 
   async setDefaultTimeout(timeout: number): Promise<void> {
-    this._channel.setDefaultTimeout(timeout);
+    super.setDefaultTimeout(timeout);
+  }
+
+  async cookies(urls?: string | string[]): Promise<api.Cookie[]> {
+    if (Utils.isNullOrUndefined(urls)) {
+      urls = [];
+    }
+    else if (typeof urls === 'string') {
+      urls = [urls];
+    }
+    const result = await this.invokeFunction(this._rtid, 'cookies', [urls]) as api.Cookie[];
+    return result;
+  }
+
+  async addCookies(cookies: (api.Cookie & { url?: string }) | (api.Cookie & { url?: string })[]): Promise<void> {
+    if (Utils.isNullOrUndefined(cookies) || (Array.isArray(cookies) && cookies.length === 0)) {
+      return;
+    }
+    else if (!Array.isArray(cookies) && typeof cookies === 'object') {
+      cookies = [cookies];
+    }
+    await this.invokeFunction(this._rtid, 'addCookies', [cookies]);
+  }
+
+  async clearCookies(options?: { name?: string | RegExp, domain?: string | RegExp, path?: string | RegExp }): Promise<void> {
+    const getValueWrapper = (value: string | RegExp | undefined) => {
+      if (value instanceof RegExp) {
+        return Utils.toRegExpSpec(value);
+      }
+      return value;
+    };
+    const opt = {
+      name: getValueWrapper(options?.name),
+      domain: getValueWrapper(options?.domain),
+      path: getValueWrapper(options?.path),
+    };
+    await this.invokeFunction(this._rtid, 'clearCookies', [opt]);
   }
 
   async openNewWindow(url?: string): Promise<api.Window> {
-    const windowInfo = await this._channel.invokeFunction(this._rtid, 'openNewWindow', [url]);
+    const windowInfo = await this.invokeFunction(this._rtid, 'openNewWindow', [url]);
     if (windowInfo && !Utils.isNullOrUndefined((windowInfo as any).id)) {
       const windowId = (windowInfo as any).id;
-      const windowRtid = RtidUtil.getWindowRtid(windowId);
-      const window = new Window(this, this._channel, windowRtid);
+      const windowRtid = RtidUtils.getWindowRtid(windowId, this._rtid.browser);
+      const window = this.repo.getWindow(windowRtid);
       return window;
     }
     else {
@@ -151,6 +180,35 @@ export class Browser implements api.Browser {
   }
 
   async close(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'close', []);
+    await this.invokeFunction(this._rtid, 'close', []);
+  }
+
+  /** ==================================================================================================================== */
+  /** ====================================================== events ====================================================== */
+  /** ==================================================================================================================== */
+  on(event: 'window', listener: (window: api.Window) => any): this;
+  on(event: 'page', listener: (page: api.Page) => any): this;
+  override on(event: string, listener: Listener): this {
+    return super.on(event, listener);
+  }
+  emit(event: 'window' | 'page', data?: any) {
+    if (event === 'window') {
+      const windowInfo = data;
+      if (!Utils.isNullOrUndefined(windowInfo?.id) && typeof windowInfo.id === 'number') {
+        const windowId = (windowInfo as any).id as number;
+        const windowRtid = RtidUtils.getWindowRtid(windowId, this._rtid.browser);
+        const window = this.repo.getWindow(windowRtid);
+        super.emit('window', window);
+      }
+    }
+    else if (event === 'page') {
+      const tabInfo = data;
+      if (!Utils.isNullOrUndefined(tabInfo?.id) && typeof tabInfo.id === 'number') {
+        const tabId = (tabInfo as any).id as number;
+        const tabRtid = RtidUtils.getTabRtid(tabId, -1, this._rtid.browser);
+        const page = this.repo.getPage(tabRtid);
+        super.emit('page', page);
+      }
+    }
   }
 }

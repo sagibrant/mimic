@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Dispatcher.ts
  * @description 
@@ -21,9 +21,9 @@
  */
 
 import { Logger } from './../Logger';
-import { Utils, MsgUtil, RtidUtil } from './../Common';
-import { ContextType, Message, MessageData } from '../../types/message';
-import { ChannelBase, ClientChannel, ClientInfo, IChannel } from './ChannelBase';
+import { Utils, MsgUtils, RtidUtils } from './../Common';
+import { Message, MessageData } from '../../types/protocol';
+import { IChannel } from './ChannelBase';
 import { IMsgDataHandler } from './MsgDataHandler';
 
 /**
@@ -33,16 +33,11 @@ export abstract class Dispatcher {
   readonly id: number;
   protected readonly logger: Logger;
   protected readonly mode: string;
-  private _timeout: number = 500;
+  private _timeout: number = 5000;
   private _responseCallbacks: Record<string, (result: MessageData) => void> = {};
   private _responseTimeoutId: Record<string, any> = {};
   private _handlers: IMsgDataHandler[] = [];
-  protected readonly routingMap: Record<ContextType, ClientChannel[]> = {
-    MAIN: [],
-    content: [],
-    background: [],
-    external: []
-  };
+
 
   constructor(mode: string) {
     this.id = Date.now();
@@ -71,55 +66,9 @@ export abstract class Dispatcher {
   }
 
   /**
- * Remove a [client, channel]  from the routing map under a routing key.
- * @param routingKey - the routing key: 'main' | 'content' | 'background' | 'external';
- * @param client - the connected client 
- * @param channel - the channel 
- */
-  addRoutingChannel(routingKey: ContextType, client: ClientInfo, channel: IChannel): void {
-    // init if no routing key
-    if (!this.routingMap.hasOwnProperty(routingKey)) {
-      this.routingMap[routingKey] = [];
-    }
-
-    let i = this.routingMap[routingKey].findIndex((val) => {
-      let [cur_client, cur_channel] = val;
-      if (cur_channel.id === channel.id && cur_client.id === client.id) {
-        return true;
-      }
-      return false;
-    });
-    if (i >= 0) {
-      this.logger.warn('addRoutingChannel: find duplicated client & channel', routingKey, client, channel);
-      this.routingMap[routingKey][i] = [client, channel];
-    }
-    else {
-      this.routingMap[routingKey].push([client, channel]);
-    }
-
-    if (channel instanceof ChannelBase) {
-      channel.on('message', (data) => {
-        this.onMessage(data.msg, channel);
-      });
-    }
-  }
-
-  /**
-   * Remove a [client, channel]  from the routing map under a routing key.
-   * @param routingKey - the routing key: 'page' | 'content' | 'background' | 'external' | 'native' | 'server'
-   * @param client - the connected client 
-   * @param channel - the channel 
+   * set the default timeout for messaging
+   * @param timeout default timeout
    */
-  removeRoutingChannel(routingKey: ContextType, client: ClientInfo, channel: IChannel): void {
-    if (!this.routingMap.hasOwnProperty(routingKey)) {
-      this.routingMap[routingKey] = [];
-    }
-
-    this.routingMap[routingKey] = this.routingMap[routingKey].filter(
-      ([cur_client, cur_channel]) => !(cur_channel.id === channel.id && cur_client.id === client.id)
-    );
-  }
-
   setDefaultTimeout(timeout: number): void {
     this._timeout = timeout;
   }
@@ -133,17 +82,31 @@ export abstract class Dispatcher {
     data: MessageData,
     timeout: number = this._timeout
   ): Promise<MessageData> {
-    this.logger.debug('sendRequest: ==> data=', data, ' timeout=', timeout);
+    this.logger.debug('sendRequest: ======> data=', data, ' timeout=', timeout);
     const handlers = this.getLocalHandlers(data);
     if (handlers.length > 0) {
       const result = await this.handleMsgData(data, handlers);
-      this.logger.debug('sendRequest: <== data=', data, ' handled result=', result);
+      this.logger.debug('sendRequest: <====== data=', data, ' handled result=', result);
       return result;
     }
     else {
-      const result = await this._sendRequestData(data, timeout);
-      this.logger.debug('sendRequest: <== data=', data, ' response result=', result);
-      return result;
+      const request = MsgUtils.createRequest(data);
+      const channel = this.getChannel(request);
+      if (Utils.isNullOrUndefined(channel)) {
+        throw new Error('Cannot find the communication channel');
+      }
+      if (channel.async) {
+        const response = await Utils.waitResult(async () => {
+          return await channel.sendRequest(request);
+        }, timeout);
+        this.logger.debug('sendRequest: <====== data=', data, ' response result=', response.data);
+        return response.data;
+      }
+      else {
+        const result = await this._postRequest(request, channel, timeout);
+        this.logger.debug('sendRequest: <====== data=', data, ' response result=', result);
+        return result;
+      }
     }
   }
 
@@ -155,23 +118,34 @@ export abstract class Dispatcher {
   async sendEvent(data: MessageData,
     timeout: number = this._timeout
   ): Promise<void> {
-    this.logger.debug('sendEvent: ==> data=', data, ' timeout=', timeout);
+    this.logger.debug('sendEvent: ======> data=', data, ' timeout=', timeout);
     const handlers = this.getLocalHandlers(data);
     if (handlers.length > 0) {
       await this.handleMsgData(data, handlers);
     }
     else {
-      const msg = MsgUtil.createEvent(data);
-      this.sendMsg(msg);
+      const event = MsgUtils.createEvent(data);
+      const channel = this.getChannel(event);
+      if (Utils.isNullOrUndefined(channel)) {
+        throw new Error('Cannot find the communication channel');
+      }
+      if (channel.async) {
+        await Utils.waitResult(async () => {
+          return await channel.sendEvent(event);
+        }, timeout);
+      }
+      else {
+        channel.postMessage(event);
+      }
     }
-    this.logger.debug('sendEvent: <==');
+    this.logger.debug('sendEvent: <====== data=', data);
   }
 
   /**
    * Handler for incoming messages from a channel.
    */
-  onMessage(msg: Message, sender: IChannel): void {
-    this.logger.debug('onMessage: ==> msg=', msg, ' sender=', sender);
+  onMessage(msg: Message, sender?: any, responseCallback?: (response: Message) => void): void {
+    this.logger.debug('onMessage: ------> msg=', msg, ' sender=', sender, ' responseCallback=', !!responseCallback);
 
     // response:
     if (msg.type === 'response' && msg.syncId) {
@@ -181,43 +155,73 @@ export abstract class Dispatcher {
         clearTimeout(timeoutId);
       }
       if (msg.syncId in this._responseCallbacks) {
-        const responseCallback = this._responseCallbacks[msg.syncId];
+        const cachedResponseCallback = this._responseCallbacks[msg.syncId];
         delete this._responseCallbacks[msg.syncId];
-        responseCallback(msg.data);
-        this.logger.debug('onMessage: <== handled by responseCallback, msg=', msg, ' sender=', sender);
+        cachedResponseCallback(msg.data);
+        this.logger.debug('onMessage: <------ handled by cachedResponseCallback, msg=', msg, ' sender=', sender);
       }
       return;
     }
 
-    // forward the event | request message
     if (msg.type === 'event') {
       const handlers = this.getLocalHandlers(msg.data);
       if (handlers.length > 0) {
         this.handleMsgData(msg.data, handlers);
-        this.logger.debug('onMessage: <== handled by local handlers, msg=', msg, ' sender=', sender);
+        this.logger.debug('onMessage: <------ handled by local handlers, msg=', msg, ' sender=', sender);
       }
       else {
-        const event = MsgUtil.createEvent(msg.data, msg.correlationId);
-        this.sendMsg(event);
-        this.logger.debug('onMessage: <== forward msg=', msg, ' new event=', event);
+        const event = MsgUtils.createEvent(msg.data, msg.correlationId);
+        this.logger.debug('onMessage: ==> forward event msg=', event);
+        const channel = this.getChannel(event);
+        if (Utils.isNullOrUndefined(channel)) {
+          throw new Error('Cannot find the communication channel');
+        }
+        if (channel.async) {
+          channel.sendEvent(event);
+        }
+        else {
+          channel.postMessage(event);
+        }
+        this.logger.debug('onMessage: <------ forward event msg=', msg, ' new event=', event, ' channel:', channel);
       }
     }
     else if (msg.type === 'request') {
       const handlers = this.getLocalHandlers(msg.data);
       if (handlers.length > 0) {
         this.handleMsgData(msg.data, handlers).then((result) => {
-          const resMsg = MsgUtil.createResponse(result, msg.syncId!, msg.correlationId);
-          this.logger.debug('onMessage: <== handled by local handlers, msg=', msg, ' sender=', sender, ' response=', resMsg);
-          sender.send(resMsg);
+          const response = MsgUtils.createResponse(result, msg.syncId!, msg.correlationId);
+          this.logger.debug('onMessage: <------ handled by local handlers, msg=', msg, ' sender=', sender, ' response=', response);
+          if (responseCallback) {
+            responseCallback(response);
+          }
         });
       }
       else {
-        this.logger.debug('onMessage: ==> forward request msg=', msg);
-        this._sendRequestData(msg.data).then((result) => {
-          const resMsg = MsgUtil.createResponse(result, msg.syncId!, msg.correlationId);
-          this.logger.debug('onMessage: <== forward request msg=', msg, ' sender=', sender, ' response=', resMsg);
-          sender.send(resMsg);
-        });
+        const request = MsgUtils.createRequest(msg.data);
+        this.logger.debug('onMessage: ------ forward request msg=', request);
+        const channel = this.getChannel(request);
+        if (Utils.isNullOrUndefined(channel)) {
+          throw new Error('Cannot find the communication channel');
+        }
+        if (channel.async) {
+          channel.sendRequest(request).then((resMsg) => {
+            const response = MsgUtils.createResponse(resMsg.data, msg.syncId!, msg.correlationId);
+            if (responseCallback) {
+              responseCallback(response);
+            }
+            this.logger.debug('onMessage: <------ forward request async msg=', msg, ' sender=', sender, ' response=', response, ' channel:', channel);
+          });
+        }
+        else {
+          // set timeout to -1 so that it will not rejected by timeout
+          this._postRequest(request, channel, -1).then((result) => {
+            const response = MsgUtils.createResponse(result, msg.syncId!, msg.correlationId);
+            if (responseCallback) {
+              responseCallback(response);
+            }
+            this.logger.debug('onMessage: <------ forward request post msg=', msg, ' sender=', sender, ' response=', response, ' channel:', channel);
+          });
+        }
       }
     }
   }
@@ -234,7 +238,7 @@ export abstract class Dispatcher {
   protected getLocalHandlers(msgData: MessageData): IMsgDataHandler[] {
     const dest = msgData.dest;
     const handlers = this._handlers.filter((handler) =>
-      Utils.isNullOrUndefined(dest) || RtidUtil.isRtidEqual(dest, handler.id)
+      Utils.isNullOrUndefined(dest) || RtidUtils.isRtidEqual(dest, handler.rtid)
     );
     return handlers;
   }
@@ -266,61 +270,44 @@ export abstract class Dispatcher {
   }
 
   /**
-   * Send request message data using channels.
+   * Post request message data using channels.
    * @param data message data for request
    * @param timeout message timeout
    */
-  private async _sendRequestData(data: MessageData, timeout: number = this._timeout): Promise<MessageData> {
+  private async _postRequest(msg: Message, channel: IChannel, timeout: number = this._timeout): Promise<MessageData> {
     return new Promise((resolve, reject) => {
       const resultCallback = (result: MessageData) => {
         resolve(result);
       };
 
-      const msg = MsgUtil.createRequest(data);
       while (Utils.isNullOrUndefined(msg.syncId) || msg.syncId in this._responseCallbacks) {
         msg.syncId = Utils.generateUUID();
       }
       const syncId = msg.syncId;
       this._responseCallbacks[syncId] = resultCallback;
-      const timeoutId = setTimeout(() => {
-        if (syncId in this._responseTimeoutId) {
-          delete this._responseTimeoutId[syncId];
-        }
-        if (syncId in this._responseCallbacks) {
-          delete this._responseCallbacks[syncId];
-          this.logger.error(`============ request timeout after ${timeout}ms. \r\nmessage: ${JSON.stringify(msg)}`);
-          reject(new Error(`Request timed out after ${timeout}ms`));
-        }
-      }, timeout);
-      this._responseTimeoutId[syncId] = timeoutId;
 
-      this.sendMsg(msg);
-    });
-  }
-
-  /**
-   * Send message using channels.   
-   * @param msg message
-   */
-  private sendMsg(msg: Message): void {
-    const channels: IChannel[] = this.getRoutingChannels(msg);
-    if (Utils.isEmpty(channels)) {
-      this.logger.warn(`sendMsg: find 0 channels when sending msg ${JSON.stringify(msg)}`);
-      return;
-    }
-    channels.forEach((channel) => {
-      try {
-        channel.send(msg);
-      } catch (error) {
-        this.logger.error(`sendMsg: channel.send error: ${error instanceof Error ? error.message : error}, msg: ${JSON.stringify(msg)} , channle: ${channel.id}`);
+      if (timeout > 0) {
+        const timeoutId = setTimeout(() => {
+          if (syncId in this._responseTimeoutId) {
+            delete this._responseTimeoutId[syncId];
+          }
+          if (syncId in this._responseCallbacks) {
+            delete this._responseCallbacks[syncId];
+            this.logger.error(`============ request timeout after ${timeout}ms. \r\nmessage: ${JSON.stringify(msg)}`);
+            reject(new Error(`Request timed out after ${timeout}ms`));
+          }
+        }, timeout);
+        this._responseTimeoutId[syncId] = timeoutId;
       }
+
+      channel.postMessage(msg);
     });
   }
 
   /**
-   * Get the routing channels from the msg.data.dest
+   * Get the channel for the msg.data.dest
    * @param msg message
    */
-  protected abstract getRoutingChannels(msg: Message): IChannel[];
+  protected abstract getChannel(msg: Message): IChannel | null;
 
 }

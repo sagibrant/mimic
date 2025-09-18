@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file sandbox.ts
  * @description 
@@ -20,31 +20,17 @@
  * limitations under the License.
  */
 
-import { RtidUtil } from "@/common/Common";
-import { Logger } from "@/common/Logger";
 import { SettingUtils } from "@/common/Settings";
-import { Browser } from "@/sdk/Browser";
-import { ExecutionMsgDispatcher } from "@/sdk/Channel";
-import { InvokeAction, Message } from "@/types/message";
+import { SandboxDispatcher } from "./SandboxDispatcher";
+import { ObjectRepository } from "@/sdk/ObjectRepository";
+import { SandboxHandler } from "./SandboxHandler";
+import { RuntimeUtils } from "@/sdk/RuntimeUtils";
 
 SettingUtils.getSettings().logLevel = 'WARN';
-const dispatcher = new ExecutionMsgDispatcher();
-const browser = new Browser(dispatcher, RtidUtil.getBrowserRtid());
-const logger = new Logger('sandbox');
-(window as any).browser = browser;
-window.addEventListener('message', async (ev) => {
-  if (ev.source !== window.parent) {
-    return;
-  }
-  const msg = ev.data as Message;
-  logger.debug('onWindowMessage:', msg);
-  // reset the page in case the tab is switched before the script execution
-  if (msg.data.type === 'command'
-    && msg.data.action.name === 'invoke'
-    && (msg.data.action as InvokeAction).params.name === 'runScript'
-  ) {
-    const page = await browser.lastActivePage();
-    (window as any).page = page;
-  }
-  dispatcher.onWindowMessage(msg);
-});
+const repo = new ObjectRepository();
+const dispatcher = new SandboxDispatcher();
+const handler = new SandboxHandler();
+dispatcher.addHandler(handler);
+RuntimeUtils.dispatcher = dispatcher;
+RuntimeUtils.repo = repo;
+await dispatcher.init();

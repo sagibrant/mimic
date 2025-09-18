@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file main.ts
  * @description 
@@ -23,11 +23,9 @@
 
 import { createApp } from 'vue';
 import Options from './Options.vue';
+import { SettingUtils } from '@/common/Settings';
 
+await SettingUtils.init();
 // Create and mount the Vue application
-createApp(Options)
-  .mount('#app');
-
-// Log initialization for debugging
-console.log('Options page initialized');
-    
+const app = createApp(Options);
+app.mount('#app');

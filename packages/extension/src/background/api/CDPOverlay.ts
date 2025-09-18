@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file CDPOverlay.ts
  * @description 
@@ -41,6 +41,33 @@ export class CDPOverlay {
   }
 
   /**
+   * Enters the 'inspect' mode. In this mode, elements that user is hovering over are highlighted. 
+   * Backend then generates 'inspectNodeRequested' event upon element selection.
+   * @param mode Set an inspection mode
+   */
+  async setInspectMode(mode: 'searchForNode' | 'searchForUAShadowDOM' | 'captureAreaScreenshot' | 'none' = 'searchForNode'): Promise<void> {
+    const targets = await this._cdp.getTargets(this._tabId);
+    targets.reverse();
+    for (const target of targets) {
+      if (!target.session) continue;
+      await this._cdp.sendCommand(target.session, "Overlay.setInspectMode", {
+        mode: mode,
+        highlightConfig: {
+          showInfo: true,
+          showStyles: true,
+          showRulers: false,
+          showAccessibilityInfo: true,
+          showExtensionLines: false,
+          contentColor: { r: 18, g: 110, b: 198, a: 0.4 },
+          paddingColor: { r: 108, g: 170, b: 78, a: 0.4 },
+          borderColor: { r: 255, g: 210, b: 10, a: 0.4 },
+          marginColor: { r: 240, g: 125, b: 10, a: 0.4 },
+        }
+      });
+    }
+  }
+
+  /**
    * Highlight a rectangle using the Overlay domain.
    * @param rect - Rectangle coordinates and style
    * @param successCallback - Called on success
@@ -49,7 +76,6 @@ export class CDPOverlay {
   async highlightRect(
     rect: unknown
   ): Promise<void> {
-    await this._cdp.attachTab(this._tabId);
     // default color picked from chrome:
     // Formula for foreground color: 
     // c_final = (1-a)*c_background + a*c_forground
@@ -73,7 +99,6 @@ export class CDPOverlay {
    * @param failCallback - Called on error
    */
   async hideHighlight(): Promise<void> {
-    await this._cdp.attachTab(this._tabId);
     await this._cdp.sendCommand(this._tabId, "Overlay.hideHighlight", undefined);
   }
 };

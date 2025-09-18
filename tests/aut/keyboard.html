@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>keyboard test</title>
+  <link rel="stylesheet" type="text/css" href="table-styles.css">
+  <link rel="stylesheet" type="text/css" href="form-styles.css">
+</head>
+
+<body>
+  <table>
+    <caption>
+      <div>
+        <input type="button" id="btn_start_monitor" value="start monitor" />
+        &nbsp;&nbsp; test keyboard events &nbsp;&nbsp;&nbsp;
+        <input type="button" id="btn_stop_monitor" value="stop monitor" />
+      </div>
+    </caption>
+    <thead>
+      <tr>
+        <th>Events</th>
+        <th scope="col">Item</th>
+        <th scope="col">Location</th>
+        <th scope="col">Outputs</th>
+        <th scope="col">Expected</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <th scope="row">clear text</th>
+        <td>
+          <input type="text" id="input_clear" value="text for testing...1234567890"></input>
+        </td>
+        <td>
+          <div id="location_input_clear" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_input_clear" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">fill textarea</th>
+        <td>
+          <textarea id="textarea_fill">text in textarea for testing...1234567890</textarea>
+        </td>
+        <td>
+          <div id="location_textarea_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_textarea_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">fill - input</th>
+        <td>
+          <input type="text" id="input_fill" value="text for testing...1234567890"></input>
+        </td>
+        <td>
+          <div id="location_input_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_input_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input,change</span>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">fill - </th>
+        <td>
+          <div id="contenteditable_fill" contenteditable="true"
+            style="border:1px solid black; min-height:100px; padding:10px;">
+            text for testing...1234567890
+          </div>
+        </td>
+        <td>
+          <div id="location_contenteditable_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <div id="output_contenteditable_fill" style="height: 100px; overflow:auto;"></div>
+        </td>
+        <td>
+          <span>event-input</span>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="5">
+
+        </th>
+      </tr>
+    </tfoot>
+
+  </table>
+
+</body>
+<script>
+  const outputEventInfo = (elem, output, ev) => {
+    let eventList = [];
+    if (typeof output.eventList !== "undefined") {
+      eventList = output.eventList;
+    }
+    eventList.push(ev);
+    if (eventList.length > 1000) {
+      eventList.shift();
+    }
+    // compress the mousemove
+    const logEventList = [];
+    for (const event of eventList) {
+      if (event.type === 'mousemove' && elem.id !== 'btn_mousemoved'
+        && logEventList.length >= 1 && logEventList[logEventList.length - 1].type === 'mousemove') {
+        continue;
+      }
+      logEventList.push(event);
+    }
+    while (logEventList.length > 300) {
+      logEventList.shift();
+    }
+    let eventLog = "";
+    for (const event of logEventList) {
+      if (elem.id.indexOf('drag') >= 0 || elem.id.indexOf('drop') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>target:${event.target.id}</span>`;
+      }
+      else if (elem.id.indexOf('wheel') >= 0 && event.type.indexOf('wheel') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>deltaX:${event.deltaX}</span>`;
+        eventLog = eventLog + `<br/><span>deltaY:${event.deltaY}</span>`;
+      }
+      else if (event.type.indexOf('input') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>data:${event.data}</span>`;
+      }
+      else if (event.type.indexOf('change') >= 0) {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+        eventLog = eventLog + `<br/><span>value:${event.target.value}</span>`;
+      }
+      else {
+        eventLog = eventLog + `<br/><span>${event.type}</span>`;
+      }
+    }
+    output.innerHTML = eventLog;
+    output.eventList = eventList;
+  }
+  const mouseEvents = ["mousedown", "mouseup",
+    // "mousemove", "mouseenter", "mouseover", "mouseleave", "mouseout",
+    //"mousewheel", 'wheel',
+    "click", "dblclick", 'auxclick', 'contextmenu',
+    "touchstart", "touchmove", "touchend", "touchcancel",
+    'focus', "focusin", "focusout", 'blur',
+    'change', 'input',
+    'dragstart', 'dragenter', 'drag', 'dragover', 'drop', 'dragend', 'dragleave'
+  ];
+  const addMouseEventListener = (elem, output) => {
+    if (elem.testEventListener) {
+      return;
+    }
+    const eventListener = (ev) => {
+      outputEventInfo(elem, output, ev);
+    };
+    elem.testEventListener = eventListener;
+    mouseEvents.forEach(function (mouseEvent) {
+      elem.addEventListener(mouseEvent, elem.testEventListener, true);
+    }.bind(this));
+  }
+  const startMonitor = (elemId, locationId, outputId) => {
+    let elem = document.getElementById(elemId);
+    let locationElem = document.getElementById(locationId);
+    let elemRect = elem.getBoundingClientRect();
+    let rectHtml = "x:" + elemRect.x + "<br/>";
+    rectHtml += "y:" + elemRect.y + "<br/>";
+    rectHtml += "width:" + elemRect.width + "<br/>";
+    rectHtml += "height:" + elemRect.height + "<br/>";
+    rectHtml += "center: (" + (elemRect.x + (elemRect.width / 2)) + "," + (elemRect.y + (elemRect.height / 2)) + ")";
+    locationElem.innerHTML = "<span>" + rectHtml + "</span>";
+    let outputElem = document.getElementById(outputId);
+    addMouseEventListener(elem, outputElem);
+  };
+  const stopMonitor = (elemId) => {
+    let elem = document.getElementById(elemId);
+    if (elem.testEventListener) {
+      mouseEvents.forEach(function (mouseEvent) {
+        elem.removeEventListener(mouseEvent, elem.testEventListener, true);
+      }.bind(this));
+      elem.testEventListener = undefined;
+    }
+  }
+
+  const btn_start_monitor = document.getElementById('btn_start_monitor');
+  btn_start_monitor.addEventListener('click', (ev) => {
+    // elments
+    startMonitor("input_clear", "location_input_clear", "output_input_clear");
+    startMonitor("textarea_fill", "location_textarea_fill", "output_textarea_fill");
+    startMonitor("input_fill", "location_input_fill", "output_input_fill");
+    startMonitor("contenteditable_fill", "location_contenteditable_fill", "output_contenteditable_fill");
+  });
+  const btn_stop_monitor = document.getElementById('btn_stop_monitor');
+  btn_stop_monitor.addEventListener('click', (ev) => {
+    // elments
+    stopMonitor("input_clear");
+    stopMonitor("textarea_fill");
+    stopMonitor("input_fill");
+    stopMonitor("contenteditable_fill");
+  });
+
+</script>
+
+</html>

@@ -1,37 +1,38 @@
 <template>
   <div class="action-container">
-    <button 
-      class="menu-item" 
-      @click="openMarket"
-    >
-      <i class="icon market-icon"></i>
-      <span>{{ t('market') }}</span>
+    <button class="menu-item" @click="openStore" :disabled="!isStoreSupported">
+      <i class="icon store-icon"></i>
+      <span>{{ t('action_btn_label_store') }}</span>
     </button>
-    
-    <button 
-      class="menu-item" 
-      @click="openSidebar"
-    >
+
+    <button class="menu-item" @click="openSidebar">
       <i class="icon sidebar-icon"></i>
-      <span>{{ t('sidebar') }}</span>
+      <span>{{ t('action_btn_label_sidebar') }}</span>
     </button>
-    
-    <button 
-      class="menu-item" 
-      :class="{ 'recording': isRecording }"
-      @click="toggleRecording"
-    >
+
+    <button class="menu-item" @click="openOptions">
+      <i class="icon options-icon"></i>
+      <span>{{ t('action_btn_label_options') }}</span>
+    </button>
+
+    <button class="menu-item" :class="{ 'recording': isRecording }" :disabled="!isRecordSupported"
+      @click="toggleRecording" :hidden="true">
       <i class="icon" :class="{ 'record-icon': !isRecording, 'stop-icon': isRecording }"></i>
-      <span>{{ isRecording ? t('stop') : t('start') }}</span>
+      <span>{{ isRecording ? t('action_btn_label_stop') : t('action_btn_label_record') }}</span>
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { BrowserUtils, Utils } from '@/common/Common';
+import { SettingUtils } from '@/common/Settings';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
 // State with proper typing
 const isRecording = ref(false);
+
+const isRecordSupported = ref(false);
+const isStoreSupported = ref(false);
 
 // Cleanup function for storage listener
 let storageChangeListener: (changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => void;
@@ -44,7 +45,7 @@ const t = (key: string): string => {
 // Initialize component
 onMounted(() => {
   // Load initial state from storage
-  chrome.storage.local.get(['isRecording', 'marketUrl']).then((result) => {
+  chrome.storage.local.get(['isRecording']).then((result) => {
     isRecording.value = result.isRecording || false;
   });
 
@@ -54,7 +55,7 @@ onMounted(() => {
       isRecording.value = changes.isRecording.newValue;
     }
   };
-  
+
   chrome.storage.onChanged.addListener(storageChangeListener);
 });
 
@@ -66,21 +67,22 @@ onUnmounted(() => {
 });
 
 /**
- * Open the market URL in a new tab using direct Chrome API
+ * Open the store URL in a new tab using direct Chrome API
  */
-const openMarket = async (): Promise<void> => {
+const openStore = async (): Promise<void> => {
   try {
-    const result = await chrome.storage.local.get('marketUrl');
-    const marketUrl = result.marketUrl || 'https://example.com/market'; // Default URL
-    
-    if (marketUrl) {
-      await chrome.tabs.create({ url: marketUrl });
+    if (!isStoreSupported.value) {
+      return;
+    }
+    const result = SettingUtils.getSettings();
+    if (result && result.storeURL) {
+      await chrome.tabs.create({ url: result.storeURL });
     } else {
-      showError(t('marketUrlNotConfigured'));
+      showError(t('action_error_storeURLNotConfigured'));
     }
   } catch (error) {
-    console.error('Error opening market:', error);
-    showError(t('failedToOpenMarket'));
+    console.error('Error opening store:', error);
+    showError(t('action_error_failedToOpenStore'));
   }
 };
 
@@ -104,27 +106,53 @@ const openSidebar = async (): Promise<void> => {
       // Open side panel for current tab
       await chrome.sidePanel.open({ tabId: currentTab.id });
     } else {
-      showError(t('noActiveTab'));
+      throw new Error('The current tab id is missing.');
     }
   } catch (error) {
     console.error('Error opening sidebar:', error);
-    showError(t('failedToOpenSidebar'));
+    showError(t('action_error_failedToOpenSidebar'));
   }
 };
+
+/**
+ * Open sidebar panel for current active tab
+ */
+const openOptions = async (): Promise<void> => {
+  try {
+    const browserInfo = BrowserUtils.getBrowserInfo();
+    const prefix = browserInfo.name === 'edge' ? 'extension' : 'chrome-extension';
+    const url = `${prefix}://${chrome.runtime.id}/ui/options/index.html`
+    await chrome.tabs.create({ url: url });
+  } catch (error) {
+    console.error('Error opening options:', error);
+    showError(t('action_error_failedToOpenOptions'));
+  }
+};
+
 
 /**
  * Toggle recording state and update storage
  */
 const toggleRecording = async (): Promise<void> => {
   try {
+    if (!isRecordSupported.value) {
+      showError(t('action_error_recordingNotSupported'));
+      return;
+    }
     const newState = !isRecording.value;
     // Update storage with new state
     await chrome.storage.local.set({ isRecording: newState });
     // Local state will be updated via storage change listener
-    showNotification(newState ? t('recordingStarted') : t('recordingStopped'));
+    showNotification(newState ? t('action_notification_recordingStarted') : t('action_notification_recordingStopped'));
+    if (newState) {
+      await Utils.wait(2000);
+      nextTick(() => {
+        showError(t('action_error_recordingNotSupported'));
+      });
+    }
   } catch (error) {
     console.error('Error toggling recording:', error);
-    showError(t('failedToToggleRecording'));
+    showError(t('action_error_failedToToggleRecording'));
   }
 };
 
@@ -134,8 +162,8 @@ const toggleRecording = async (): Promise<void> => {
 const showError = (message: string): void => {
   chrome.notifications.create({
     type: 'basic',
-    iconUrl: chrome.runtime.getURL('assets/icons/icon_color_48x48.png'),
-    title: t('error'),
+    iconUrl: chrome.runtime.getURL('assets/icons/icon_48x48.png'),
+    title: t('action_error'),
     message,
     priority: 2
   });
@@ -147,9 +175,9 @@ const showError = (message: string): void => {
 const showNotification = (message: string): void => {
   chrome.notifications.create({
     type: 'basic',
-    // iconUrl: '../../assets/icons/icon_color_48x48.png',
-    iconUrl: chrome.runtime.getURL('assets/icons/icon_color_48x48.png'),
-    title: t('gogogo'),
+    // iconUrl: '../../assets/icons/icon_48x48.png',
+    iconUrl: chrome.runtime.getURL('assets/icons/icon_48x48.png'),
+    title: t('action_notification'),
     message,
     priority: 2
   });
@@ -157,6 +185,10 @@ const showNotification = (message: string): void => {
 </script>
 
 <style scoped>
+[hidden] {
+  display: none !important;
+}
+
 /* Menu/list inspired design for Chrome extension popup */
 .action-container {
   display: flex;
@@ -207,6 +239,11 @@ const showNotification = (message: string): void => {
   background-color: rgba(211, 47, 47, 0.2);
 }
 
+.menu-item:disabled {
+  cursor: not-allowed;
+}
+
+
 /* Icon styling */
 .icon {
   display: inline-block;
@@ -216,20 +253,24 @@ const showNotification = (message: string): void => {
   font-style: normal;
 }
 
-.market-icon::before {
-  content: '📑';
+.store-icon::before {
+  content: '⚖';
+}
+
+.options-icon::before {
+  content: '☑';
 }
 
 .sidebar-icon::before {
-  content: '📄';
+  content: '◨';
 }
 
 .record-icon::before {
-  content: '📖';
+  content: '◉';
 }
 
 .stop-icon::before {
-  content: '🗞';
+  content: '■';
 }
 
 /* Theme adaptation for Chrome */
@@ -242,4 +283,3 @@ const showNotification = (message: string): void => {
   }
 }
 </style>
-    

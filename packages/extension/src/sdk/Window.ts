@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Window.ts
  * @description 
@@ -20,25 +20,31 @@
  * limitations under the License.
  */
 
-import { RtidUtil, Utils } from "@/common/Common";
-import { Logger } from "@/common/Logger";
-import * as api from "@/types/api";
-import { IMsgChannel } from "./Channel";
-import { Page } from "./Page";
-import { Rtid } from "@/types/message";
+import { RtidUtils, Utils } from "@/common/Common";
+import * as api from "@/types/types";
+import { Rtid } from "@/types/protocol";
+import { WindowLocator } from "./WindowLocator";
+import { PageLocator } from "./PageLocator";
+import { AutomationObject, Listener } from "./AutomationObject";
 
-export class Window implements api.Window {
-  protected readonly logger: Logger;
+export class Window extends AutomationObject implements api.Window {
   private readonly _browser: api.Browser;
-  private readonly _rtid: Rtid;
-  private readonly _channel: IMsgChannel;
 
-  constructor(browser: api.Browser, channel: IMsgChannel, rtid: Rtid) {
-    const prefix = Utils.isEmpty(this.constructor?.name) ? "Window" : this.constructor?.name;
-    this.logger = new Logger(prefix);
-    this._browser = browser;
-    this._channel = channel;
-    this._rtid = rtid;
+  constructor(rtid: Rtid) {
+    super(rtid);
+    const browserRtid = RtidUtils.getBrowserRtid(rtid.browser);
+    this._browser = this.repo.getBrowser(browserRtid);
+  }
+
+  /** ==================================================================================================================== */
+  /** ===================================================== locator ====================================================== */
+  /** ==================================================================================================================== */
+
+  page(selector?: api.PageLocatorOptions): api.PageLocator {
+    const windowLocator = new WindowLocator();
+    windowLocator.resolve([this]);
+    const pageLocator = new PageLocator(windowLocator, selector);
+    return pageLocator;
   }
 
   /** ==================================================================================================================== */
@@ -49,51 +55,44 @@ export class Window implements api.Window {
     return this._rtid;
   }
 
-  async state(): Promise<'normal'|'minimized'|'maximized'|'fullscreen'|'locked-fullscreen'> {
-    const propValue = await this._channel.queryProperty(this._rtid, 'state');
-    return propValue as 'normal'|'minimized'|'maximized'|'fullscreen'|'locked-fullscreen';
+  async browser(): Promise<api.Browser> {
+    return this._browser;
+  }
+
+  async pages(): Promise<api.Page[]> {
+    const locators = await this.page().all();
+    const pages = [];
+    for (const locator of locators) {
+      const page = await locator.get();
+      pages.push(page);
+    }
+    return pages;
+  }
+
+  async activePage(): Promise<api.Page> {
+    const page = await this.page({ active: true }).get();
+    return page;
+  }
+
+  async state(): Promise<'normal' | 'minimized' | 'maximized' | 'fullscreen' | 'locked-fullscreen'> {
+    const propValue = await this.queryProperty(this._rtid, 'state');
+    return propValue as 'normal' | 'minimized' | 'maximized' | 'fullscreen' | 'locked-fullscreen';
   }
 
   async focused(): Promise<boolean> {
-    const propValue = await this._channel.queryProperty(this._rtid, 'focused');
+    const propValue = await this.queryProperty(this._rtid, 'focused');
     return propValue as boolean;
   }
 
   async incognito(): Promise<boolean> {
-    const propValue = await this._channel.queryProperty(this._rtid, 'incognito');
+    const propValue = await this.queryProperty(this._rtid, 'incognito');
     return propValue as boolean;
   }
 
-  browser(): api.Browser {
-    return this._browser;
-  }
-  
-  async pages(): Promise<api.Page[]> {
-    const result: api.Page[] = [];
-    const tabs = await this._channel.queryObjects(this._rtid, { type: 'tab' });
-    for (const tab of tabs) {
-      const page = new Page(this._browser, this._channel, tab.rtid);
-      result.push(page);
-    }
-    return result;
-  }
-
-  async activePage(): Promise<api.Page> {
-    const tabs = await this._channel.queryObjects(this._rtid, {
-      type: 'tab',
-      queryInfo: {
-        primary: [
-          { name: 'active', value: true, type: 'property', match: 'exact' }
-        ]
-      }
-    });
-    if (tabs.length === 1) {
-      const page = new Page(this._browser, this._channel, tabs[0].rtid);
-      return page;
-    }
-    else {
-      throw new Error('Failed on query the last active page.');
-    }
+  async closed(): Promise<boolean> {
+    const browserRtid = RtidUtils.getBrowserRtid(this._rtid.browser);
+    const isClosed = await this.invokeFunction(browserRtid, 'isWindowClosed', [this._rtid.window]) as boolean;
+    return isClosed;
   }
 
   /** ==================================================================================================================== */
@@ -101,11 +100,11 @@ export class Window implements api.Window {
   /** ==================================================================================================================== */
 
   async openNewPage(url?: string): Promise<api.Page> {
-    const tabInfo = await this._channel.invokeFunction(this._rtid, 'openNewTab', [url]);
+    const tabInfo = await this.invokeFunction(this._rtid, 'openNewTab', [url]);
     if (tabInfo && !Utils.isNullOrUndefined((tabInfo as any).id)) {
       const tabId = (tabInfo as any).id;
-      const tabRtid = RtidUtil.getTabRtid(tabId, -1);
-      const page = new Page(this._browser, this._channel, tabRtid);
+      const tabRtid = RtidUtils.getTabRtid(tabId, -1, this._rtid.browser);
+      const page = this.repo.getPage(tabRtid);
       return page;
     }
     else {
@@ -114,26 +113,49 @@ export class Window implements api.Window {
   }
 
   async focus(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'focus', []);
+    await this.invokeFunction(this._rtid, 'focus', []);
   }
 
   async close(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'close', []);
+    await this.invokeFunction(this._rtid, 'close', []);
   }
 
   async minimize(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'minimize', []);
+    await this.invokeFunction(this._rtid, 'minimize', []);
   }
 
   async maximize(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'maximize', []);
+    await this.invokeFunction(this._rtid, 'maximize', []);
   }
 
   async restore(): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'restore', []);
+    await this.invokeFunction(this._rtid, 'restore', []);
   }
 
   async fullscreen(toggle: boolean = true): Promise<void> {
-    await this._channel.invokeFunction(this._rtid, 'fullscreen', [toggle]);
+    await this.invokeFunction(this._rtid, 'fullscreen', [toggle]);
+  }
+
+  /** ==================================================================================================================== */
+  /** ====================================================== events ====================================================== */
+  /** ==================================================================================================================== */
+  on(event: 'page', listener: (page: api.Page) => any): this;
+  on(event: 'close', listener: (window: api.Window) => any): this;
+  override on(event: string, listener: Listener): this {
+    return super.on(event, listener);
+  }
+  emit(event: 'page' | 'close', data?: any) {
+    if (event === 'page') {
+      const tabInfo = data;
+      if (!Utils.isNullOrUndefined(tabInfo?.id) && typeof tabInfo.id === 'number') {
+        const tabId = (tabInfo as any).id as number;
+        const tabRtid = RtidUtils.getTabRtid(tabId, -1, this._rtid.browser);
+        const page = this.repo.getPage(tabRtid);
+        super.emit('page', page);
+      }
+    }
+    else if (event === 'close') {
+      super.emit('close', this);
+    }
   }
 }

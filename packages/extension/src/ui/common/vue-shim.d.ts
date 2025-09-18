@@ -1,11 +1,10 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file shims-vue.d.ts
  * @description 
- * Entry point for Action popup component
- * Initializes and mounts the Vue application
+ * to support vue
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

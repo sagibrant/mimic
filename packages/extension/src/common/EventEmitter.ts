@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file EventEmitter.ts
  * @description 
@@ -222,17 +222,11 @@ export class EventEmitter<Events extends EventMap = any> {
         // Prevent unhandled promise rejections
         if (result && typeof result.then === 'function') {
           result.catch(error => {
-            this.logger.error(
-              `Unhandled async error in "${String(event)}" listener`,
-              error
-            );
+            this.logger.error(`Unhandled async error in "${String(event)}" listener`, error);
           });
         }
       } catch (error) {
-        this.logger.error(
-          `Sync listener error for "${String(event)}"`,
-          error
-        );
+        this.logger.error(`Sync listener error for "${String(event)}"`, error);
       } finally {
         // Mark once listeners for removal
         if (once) {
@@ -278,10 +272,7 @@ export class EventEmitter<Events extends EventMap = any> {
       try {
         await listener(args);
       } catch (error) {
-        this.logger.error(
-          `Parallel listener error for "${String(event)}"`,
-          error
-        );
+        this.logger.error(`Parallel listener error for "${String(event)}"`, error);
       } finally {
         if (once) {
           onceListenersToRemove.push(listener);
@@ -329,10 +320,7 @@ export class EventEmitter<Events extends EventMap = any> {
       try {
         await listener(args);
       } catch (error) {
-        this.logger.error(
-          `Series listener error for "${String(event)}"`,
-          error
-        );
+        this.logger.error(`Series listener error for "${String(event)}"`, error);
       } finally {
         if (once) {
           onceListenersToRemove.push(listener);

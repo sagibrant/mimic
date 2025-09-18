@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file main.ts
  * @description 
@@ -23,11 +23,9 @@
 
 import { createApp } from 'vue';
 import Action from './Action.vue';
+import { SettingUtils } from '@/common/Settings';
 
+await SettingUtils.init();
 // Create and mount the Vue application
 const app = createApp(Action);
 app.mount('#app');
-
-// Log initialization for debugging
-console.log('Action popup initialized');
-    

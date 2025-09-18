@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file ChromeExtensionAPI.ts
  * @description 
@@ -20,12 +20,28 @@
  * limitations under the License.
  */
 
-import { ChromiumExtensionAPI } from "./ChromiumExtensionAPI";
+import { ChromeCookiesAPI } from "./ChromeCookiesAPI";
+import { ChromeDevToolsProtocol } from "./ChromeDevToolsProtocol";
+import { ChromeScriptingAPI } from "./ChromeScriptingAPI";
+import { ChromeTabAPI } from "./ChromeTabAPI";
+import { ChromeWebNavigationAPI } from "./ChromeWebNavigationAPI";
+import { ChromeWindowAPI } from "./ChromeWindowAPI";
 
-export class ChromeExtensionAPI extends ChromiumExtensionAPI {
+export class ChromeExtensionAPI {
+
+  readonly windowAPI: ChromeWindowAPI;
+  readonly tabAPI: ChromeTabAPI;
+  readonly cdpAPI: ChromeDevToolsProtocol;
+  readonly webNavigationAPI: ChromeWebNavigationAPI;
+  readonly scriptingAPI: ChromeScriptingAPI;
+  readonly cookiesAPI: ChromeCookiesAPI;
 
   constructor() {
-    super();
+    this.windowAPI = new ChromeWindowAPI();
+    this.tabAPI = new ChromeTabAPI();
+    this.webNavigationAPI = new ChromeWebNavigationAPI();
+    this.cdpAPI = new ChromeDevToolsProtocol();
+    this.scriptingAPI = new ChromeScriptingAPI();
+    this.cookiesAPI = new ChromeCookiesAPI();
   }
-
 }

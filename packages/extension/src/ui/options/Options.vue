@@ -1,29 +1,57 @@
 <template>
   <div class="settings-container">
-    <h1>{{ t('automationSettings') }}</h1>
+    <h1>{{ t('options_label_settings') }}</h1>
 
     <form @submit.prevent="saveSettings">
-      <!-- Market URL Field -->
+      <!-- Store URL Field -->
       <div class="settings-group">
-        <label class="setting-label" for="marketUrl">{{ t('marketUrl') }}</label>
+        <label class="setting-label" for="storeURL">
+          {{ t('options_label_storeURL') }}
+        </label>
         <div class="input-container">
-          <input id="marketUrl" v-model="settings.marketUrl" type="url" class="setting-input"
-            placeholder="https://example.com/market">
+          <input id="storeURL" v-model="settings.storeURL" type="url" class="setting-input"
+            :placeholder="t('options_placeholder_storeURL')">
         </div>
       </div>
 
-      <!-- Access Key Field -->
+      <!-- AI BaseURL Field -->
       <div class="settings-group">
-        <label class="setting-label" for="accessKey">{{ t('accessKey') }}</label>
+        <label class="setting-label" for="ai_baseURL">
+          {{ t('options_label_ai_baseURL') }}
+        </label>
         <div class="input-container">
-          <input id="accessKey" v-model="settings.accessKey" type="text" class="setting-input"
-            placeholder="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imk2...">
+          <input id="ai_baseURL" v-model="settings.aiSettings.baseURL" type="url" class="setting-input"
+            :placeholder="t('options_placeholder_ai_baseURL')">
+        </div>
+      </div>
+
+      <!-- AI Models Field -->
+      <div class="settings-group">
+        <label class="setting-label" for="ai_models">
+          {{ t('options_label_ai_models') }}
+        </label>
+        <div class="input-input">
+          <input id="ai_models" v-model="settings.aiSettings.models" type="text" class="setting-input"
+            :placeholder="t('options_placeholder_ai_models')">
+        </div>
+      </div>
+
+      <!-- AI API Key Field -->
+      <div class="settings-group">
+        <label class="setting-label" for="ai_apiKey">
+          {{ t('options_label_ai_apiKey') }}
+        </label>
+        <div class="input-container">
+          <input id="ai_apiKey" v-model="settings.aiSettings.apiKey" type="password" class="setting-input"
+            :placeholder="t('options_placeholder_ai_apiKey')">
         </div>
       </div>
 
       <!-- Log Level Select -->
       <div class="settings-group">
-        <label class="setting-label" for="logLevel">{{ t('logLevel') }}</label>
+        <label class="setting-label" for="logLevel">
+          {{ t('options_label_logLevel') }}
+        </label>
         <div class="select-container">
           <select id="logLevel" v-model="settings.logLevel" class="setting-select">
             <option value="TRACE">TRACE</option>
@@ -37,44 +65,35 @@
         </div>
       </div>
 
-      <!-- Object Identification Settings -->
-      <div class="settings-group">
-        <label class="setting-label" for="objectIdentificationSettings">
-          {{ t('objectIdentificationSettings') }}
-        </label>
-        <div class="textarea-container">
-          <textarea id="objectIdentificationSettings" v-model="settings.objectIdentificationSettings"
-            class="setting-textarea" rows="5" :placeholder="t('jsonPlaceholder')"></textarea>
-        </div>
-      </div>
-
       <!-- Replay Settings -->
       <div class="settings-group">
         <label class="setting-label" for="replaySettings">
-          {{ t('replaySettings') }}
+          {{ t('options_label_replaySettings') }}
         </label>
         <div class="textarea-container">
-          <textarea id="replaySettings" v-model="settings.replaySettings" class="setting-textarea" rows="5"
-            :placeholder="t('jsonPlaceholder')"></textarea>
+          <textarea id="replaySettings" v-model="replaySettings" class="setting-textarea" rows="5"
+            :placeholder="t('options_placeholder_json')"></textarea>
         </div>
       </div>
 
       <!-- Record Settings -->
       <div class="settings-group">
         <label class="setting-label" for="recordSettings">
-          {{ t('recordSettings') }}
+          {{ t('options_label_recordSettings') }}
         </label>
         <div class="textarea-container">
-          <textarea id="recordSettings" v-model="settings.recordSettings" class="setting-textarea" rows="5"
-            :placeholder="t('jsonPlaceholder')"></textarea>
+          <textarea id="recordSettings" v-model="recordSettings" class="setting-textarea" rows="5"
+            :placeholder="t('options_placeholder_json')"></textarea>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="settings-actions">
-        <button type="submit" class="btn btn-primary">{{ t('apply') }}</button>
+        <button type="submit" class="btn btn-primary">
+          {{ t('options_btn_label_apply') }}
+        </button>
         <button type="button" class="btn btn-secondary" @click="resetSettings">
-          {{ t('reset') }}
+          {{ t('options_btn_label_reset') }}
         </button>
       </div>
     </form>
@@ -94,6 +113,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Settings, SettingUtils } from '../../common/Settings'
+import { Utils } from '@/common/Common';
+import { CryptoUtil } from '@/common/CryptoUtil';
 
 // Define notification interface
 interface Notification {
@@ -102,18 +123,15 @@ interface Notification {
   type: 'success' | 'error' | 'info';
 }
 
-// State
-const settings = ref<Settings>({
-  marketUrl: '',
-  accessKey: '',
-  logLevel: 'ERROR',
-  objectIdentificationSettings: '{}',
-  replaySettings: '{}',
-  recordSettings: '{}'
-});
+// Settings
+const settings = ref<Settings>(SettingUtils.getSettings());
 
 // Store original settings for reset functionality
-const originalSettings = ref<Settings>({ ...settings.value });
+const originalSettings = ref<Settings>(Utils.deepClone(settings.value));
+
+// sub settings text
+const replaySettings = ref('');
+const recordSettings = ref('');
 
 // Notification state
 const notification = ref<Notification>({
@@ -153,15 +171,17 @@ const updateTheme = () => {
  */
 const loadSettings = async (): Promise<void> => {
   try {
-    const result = await SettingUtils.load();
+    const result = SettingUtils.getSettings();
     if (!result) {
-      throw new Error('fail to load settings by calling SettingUtils.load');
+      throw new Error('fail to load settings by calling SettingUtils.getSettings');
     }
     settings.value = result;
-    originalSettings.value = { ...settings.value };
+    originalSettings.value = Utils.deepClone(result);
+    replaySettings.value = JSON.stringify(settings.value.replaySettings, null, 2);
+    recordSettings.value = JSON.stringify(settings.value.recordSettings, null, 2);
   } catch (error) {
     console.error('Error loading settings:', error);
-    showNotification(t('failedToLoadSettings'), 'error');
+    showNotification(t('options_notification_failedToLoadSettings'), 'error');
   }
 };
 
@@ -170,31 +190,41 @@ const loadSettings = async (): Promise<void> => {
  */
 const saveSettings = async (): Promise<void> => {
   try {
-    // Validate JSON fields
-    if (!validateJson(settings.value.objectIdentificationSettings)) {
-      showNotification(t('invalidJsonObject'), 'error');
+    const newSettings = Utils.deepClone(settings.value);
+
+    newSettings.replaySettings = parseReplaySettings(replaySettings.value);
+    if (!newSettings.replaySettings) {
+      showNotification(t('options_notification_invalidJsonReplay'), 'error');
       return;
     }
 
-    if (!validateJson(settings.value.replaySettings)) {
-      showNotification(t('invalidJsonReplay'), 'error');
+    newSettings.recordSettings = parseRecordSettings(recordSettings.value);
+    if (!newSettings.recordSettings) {
+      showNotification(t('options_notification_invalidJsonRecord'), 'error');
       return;
     }
 
-    if (!validateJson(settings.value.recordSettings)) {
-      showNotification(t('invalidJsonRecord'), 'error');
-      return;
+    const newSettingsVal = JSON.stringify(newSettings, null, 2);
+    if (SettingUtils.parse2Settings(newSettingsVal) === null) {
+      throw new Error('The input settings are invalid.')
     }
-
-    const result = await SettingUtils.save(settings.value);
+    // encrypt the sensitive values before storage
+    if (newSettings.aiSettings.apiKey) {
+      newSettings.aiSettings.apiKey = await CryptoUtil.encrypt(newSettings.aiSettings.apiKey);
+    }
+    const result = await SettingUtils.save(newSettings);
     if (!result) {
       throw new Error('fail to save settings by calling SettingUtils.save');
     }
-    originalSettings.value = { ...settings.value };
-    showNotification(t('settingsSavedSuccessfully'), 'success');
+
+    settings.value = result;
+    originalSettings.value = Utils.deepClone(result);
+    recordSettings.value = JSON.stringify(settings.value.recordSettings, null, 2);
+    replaySettings.value = JSON.stringify(settings.value.replaySettings, null, 2);
+    showNotification(t('options_notification_settingsSavedSuccessfully'), 'success');
   } catch (error) {
     console.error('Error saving settings:', error);
-    showNotification(t('failedToSaveSettings'), 'error');
+    showNotification(t('options_notification_failedToSaveSettings'), 'error');
   }
 };
 
@@ -202,20 +232,51 @@ const saveSettings = async (): Promise<void> => {
  * Reset settings to original values
  */
 const resetSettings = (): void => {
-  settings.value = { ...originalSettings.value };
-  showNotification(t('settingsReset'), 'info');
+  settings.value = Utils.deepClone(originalSettings.value);
+  recordSettings.value = JSON.stringify(settings.value.recordSettings, null, 2);
+  replaySettings.value = JSON.stringify(settings.value.replaySettings, null, 2);
+  showNotification(t('options_notification_settingsReset'), 'info');
 };
 
 /**
- * Validate JSON string
+ * parese the replaySettings
  */
-const validateJson = (jsonString: string): boolean => {
+const parseReplaySettings = (jsonString: string) => {
   try {
-    if (!jsonString.trim()) return true; // Allow empty
-    JSON.parse(jsonString);
-    return true;
+    if (!jsonString.trim()) return null;
+    const settings = JSON.parse(jsonString);
+    const check = [
+      typeof settings.attachDebugger === 'boolean',
+      typeof settings.autoSync === 'boolean',
+      typeof settings.stepTimeout === 'number',
+      typeof settings.stepInterval === 'number',
+      typeof settings.captureScreenshot === 'boolean',
+    ];
+    if (check.some(c => !c)) {
+      return null;
+    }
+    return settings;
   } catch (e) {
-    return false;
+    return null;
+  }
+};
+
+/**
+ * parese the recordSettings
+ */
+const parseRecordSettings = (jsonString: string) => {
+  try {
+    if (!jsonString.trim()) return null;
+    const settings = JSON.parse(jsonString);
+    const check = [
+      typeof settings.recordNavigation === 'boolean',
+    ];
+    if (check.some(c => !c)) {
+      return null;
+    }
+    return settings;
+  } catch (e) {
+    return null;
   }
 };
 

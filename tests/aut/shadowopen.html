@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <h1>The js link Element inside the shadowdom</h1>
+  <input type="button" id="btn1" value="click to hide the link!" />
+  <br />
+  <br />
+  <div id="shadowdiv1">
+    <div>
+      <br />
+      <br />
+      <input type="button" id="btn2" value="button in shadowdiv1 outside shadowdom" />
+    </div>
+  </div>
+  <br />
+  <br />
+  <input type="text" id="btn3" value="input outside the shadowdom"></input>
+
+</body>
+<script>
+  var component = document.getElementById('shadowdiv1');
+  var shadow = component.attachShadow({
+    mode: 'open'
+  });
+  shadow.innerHTML =
+    `
+        <a href="javascript:jsclick('js link click')" id="link1">
+            Click Me!
+            <br/> 
+            <img id="id-img" style="width:64px;height:64px;" alt="image" src="icon.png" />
+        </a>
+        <br/> 
+        <a href="javascript:jsclick('role based js link click')" role="button" id="role_based_link_button">Click role based link button</a>
+        <br/>
+        <input type="text" id="btn4"></input>
+        <div id="output" style="margin-top: 10px; margin-botton: 10px;"></div>
+        `;
+
+  function jsclick(msg) {
+    console.warn(msg, arguments);
+    debugger;
+    var shadowdiv1 = document.getElementById('shadowdiv1');
+    var btn4 = shadowdiv1.shadowRoot.getElementById("btn4");
+    btn4.value = msg;
+    var output = shadowdiv1.shadowRoot.getElementById("output");
+    var link1 = shadowdiv1.shadowRoot.getElementById("link1");
+    msg = msg + " (" + (link1.style.display || "block") + ")";
+    output.innerHTML = output.innerHTML + msg + "<br\>";
+  }
+
+  var btn1 = document.getElementById("btn1");
+  btn1.addEventListener("click", btnClick.bind(this));
+  function btnClick() {
+    var shadowdiv1 = document.getElementById('shadowdiv1');
+    var link1 = shadowdiv1.shadowRoot.getElementById("link1");
+    var role_based_link_button = shadowdiv1.shadowRoot.getElementById("role_based_link_button");
+    if (link1.style.display !== "none") {
+      link1.style.display = "none";
+      role_based_link_button.style.display = "none";
+      btn1.value = "click to display the link!";
+    }
+    else {
+      link1.style.display = "block";
+      role_based_link_button.style.display = "block";
+      btn1.value = "click to hide the link!";
+    }
+    //alert(btn1.value);
+  }
+
+  var btn2 = document.getElementById("btn2");
+  btn2.addEventListener("click", function () {
+    alert("the hidden button is clicked!");
+  });
+
+  var myquerySelectorAll = document.querySelectorAll;
+  document.querySelectorAll = function (selector) {
+    console.log("this is the customized querySelectorAll");
+    return [];
+  }
+  var shadowSelectorAll = component.shadowRoot.querySelectorAll;
+  component.shadowRoot.querySelectorAll = function (selector) {
+    console.log("this is the customized querySelectorAll in shadowRoot");
+    return [];
+  }
+  component.shadowRoot.shadowSelectorAll = shadowSelectorAll;
+</script>
+
+</html>

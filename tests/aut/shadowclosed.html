@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <h1>The editor Element inside the closed shadowdom</h1>
+
+  <div id="shadowdiv1">
+
+  </div>
+  <br />
+  <br />
+  <br />
+  <div id="container1">
+    <iframe sandbox="allow-scripts allow-modals allow-popups" id="frame1" style="border: 10px red solid;" width="80%"
+      height="200" src="https://developer.mozilla.org/en-US/"></iframe>
+  </div>
+  <div id="container2">
+    <iframe sandbox="allow-scripts allow-modals allow-popups" id="frame2" style="border: 10px red solid;" width="80%"
+      height="200" src="https://cn.bing.com/translator?setlang=zh-cn/"></iframe>
+  </div>
+
+</body>
+<script>
+  var component = document.getElementById('shadowdiv1');
+  var shadow = component.attachShadow({
+    mode: 'closed'
+  });
+  shadow.innerHTML =
+    `<br/> 
+        <input type="text" name="aaa"></input>
+        <br/> `;
+</script>
+
+</html>

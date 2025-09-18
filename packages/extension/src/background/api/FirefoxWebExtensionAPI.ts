@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file FirefoxWebExtensionAPI.ts
  * @description 
@@ -20,9 +20,9 @@
  * limitations under the License.
  */
 
-import { ChromiumExtensionAPI } from "./ChromiumExtensionAPI";
+import { ChromeExtensionAPI } from "./ChromeExtensionAPI";
 
-export class FirefoxWebExtensionAPI extends ChromiumExtensionAPI {
+export class FirefoxWebExtensionAPI extends ChromeExtensionAPI {
 
   constructor() {
     super();

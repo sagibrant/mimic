@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file ExtensionChannel.ts
  * @description 
@@ -22,9 +22,9 @@
  * limitations under the License.
  */
 
-import { Utils, MsgUtil, RtidUtil } from '../../Common';
+import { Utils, MsgUtils, RtidUtils } from '../../Common';
 import { ChannelBase, ChannelClient, ChannelHost, ChannelStatus, ClientChannel, ClientInfo } from '../ChannelBase';
-import { Message } from '../../../types/message';
+import { Message } from '../../../types/protocol';
 
 interface PortListenerWrapper {
   onMessage: (msg: Message, port: chrome.runtime.Port) => void;
@@ -36,40 +36,53 @@ interface PortListenerWrapper {
  */
 export class ExtensionPortChannel extends ChannelBase {
   /**
-   * the listenerWrapper for port events
-   */
-  private readonly _listener: PortListenerWrapper;
-  /**
    * the port for communication
    */
   private readonly _port: chrome.runtime.Port;
+  /**
+   * the listenerWrapper for port events
+   */
+  private _listener?: PortListenerWrapper;
 
   constructor(port: chrome.runtime.Port) {
     super();
 
     this._port = port;
     this._status = ChannelStatus.CONNECTED;
+  }
+
+  startListening() {
+    if (this._listener) {
+      return;
+    }
     this._listener = {
       onMessage: this.onMessage.bind(this),
       onDisconnect: this.onDisconnect.bind(this)
     };
-
     this._port.onMessage.addListener(this._listener.onMessage);
     this._port.onDisconnect.addListener(this._listener.onDisconnect);
   }
 
-  send(msg: Message): void {
-    if (this._status != ChannelStatus.CONNECTED) {
-      this.logger.warn('send: failed to send message because the port status is not connected');
+  stopListening() {
+    if (Utils.isNullOrUndefined(this._listener)) {
       return;
     }
+    this._port.onMessage.removeListener(this._listener.onMessage);
+    this._port.onDisconnect.removeListener(this._listener.onDisconnect);
+    this._listener = undefined;
+  }
+
+  postMessage(msg: Message): void {
+    if (this._status != ChannelStatus.CONNECTED) {
+      throw new Error('Channel is not connected');
+    }
     try {
-      this.logger.debug('send: ==>> msg=', msg);
+      this.logger.debug('postMessage: >>>> msg=', msg);
 
       this._port.postMessage(msg);
-    }
-    catch (err) {
-      this.logger.error(`send: port.postMessage failed, error: ${err instanceof Error ? err.message : err}, msg: ${msg}`);
+    } catch (error) {
+      this.logger.error('postMessage: error ', error, msg);
+      throw error;
     }
     finally {
       let error = '';
@@ -83,22 +96,37 @@ export class ExtensionPortChannel extends ChannelBase {
         this.logger.error(`send: port.postMessage get error: ${error}, msg: ${msg}`);
       }
     }
+  }
 
+  async sendEvent(msg: Message): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async sendRequest(msg: Message): Promise<Message> {
+    throw new Error("Method not implemented.");
   }
 
   disconnect(_reason?: string): void {
     if (this._status != ChannelStatus.CONNECTED) {
-      this.logger.warn('disconnect: failed to disconnect because the port status is not connected');
+      this.logger.warn('disconnect: failed to disconnect because the status is not connected');
       return;
     }
     this._status = ChannelStatus.DISCONNECTING;
+    this.stopListening();
     this._port.disconnect();
   }
 
   private onMessage(msg: Message, port: chrome.runtime.Port): void {
-    this.logger.debug('onMessage: ==>> msg=', msg, ' port:', port);
+    this.logger.debug('onMessage: >>>> msg=', msg, ' port:', port);
 
-    this.emit('message', { msg: msg });
+    this.emit('message', {
+      msg: msg,
+      sender: port,
+      responseCallback: (response) => {
+        this.postMessage(response);
+        this.logger.debug('onMessage: <<<< msg=', msg, ' port:', port, ' response:', response);
+      }
+    });
   }
 
   private onDisconnect(port: chrome.runtime.Port): void {
@@ -156,10 +184,10 @@ export class ExtensionChannelClient extends ChannelClient {
     this._type = type;
     this._externalId = externalId;
     if (this._type === 'extension' && Utils.isNullOrUndefined(this._externalId)) {
-      throw new Error('Invalid Arguments: the external id is missing for external extension connection');
+      throw new Error('The external id is missing for external extension connection');
     }
     if (this._type === 'native' && Utils.isNullOrUndefined(this._externalId)) {
-      throw new Error('Invalid Arguments: the external id is missing for external native connection');
+      throw new Error('The external id is missing for external native connection');
     }
 
     if (Utils.isFunction(chrome.runtime?.connect)) {
@@ -169,7 +197,7 @@ export class ExtensionChannelClient extends ChannelClient {
       this.logger.debug('use chrome.extension for messaging');
       this._messagingService = chrome?.extension;
     } else {
-      throw new Error('the messagingService (chrome.runtime | chrome.extension) is not available');
+      throw new Error('chrome.runtime is not available');
     }
     /**
      * we wrapped the callback so that we can safely remove the listeners after the binding
@@ -182,7 +210,7 @@ export class ExtensionChannelClient extends ChannelClient {
 
   connect(): void {
     if (!Utils.isNullOrUndefined(this._port) || !Utils.isNullOrUndefined(this._channel)) {
-      this.logger.warn('connect: already connected as port or channel is not null')
+      this.logger.warn('connect: already connected as port or channel is not null');
       return;
     }
 
@@ -195,57 +223,42 @@ export class ExtensionChannelClient extends ChannelClient {
     switch (this._type) {
       case 'native': {
         if (!('connectNative' in this._messagingService)) {
-          throw new Error('Unsupported Method: the connectNative function is missing');
+          throw new Error('The connectNative function is missing');
         }
         if (Utils.isEmpty(this._externalId)) {
-          throw new Error('Invalid Arguments: the external id is missing for external native connection');
+          throw new Error('The external id is missing for external native connection');
         }
 
-        try {
-          this.logger.debug(`connect: ==> connectNative to the ${this._externalId}`);
-          this._port = this._messagingService.connectNative(this._externalId);
-          this.logger.debug(`connect: <== connectNative to the ${this._externalId}}`);
-        }
-        catch (ex) {
-          this.logger.error('connect failed', ex);
-        }
+        this.logger.debug(`connect: ==> connectNative to the ${this._externalId}`);
+        this._port = this._messagingService.connectNative(this._externalId);
+        this.logger.debug(`connect: <== connectNative to the ${this._externalId}}`);
         break;
       }
       case 'background': {
         if (!('connect' in this._messagingService)) {
-          throw new Error('Unsupported Method: the connect function is missing');
+          throw new Error('The connect function is missing');
         }
 
-        try {
-          this.logger.debug(`connect: ==> connect to background`);
-          this._port = this._messagingService.connect(connectInfo);
-          this.logger.debug(`connect: <== connect to background`);
-        }
-        catch (ex) {
-          this.logger.error('connect failed', ex);
-        }
+        this.logger.debug(`connect: ==> connect to background`);
+        this._port = this._messagingService.connect(connectInfo);
+        this.logger.debug(`connect: <== connect to background`);
         break;
       }
       case 'extension': {
         if (!('connect' in this._messagingService)) {
-          throw new Error('Unsupported Method: the connect function is missing');
+          throw new Error('The connect function is missing');
         }
         if (Utils.isEmpty(this._externalId)) {
-          throw new Error('Invalid Arguments: the external id is missing for external extension connection');
+          throw new Error('The external id is missing for external extension connection');
         }
 
-        try {
-          this.logger.debug(`connect: ==> connect to external extension - ${this._externalId}`);
-          this._port = this._messagingService.connect(this._externalId, connectInfo);
-          this.logger.debug(`connect: <== connect to external extension - ${this._externalId}`);
-        }
-        catch (ex) {
-          this.logger.error('connect failed', ex);
-        }
+        this.logger.debug(`connect: ==> connect to external extension - ${this._externalId}`);
+        this._port = this._messagingService.connect(this._externalId, connectInfo);
+        this.logger.debug(`connect: <== connect to external extension - ${this._externalId}`);
         break;
       }
       default: {
-        this.logger.warn(`connect: the channel client type[${this._type}] is not supported`)
+        this.logger.warn(`connect: the channel client type[${this._type}] is not supported`);
         return;
       }
     }
@@ -312,8 +325,7 @@ export class ExtensionChannelClient extends ChannelClient {
         else {
           setTimeout(reconnectFunc, delay);
         }
-      }
-      catch (error) {
+      } catch (error) {
         this.logger.error('reconnect failed', error);
         setTimeout(reconnectFunc, delay);
       }
@@ -360,6 +372,7 @@ export class ExtensionChannelClient extends ChannelClient {
           });
           // emit the connected event
           this.emit('connected', { client: clientInfo, channel: channel });
+          channel.startListening();
           return;
         } else {
           this.logger.warn('onMessage: Connection failed', msg);
@@ -430,7 +443,7 @@ export class ExtensionChannelHost extends ChannelHost {
       this.logger.debug('use chrome.extension for messaging');
       this._messagingService = chrome?.extension;
     } else {
-      throw new Error('the messagingService (chrome.runtime | chrome.extension) is not available');
+      throw new Error('chrome.runtime is not available');
     }
 
     const manifest = chrome.runtime.getManifest();
@@ -466,17 +479,17 @@ export class ExtensionChannelHost extends ChannelHost {
     const clientInfo = this.getClientInfo(port);
     // unsupported connection, refuse the connection
     if (Utils.isNullOrUndefined(clientInfo) || Utils.isEmpty(clientInfo.id)) {
-      const msgData = MsgUtil.createMessageData('config', RtidUtil.getAgentRtid(), { name: 'set', params: { 'reason': 'connection refused' } });
+      const msgData = MsgUtils.createMessageData('config', RtidUtils.getAgentRtid(), { name: 'set', params: { 'reason': 'connection refused' } });
       msgData.status = 'ERROR';
-      const refuseMsg = MsgUtil.createEvent(msgData);
+      const refuseMsg = MsgUtils.createEvent(msgData);
       port.postMessage(refuseMsg);
       return;
     }
 
     // send back the success response
-    const msgData = MsgUtil.createMessageData('config', RtidUtil.getAgentRtid(), { name: 'set', params: { name: 'clientInfo', value: clientInfo } });
+    const msgData = MsgUtils.createMessageData('config', RtidUtils.getAgentRtid(), { name: 'set', params: { name: 'clientInfo', value: clientInfo } });
     msgData.status = 'OK';
-    const connectResponse = MsgUtil.createEvent(msgData);
+    const connectResponse = MsgUtils.createEvent(msgData);
     port.postMessage(connectResponse);
 
     // set port after the postMessage
@@ -491,6 +504,7 @@ export class ExtensionChannelHost extends ChannelHost {
     this._clientChannels[clientInfo.id] = [clientInfo, channel];
     // dispatch event: connected
     this.emit('connected', { client: clientInfo, channel: channel });
+    channel.startListening();
   }
 
   private getClientInfo(port: chrome.runtime.Port): ClientInfo | null {
@@ -526,7 +540,7 @@ export class ExtensionChannelHost extends ChannelHost {
       connectionId = `content-tab::${sender?.tab?.id}-frameId::${sender?.frameId}`;
     }
     else if (mode === 'background') {
-      // sidebar url: "chrome-extension://imcoelekoapmlngkdofleambknkkkicp/ui/sidebar/index.html"
+      // sidebar url: "chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/ui/sidebar/index.html"
       connectionId = `background::url::${sender?.url}`;
     }
     else if (mode === 'external') {
@@ -543,7 +557,7 @@ export class ExtensionChannelHost extends ChannelHost {
           isReconnected = knownClientInfo.isReconnected;
         }
       } catch {
-        this.logger.warn(`Unexpected port name format ${port.name}`);
+        this.logger.warn('Unexpected port name format - ', port.name);
       }
     }
 

@@ -1,25 +1,43 @@
 /**
- * background.ts
- * init the extension background
- * @author: Zhang Jie
+ * @copyright 2025 Sagi All Rights Reserved.
+ * @author: Sagi <sagibrant@hotmail.com>
+ * @license Apache-2.0
+ * @file background.ts
+ * @description 
+ * the extension background.js
+ * 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+
 import { BrowserUtils } from "./common/Common";
 import { BackgroundDispatcher } from "./background/BackgroundDispatcher";
-import { Agent } from "./background/aos/Agent";
+import { AgentHandler } from "./background/handlers/AgentHandler";
 import { ChromeExtensionAPI } from "./background/api/ChromeExtensionAPI";
-import { ChromiumExtensionAPI } from "./background/api/ChromiumExtensionAPI";
 import { EdgeExtensionAPI } from "./background/api/EdgeExtensionAPI";
 import { FirefoxWebExtensionAPI } from "./background/api/FirefoxWebExtensionAPI";
 import { SafariWebExtensionAPI } from "./background/api/SafariWebExtensionAPI";
 import { SettingUtils } from "./common/Settings";
-
-const timestamp = () => new Date().toISOString().replace(/T/, '-').replace(/:/g, '-').split('.')[0] + '-' + Date.now() % 1000;
-console.debug(`${timestamp()} background:: start`);
+import { BackgroundUtils } from "./background/BackgroundUtils";
 
 await SettingUtils.init();
+// create dispatcher
 const dispatcher = new BackgroundDispatcher();
+BackgroundUtils.dispatcher = dispatcher;
+// create agent
 const browserInfo = BrowserUtils.getBrowserInfo();
-type BrowserAPI = ChromiumExtensionAPI | ChromeExtensionAPI | EdgeExtensionAPI | FirefoxWebExtensionAPI | SafariWebExtensionAPI;
+type BrowserAPI = ChromeExtensionAPI | EdgeExtensionAPI | FirefoxWebExtensionAPI | SafariWebExtensionAPI;
 const createBrowserAPIFunc = (browserName: string) => {
   switch (browserName) {
     case 'chrome':
@@ -31,14 +49,18 @@ const createBrowserAPIFunc = (browserName: string) => {
     case 'safari':
       return new SafariWebExtensionAPI();
     default:
-      console.error(`unexpected browser type ${browserName}, rollback to ChromiumExtensionAPI`);
-      return new ChromiumExtensionAPI();
+      return new ChromeExtensionAPI();
   }
 }
 const browserAPI = createBrowserAPIFunc(browserInfo.name);
-const agent = new Agent(browserAPI);
+const agent = new AgentHandler(browserAPI);
 dispatcher.addHandler(agent);
+BackgroundUtils.agent = agent;
+
 agent.on('browserCreated', ({ browser }) => {
+  // set browser
+  BackgroundUtils.browser = browser;
+
   dispatcher.addHandler(browser);
 
   browser.on('tabCreated', ({ tab }) => {
@@ -57,8 +79,6 @@ agent.on('browserCreated', ({ browser }) => {
 
   browser.init();
 });
-await agent.init();
-await dispatcher.init();
 
 // extend self type for TypeScript requirements
 declare global {
@@ -66,7 +86,7 @@ declare global {
     gogogo: {
       dispatcher: BackgroundDispatcher,
       browserAPI: BrowserAPI,
-      agent: Agent,
+      agent: AgentHandler,
     };
   }
 }
@@ -79,6 +99,7 @@ swSelf.gogogo = {
   agent: agent
 };
 
-console.debug(`${timestamp()} background:: end`);
+await agent.init();
+await dispatcher.init();
 
 export { };

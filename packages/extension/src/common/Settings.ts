@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Settings.ts
  * @description 
@@ -20,86 +20,189 @@
  * limitations under the License.
  */
 
+import { Utils } from "./Common";
+
 export interface Settings {
-  marketUrl: string;
-  accessKey: string;
+  storeURL: string;
   logLevel: 'TRACE' | 'DEBUG' | 'LOG' | 'INFO' | 'WARN' | 'ERROR';
-  objectIdentificationSettings: string;
-  replaySettings: string;
-  recordSettings: string;
+  aiSettings: {
+    apiKey: string;
+    baseURL: string;
+    models: string;
+  };
+  replaySettings: {
+    attachDebugger: boolean;
+    autoSync: boolean;
+    autoActionCheck: boolean;
+    inputMode: 'auto' | 'event' | 'cdp';
+    stepTimeout: number;
+    stepInterval: number;
+    locatorTimeout: number;
+    captureScreenshot: boolean;
+  };
+  recordSettings: {
+    recordNavigation: boolean;
+  };
 }
 
 export class SettingUtils {
 
-  private static settings: Settings = {
-    marketUrl: '',
-    accessKey: '',
-    logLevel: 'WARN',
-    objectIdentificationSettings: '',
-    replaySettings: '',
-    recordSettings: ''
-  };
+  private static settings: Settings = SettingUtils.defaultSettings();
+  private static onChangedListener: (changes: any, areaName: any) => void;
 
-  static async init(): Promise<void> {
+  public static isSettings(data: unknown): data is Settings {
+    if (Utils.isNullOrUndefined(data)) {
+      return false;
+    }
+    const settings = data as any;
+    const defaultSettings = SettingUtils.defaultSettings();
+    Utils.fillWithDefaultValues(settings, defaultSettings);
+    const checks = [
+      typeof settings.storeURL === 'string',
+      typeof settings.logLevel === 'string' && ['TRACE', 'DEBUG', 'LOG', 'INFO', 'WARN', 'ERROR'].includes(settings.logLevel),
+      typeof settings.aiSettings === 'object',
+      typeof settings.replaySettings === 'object',
+      typeof settings.recordSettings === 'object',
+    ];
+    if (checks.some(c => !c)) {
+      return false;
+    }
+
+    const check_aiSettings = [
+      typeof settings.aiSettings.apiKey === 'string',
+      typeof settings.aiSettings.baseURL === 'string',
+      typeof settings.aiSettings.models === 'string',
+    ];
+    if (check_aiSettings.some(c => !c)) {
+      return false;
+    }
+
+    const check_replaySettings = [
+      typeof settings.replaySettings.attachDebugger === 'boolean',
+      typeof settings.replaySettings.autoSync === 'boolean',
+      typeof settings.replaySettings.autoActionCheck === 'boolean',
+      typeof settings.replaySettings.inputMode === 'string' && ['auto', 'event', 'cdp'].includes(settings.replaySettings.inputMode),
+      typeof settings.replaySettings.stepTimeout === 'number',
+      typeof settings.replaySettings.stepInterval === 'number',
+      typeof settings.replaySettings.locatorTimeout === 'number',
+      typeof settings.replaySettings.captureScreenshot === 'boolean'
+    ];
+    if (check_replaySettings.some(c => !c)) {
+      return false;
+    }
+
+    const check_recordSettings = [
+      typeof settings.recordSettings.recordNavigation === 'boolean',
+    ];
+    if (check_recordSettings.some(c => !c)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public static parse2Settings(text: string): Settings | null {
     try {
-      chrome.storage.onChanged.addListener((changes, areaName) => {
-        if (areaName === 'local') {
-          for (const key in SettingUtils.settings) {
-            if (key in changes) {
-              const settingKey = key as keyof Settings;
-              SettingUtils.settings[settingKey] = changes[settingKey].newValue;
-            }
-          }
-        }
-      });;
-      await SettingUtils.load();
+      const settings = JSON.parse(text);
+      if (!SettingUtils.isSettings(settings)) {
+        return null;
+      }
+      return settings as Settings;
     } catch (error) {
-      console.error('Error init the settings:', error);
+      console.error('parse2Settings Error:', error, ' text:', text);
+      return null;
     }
   }
 
-  static async load(): Promise<Settings | undefined> {
-    try {
-      const result = await chrome.storage.local.get([
-        'marketUrl',
-        'accessKey',
-        'logLevel',
-        'objectIdentificationSettings',
-        'replaySettings',
-        'recordSettings'
-      ]);
+  public static defaultSettings(): Settings {
+    return {
+      storeURL: '',
+      logLevel: 'WARN',
+      aiSettings: {
+        baseURL: '',
+        apiKey: '',
+        models: ''
+      },
+      replaySettings: {
+        attachDebugger: true,
+        autoSync: true,
+        autoActionCheck: true,
+        inputMode: 'auto',
+        stepTimeout: 300000,
+        stepInterval: 1000,
+        locatorTimeout: 5000,
+        captureScreenshot: false
+      },
+      recordSettings: {
+        recordNavigation: false
+      }
+    };
+  }
 
-      // Merge loaded settings with defaults
-      SettingUtils.settings = {
-        marketUrl: result.marketUrl || SettingUtils.settings.marketUrl,
-        accessKey: result.accessKey || SettingUtils.settings.accessKey,
-        logLevel: (result.logLevel as 'TRACE' | 'DEBUG' | 'LOG' | 'INFO' | 'WARN' | 'ERROR') || SettingUtils.settings.logLevel,
-        objectIdentificationSettings: result.objectIdentificationSettings || SettingUtils.settings.objectIdentificationSettings,
-        replaySettings: result.replaySettings || SettingUtils.settings.replaySettings,
-        recordSettings: result.recordSettings || SettingUtils.settings.recordSettings
-      };
+  static async init(): Promise<void> {
+    try {
+      if (!SettingUtils.onChangedListener) {
+        SettingUtils.onChangedListener = (changes, areaName) => {
+          if (areaName !== 'local') {
+            return;
+          }
+          if ('settings' in changes) {
+            const newValue = changes['settings'].newValue;
+            if (newValue) {
+              const newSettings = SettingUtils.parse2Settings(newValue);
+              if (newSettings) {
+                SettingUtils.settings = newSettings;
+              }
+            }
+            else {
+              SettingUtils.settings = SettingUtils.defaultSettings();
+            }
+          }
+        };
+        chrome.storage.onChanged.addListener(SettingUtils.onChangedListener);
+      }
+      await SettingUtils.load();
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('init Error:', error);
+    }
+  }
+
+  static async load(data?: Settings): Promise<Settings | undefined> {
+    try {
+      if (data && SettingUtils.isSettings(data)) {
+        const newSettings = data as Settings;
+        SettingUtils.settings = newSettings;
+      }
+      else {
+        const result = await chrome.storage.local.get(['settings']);
+        if (typeof result.settings === 'string' && result.settings) {
+          const newSettings = SettingUtils.parse2Settings(result.settings);
+          if (newSettings) {
+            SettingUtils.settings = newSettings;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('load Error:', error, ' data:', data);
     }
     finally {
       return SettingUtils.settings;
     }
   }
 
-  static async save(settings?: Settings): Promise<Settings | undefined> {
+  static async save(settings?: Settings): Promise<Settings> {
     try {
+      if (settings && !SettingUtils.isSettings(settings)) {
+        throw new Error('Invalid Settings');
+      }
       settings = settings || SettingUtils.settings;
+      const strValue = JSON.stringify(settings, null, 2);
       await chrome.storage.local.set({
-        marketUrl: settings.marketUrl,
-        accessKey: settings.accessKey,
-        logLevel: settings.logLevel,
-        objectIdentificationSettings: settings.objectIdentificationSettings,
-        replaySettings: settings.replaySettings,
-        recordSettings: settings.recordSettings
+        settings: strValue
       });
       SettingUtils.settings = settings;
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('save Error:', error, ' settings:', settings);
     }
     finally {
       return SettingUtils.settings;
@@ -110,27 +213,19 @@ export class SettingUtils {
     return SettingUtils.settings;
   }
 
-  static getMarketUrl(): string {
-    return SettingUtils.settings.marketUrl;
-  }
-
-  static getAccessKey(): string {
-    return SettingUtils.settings.accessKey;
+  static getStoreURL(): string {
+    return SettingUtils.settings.storeURL;
   }
 
   static getLogLevel(): string {
     return SettingUtils.settings.logLevel;
   }
 
-  static getObjectIdentificationSettings(): object {
-    return {};
+  static getReplaySettings() {
+    return SettingUtils.settings.replaySettings;
   }
 
-  static getReplaySettings(): object {
-    return {};
-  }
-
-  static getRecordSettings(): object {
-    return {};
+  static getRecordSettings() {
+    return SettingUtils.settings.recordSettings;
   }
 }

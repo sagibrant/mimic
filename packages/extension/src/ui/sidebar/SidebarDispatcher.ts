@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file SidebarDispatcher.ts
  * @description 
@@ -20,74 +20,79 @@
  * limitations under the License.
  */
 
-import { RtidUtil, Utils } from "@/common/Common";
+import { MsgUtils, RtidUtils } from "@/common/Common";
 import { IChannel } from "@/common/Messaging/ChannelBase";
-import { ExtensionChannelClient } from "@/common/Messaging/ComChannels/ExtensionChannel";
 import { Dispatcher } from "@/common/Messaging/Dispatcher";
-import { Message } from "@/types/message";
-import { SidebarHandler } from "./SidebarHandler";
+import { Message } from "@/types/protocol";
 import { PostMessageChannel } from "@/common/Messaging/ComChannels/PostMessageChannel";
+import { ExtensionRuntimeChannel } from "@/common/Messaging/ComChannels/ExtensionRuntimeChannel";
 
+class SidebarToBackgroundChannel extends ExtensionRuntimeChannel { }
+class SidebarToSandboxChannel extends PostMessageChannel { }
 
 export class SidebarDispatcher extends Dispatcher {
-  private readonly _extensionChannelClient: ExtensionChannelClient;
-  private readonly _runScriptChannel: PostMessageChannel;
+  private readonly _sidebarToSandboxChannel: SidebarToSandboxChannel;
+  private readonly _sidebarToBackgroundChannel: SidebarToBackgroundChannel;
 
   constructor() {
     super('sidebar');
 
-    this._extensionChannelClient = new ExtensionChannelClient('background');
-    this._runScriptChannel = new PostMessageChannel('sandbox-iframe');
-    this.logger.debug('SidebarDispatcher created');
+    // id : "ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // origin: "chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // bg url: 'chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/background.js'
+    // sidebar url: "chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/ui/sidebar/index.html"
+    const extensionId = chrome.runtime.id;
+    const extensionOrigin = `chrome-extension://${extensionId}`;
+    const backgroundURL = `chrome-extension://${extensionId}/background.js`;
+    // const sidebarURL = `chrome-extension://${extensionId}/ui/sidebar/index.html`;
+
+    this._sidebarToBackgroundChannel = new SidebarToBackgroundChannel();
+    this._sidebarToBackgroundChannel.on('message', ({ msg, sender, responseCallback }) => {
+      if (!MsgUtils.isMessage(msg)) {
+        this.logger.error('Invalid message format: msg:', msg, ' sender:', sender);
+        return;
+      }
+      const { id, origin, url } = sender as any;
+      if (id !== extensionId || (url && url !== backgroundURL) || (origin && origin !== extensionOrigin)) {
+        // do not log here as all message to background will also be received here
+        // this.logger.error('Invalid message sender: msg:', msg, ' sender:', sender);
+        return;
+      }
+      // event or request must specify the external as 'sidebar'
+      if ((msg.type === 'event' || msg.type === 'request') && msg.data.dest.external !== 'sidebar') {
+        this.logger.error('Invalid message dest: msg:', msg, ' sender:', sender, ' external: ', msg.data.dest.external);
+        return;
+      }
+
+      this.onMessage(msg, sender, responseCallback);
+    });
+
+    const frame = document.getElementById('sandbox-iframe');
+    if (frame && 'contentWindow' in frame) {
+      const win = frame.contentWindow as Window;
+      this._sidebarToSandboxChannel = new SidebarToSandboxChannel(win);
+      this._sidebarToSandboxChannel.on('message', ({ msg, sender, responseCallback }) => {
+        this.onMessage(msg, sender, responseCallback);
+      });
+    }
+    else {
+      throw new Error('SidebarToSandboxChannel init failed in getElementById - sandbox-iframe');
+    }
   }
 
-  async init(handler: SidebarHandler) {
-    this._extensionChannelClient.on('connected', ({ client, channel }) => {
-      console.error('connected:', client, channel);
-      this.addRoutingChannel('background', client, channel);
-      handler.id.external = client.id;
-    });
-    this._extensionChannelClient.on('disconnected', ({ client, channel }) => {
-      this.removeRoutingChannel('background', client, channel);
-      // try re-connect
-      console.error('disconnected:', client, channel);
-      this._extensionChannelClient.connect();
-    });
-
-    this.addRoutingChannel('external', { id: 'runScipt-sandbox', type: 'external' }, this._runScriptChannel);
-    
-    this._extensionChannelClient.connect();
+  async init() {
+    this._sidebarToBackgroundChannel.startListening(true, false);
+    this._sidebarToSandboxChannel.startListening();
   }
 
-  protected override getRoutingChannels(msg: Message): IChannel[] {
-
+  protected override getChannel(msg: Message): IChannel {
     const dest = msg.data.dest;
-    let channels: IChannel[] = [];
-
-    let routingKey = RtidUtil.getRtidContextType(dest);
-    if (Utils.isNullOrUndefined(routingKey)) {
-      this.logger.error('getRoutingChannels: fail to find the routingKey for the rtid: ', dest);
-      return [];
+    let contextType = RtidUtils.getRtidContextType(dest);
+    if (contextType === 'external' && dest.external === 'sandbox-handler') {
+      return this._sidebarToSandboxChannel;
     }
-
-    if(routingKey!== 'external') {
-      routingKey = 'background';
+    else {
+      return this._sidebarToBackgroundChannel;
     }
-
-    const clientChannels = this.routingMap[routingKey];
-    if (Utils.isEmpty(clientChannels)) {
-      return [];
-    }
-
-    clientChannels.forEach((clientChannel) => {
-      const [_client, channel] = clientChannel;
-      channels.push(channel);
-    });
-
-    if (channels.length > 1) {
-      this.logger.warn(`getRoutingChannels: find unexpected ${channels.length} channels`);
-    }
-
-    return channels;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file Channel.ts
  * @description 
@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { ContextType, Message } from '../../types/message';
+import { ContextType, Message } from '../../types/protocol';
 import { EventEmitter } from "../EventEmitter";
 
 /**
@@ -43,8 +43,8 @@ export interface ChannelEvents {
    * Triggered when the channel receives a message
    * @property msg - The received message object
    */
-  message: { msg: Message };
-  
+  message: { msg: Message, sender?: any, responseCallback?: (response: Message) => void };
+
   /**
    * Triggered when the channel is disconnected
    * @property reason - Optional reason for disconnection
@@ -71,7 +71,7 @@ export interface ChannelClientEvents {
    * @property channel - The connected channel instance
    */
   connected: { client: ClientInfo, channel: IChannel };
-  
+
   /**
    * Triggered when the channel disconnects
    * @property client - Information about the disconnected client
@@ -89,24 +89,42 @@ export interface IChannel {
    * Unique identifier for the channel
    */
   readonly id: string;
-  
+
+  /**
+   * If there's only postMessage available
+   */
+  readonly async: boolean;
+
   /**
    * Retrieves the current status of the channel
    * @returns The current ChannelStatus
    */
   getStatus(): ChannelStatus;
-  
+
   /**
    * Disconnects the channel
    * @param reason - Optional reason for disconnection
    */
   disconnect(reason?: string): void;
-  
+
   /**
-   * Sends a message through the channel
-   * @param msg - The Message object to be sent
+   * Abstract method to send a request message through the channel
+   * @param msg - The Message object to send
+   * @returns The response message
    */
-  send(msg: Message): void;
+  sendRequest(msg: Message): Promise<Message>;
+
+  /**
+   * Abstract method to send an event message through the channel
+   * @param msg - The Message object to send
+   */
+  sendEvent(msg: Message): Promise<void>;
+
+  /**
+   * Abstract method to post a message through the channel
+   * @param msg - The Message object to send
+   */
+  postMessage(msg: Message): void;
 }
 
 /**
@@ -122,6 +140,7 @@ export type ClientChannel = [client: ClientInfo, channel: IChannel];
  */
 export abstract class ChannelBase extends EventEmitter<ChannelEvents> implements IChannel {
   readonly id: string;
+  readonly async: boolean;
   protected _status: ChannelStatus = ChannelStatus.DISCONNECTED;
 
   /**
@@ -131,6 +150,7 @@ export abstract class ChannelBase extends EventEmitter<ChannelEvents> implements
   constructor() {
     super();
     this.id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    this.async = false;
   }
 
   /**
@@ -149,11 +169,26 @@ export abstract class ChannelBase extends EventEmitter<ChannelEvents> implements
   abstract disconnect(reason?: string): void;
 
   /**
-   * Abstract method to send a message through the channel
+   * Abstract method to send a request message through the channel
+   * Must be implemented by subclasses to handle specific message transmission
+   * @param msg - The Message object to send
+   * @returns The response message
+   */
+  abstract sendRequest(msg: Message): Promise<Message>;
+
+  /**
+   * Abstract method to send an event message through the channel
    * Must be implemented by subclasses to handle specific message transmission
    * @param msg - The Message object to send
    */
-  abstract send(msg: Message): void;
+  abstract sendEvent(msg: Message): Promise<void>;
+
+  /**
+   * Abstract method to post a message through the channel
+   * Must be implemented by subclasses to handle specific message transmission
+   * @param msg - The Message object to send
+   */
+  abstract postMessage(msg: Message): void;
 }
 
 /**

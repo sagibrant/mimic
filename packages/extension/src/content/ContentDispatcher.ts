@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file ContentDispatcher.ts
  * @description 
@@ -20,98 +20,83 @@
  * limitations under the License.
  */
 
-import { RtidUtil, Utils } from "../common/Common";
+import { ExtensionRuntimeChannel } from "@/common/Messaging/ComChannels/ExtensionRuntimeChannel";
+import { MsgUtils, RtidUtils, Utils } from "../common/Common";
 import { IChannel } from "../common/Messaging/ChannelBase";
-import { ExtensionChannelClient, ExtensionClientInfo } from "../common/Messaging/ComChannels/ExtensionChannel";
 import { Dispatcher } from "../common/Messaging/Dispatcher";
-import { Message } from "../types/message";
+import { Message, Rtid } from "@/types/protocol";
+import { ContentUtils } from "./ContentUtils";
+
+class ContentToBackgroundChannel extends ExtensionRuntimeChannel { }
 
 export class ContentDispatcher extends Dispatcher {
-  private readonly _extensionChannelClient: ExtensionChannelClient;
-  private _frameId?: number;
-  private _tabId?: number;
+  private readonly _contentToBackgroundChannel: ContentToBackgroundChannel;
+  private _frameSenderInfo: unknown;
 
   constructor() {
     super('content');
 
-    // connect to native (native messaging)
-    this._extensionChannelClient = new ExtensionChannelClient('background');
-    this._extensionChannelClient.on('connected', ({ client, channel }) => {
-      console.error('connected', client, channel);
-      this.addRoutingChannel('background', client, channel);
-
-      this._tabId = (client as ExtensionClientInfo).info?.tab?.id;
-      this._frameId = (client as ExtensionClientInfo).info?.frameId;
-
-      if (!Utils.isNullOrUndefined(this._tabId) && !Utils.isNullOrUndefined(this._frameId)) {
-        self.gogogo.frame.init(this._tabId, this._frameId);
+    // id : "ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // origin: "chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // bg url: 'chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/background.js'
+    const extensionId = chrome.runtime.id;
+    const extensionOrigin = `chrome-extension://${extensionId}`;
+    const backgroundUrl = `chrome-extension://${extensionId}/background.js`
+    this._contentToBackgroundChannel = new ContentToBackgroundChannel();
+    this._contentToBackgroundChannel.on('message', ({ msg, sender, responseCallback }) => {
+      if (!MsgUtils.isMessage(msg)) {
+        this.logger.error('Invalid message format: msg:', msg, ' sender:', sender);
+        return;
       }
-    });
-    this._extensionChannelClient.on('disconnected', ({ client, channel }) => {
-      console.error('disconnected', client, channel);
-      this.removeRoutingChannel('background', client, channel);
+      const { id, origin, url } = sender as any;
+      if (id !== extensionId || (origin !== extensionOrigin && url !== backgroundUrl)) {
+        this.logger.error('Invalid message sender: msg:', msg, ' sender:', sender);
+        return;
+      }
+      const frameRtid = Utils.deepClone(msg.data.dest);
+      frameRtid.object = -1;
+      if ((msg.type === 'event' || msg.type === 'request') && !RtidUtils.isRtidEqual(frameRtid, ContentUtils.frame.rtid)) {
+        this.logger.error('Invalid message dest: msg:', msg, ' sender:', sender, ' frameRtid:', ContentUtils.frame.rtid);
+        return;
+      }
 
-      this._extensionChannelClient.reconnect();
+      this.onMessage(msg, sender, responseCallback);
     });
-
-    this.logger.debug('ContentDispatcher created');
   }
 
   async init() {
-    this._extensionChannelClient.connect();
-    // todo: connect to the MAIN WORLD
+    this._frameSenderInfo = await this.getConfig(RtidUtils.getAgentRtid(), 'sender');
+    const frameId = (this._frameSenderInfo as any).frameId as number;
+    const tabId = ((this._frameSenderInfo as any).tab as any).id as number;
+    await ContentUtils.frame.init(tabId, frameId);
+    this.logger.debug("init: ==== frame sender:", this._frameSenderInfo);
+    const isRecording = await this.getConfig(RtidUtils.getBrowserRtid(), 'isRecording');
+    if (isRecording) {
+      await ContentUtils.frame.startRecording();
+    }
+    this._contentToBackgroundChannel.startListening(true, false);
   }
 
-  protected override getRoutingChannels(msg: Message): IChannel[] {
-
-    const dest = msg.data.dest;
-    let channels: IChannel[] = [];
-
-    let routingKey = RtidUtil.getRtidContextType(dest);
-    if (Utils.isNullOrUndefined(routingKey)) {
-      this.logger.error('getRoutingChannels: fail to find the routingKey for the rtid: ', dest);
-      return [];
-    }
-
-    // content send msg to background and then background forward the message to native/server/extension
-    if (routingKey === 'external') {
-      routingKey = 'background';
-    }
-
-    // msg to other frames, forward msg to bg and then bg will forward to the correct frame
-    if (routingKey === 'content' && dest.frame != this._frameId) {
-      routingKey = 'background';
-    }
-
-    const clientChannels = this.routingMap[routingKey];
-    if (Utils.isEmpty(clientChannels)) {
-      return channels;
-    }
-
-    // for 'background' | 'extension' | 'native' | 'server'
-    if (routingKey === 'background') {
-      // forward the message to background using the ExtensionChannel
-      clientChannels.forEach((clientChannel) => {
-        const [_client, channel] = clientChannel;
-        channels.push(channel);
-      });
-    }
-    else if (routingKey === 'MAIN') {
-      // should use the CustomEventChannel
-      clientChannels.forEach((clientChannel) => {
-        const [_client, channel] = clientChannel;
-        channels.push(channel);
-      });
+  async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<any> {
+    const reqMsgData = MsgUtils.createMessageData('config', rtid, { name: 'get', params: { name: propName } });
+    const resMsgData = await this.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      const propValue = Utils.getItem(propName, resMsgData.result as any);
+      return propValue;
     }
     else {
-      // message to content, should be handled by local handlers
-      this.logger.warn(`getRoutingChannels: receive unexpected routingKey ${routingKey}`);
+      throw new Error(resMsgData.error || `get config value of ${propName} failed`);
     }
+  }
 
-    if (channels.length > 1) {
-      this.logger.warn(`getRoutingChannels: find unexpected ${channels.length} channels`);
+  protected override getChannel(msg: Message): IChannel {
+    const dest = msg.data.dest;
+    let contextType = RtidUtils.getRtidContextType(dest);
+    if (contextType !== 'MAIN') {
+      return this._contentToBackgroundChannel;
     }
-
-    return channels;
+    else {
+      throw new Error(`Unsupported context type ${contextType}`);
+    }
   }
 }

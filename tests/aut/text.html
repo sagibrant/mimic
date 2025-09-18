@@ -1,0 +1,617 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Range and Input Example</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style id="compiled-css" type="text/css">
+        #info {
+            position: fixed;
+            background-color: cyan;
+            width: 800px;
+            max-width: 800px;
+            height: 250px;
+            max-height: 250px;
+            right: 0px;
+            overflow: scroll;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        tr td {
+            border: solid thin;
+            min-height: 100px;
+        }
+        a {
+            -webkit-border-radius: 100px;
+            border-radius: 100px;
+            background: #0b57d0;
+            background: var(--gm3-sys-color-primary, #0b57d0);
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #fff;
+            color: var(--gm3-sys-color-on-primary, #fff);
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 40px;
+            outline: none;
+            padding: 10px 24px;
+            text-align: center;
+            text-decoration: none;
+            white-space: normal;
+            line-height: 18px;
+            position: relative;
+        }
+
+        a::before {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            -webkit-border-radius: 100px;
+            border-radius: 100px;
+            background: #0b57d0;
+            background: var(--gm3-sys-color-on-primary, #0b57d0);
+            -webkit-transition: opacity .5s ease-out;
+            -webkit-transition: opacity .5s ease-out;
+            transition: opacity .5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <title>Range and Input Example</title>
+    <div id="info" style="display: none;z-Index: 100;">
+        here's the information for the text identification results using pure web technology
+    </div>
+    <div class="parent">
+        <table>
+            <tr>
+                <td>tag: div in shadowdom</td>
+                <td>
+                    <div id="shadowdiv1">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="div_clip_rect_label" style="height: 100px;">
+                        tag: div with clip
+                    </div>
+                </td>
+                <td>
+                    <div id="div_clip_rect">
+                        <span>
+                            Bacon ipsum dolor amet meatball bresaola t-bone tri-tip brisket. Jowl pig picanha
+                            cupim
+                            landjaeger, frankfurter spare ribs chicken. Porchetta jowl pancetta drumstick shankle cow
+                            spare
+                            ribs jerky
+                            tail kevin biltong capicola brisket venison bresaola. Flank sirloin jowl andouille meatball
+                            venison salami
+                            ground round rump boudin turkey capicola t-bone. Sirloin filet mignon tenderloin beef,
+                            biltong
+                            doner
+                            bresaola brisket shoulder pork loin shankle turducken shank cow. Bacon ball tip sirloin ham.
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="div_clippath_rect_label" style="height: 100px;">
+                        tag: div with clippath
+                    </div>
+                </td>
+                <td>
+                    <div id="div_clippath_rect" style="clip-path: inset(10px, 100px, 100px, 10px)">
+                        <span>
+                            Bacon ipsum dolor amet meatball bresaola t-bone tri-tip brisket. Jowl pig picanha
+                            cupim
+                            landjaeger, frankfurter spare ribs chicken. Porchetta jowl pancetta drumstick shankle cow
+                            spare
+                            ribs jerky
+                            tail kevin biltong capicola brisket venison bresaola. Flank sirloin jowl andouille meatball
+                            venison salami
+                            ground round rump boudin turkey capicola t-bone. Sirloin filet mignon tenderloin beef,
+                            biltong
+                            doner
+                            bresaola brisket shoulder pork loin shankle turducken shank cow. Bacon ball tip sirloin ham.
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: div</td>
+                <td>
+                    <div class="child" style="width: 500px; height: 60px; overflow-x: scroll; overflow-y: scroll;">
+                        <div style="width: 800px; height:120px">
+                            Bacon ipsum dolor amet meatball bresaola t-bone tri-tip brisket. Jowl pig picanha
+                            cupim
+                            landjaeger, frankfurter spare ribs chicken. Porchetta jowl pancetta drumstick shankle cow
+                            spare
+                            ribs jerky
+                            tail kevin biltong capicola brisket venison bresaola. Flank sirloin jowl andouille meatball
+                            venison salami
+                            ground round rump boudin turkey capicola t-bone. Sirloin filet mignon tenderloin beef,
+                            biltong
+                            doner
+                            bresaola brisket shoulder pork loin shankle turducken shank cow. Bacon ball tip sirloin ham.
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: div vertical</td>
+                <td>
+                    <div class="child" style="width: 200px; height: 200px; overflow-x: scroll; overflow-y: scroll;">
+                        <div class="child" style="width: 500px; height:400px; writing-mode: vertical-lr;">
+                            The compareDocumentPosition() method of the Node interface reports the position of its
+                            argument node relative to the node on which it is called.
+                            otherNode
+                            The Node for which position should be reported, relative to the node.
+
+                            Return value
+                            An integer value representing otherNode's position relative to node as a bitmask combining
+                            the following constant properties of Node:
+
+                            Node.DOCUMENT_POSITION_DISCONNECTED (1)
+                            Both nodes are in different documents or different trees in the same document.
+
+                            Node.DOCUMENT_POSITION_PRECEDING (2)
+                            otherNode precedes the node in either a pre-order depth-first traversal of a tree containing
+                            both (e.g., as an ancestor or previous sibling or a descendant of a previous sibling or
+                            previous sibling of an ancestor) or (if they are disconnected) in an arbitrary but
+                            consistent ordering.
+
+                            Node.DOCUMENT_POSITION_FOLLOWING (4)
+                            otherNode follows the node in either a pre-order depth-first traversal of a tree containing
+                            both (e.g., as a descendant or following sibling or a descendant of a following sibling or
+                            following sibling of an ancestor) or (if they are disconnected) in an arbitrary but
+                            consistent ordering.
+
+                            Node.DOCUMENT_POSITION_CONTAINS (8)
+                            otherNode is an ancestor of the node.
+
+                            Node.DOCUMENT_POSITION_CONTAINED_BY (16)
+                            otherNode is a descendant of the node.
+
+                            Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC (32)
+                            The result relies upon arbitrary and/or implementation-specific behavior and is not
+                            guaranteed to be portable.
+
+                            Zero or more bits can be set, depending on which scenarios apply. For example, if otherNode
+                            is located earlier in the document and contains the node on which compareDocumentPosition()
+                            was called, then both the DOCUMENT_POSITION_CONTAINS and DOCUMENT_POSITION_PRECEDING bits
+                            would be set, producing a value of 10 (0x0A).
+
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: div vertical</td>
+                <td>
+                    <div class="child" style="width: 200px; height: 200px; overflow-x: scroll; overflow-y: scroll;">
+                        <div class="child"
+                            style="width: 500px; height:400px; writing-mode: vertical-rl; position: relative;">
+                            The contains() method of the Node interface returns a boolean value indicating whether a
+                            node is a descendant of a given node, that is the node itself, one of its direct children
+                            (childNodes), one of the children's direct children, and so on.
+                            Parameters
+                            otherNode
+                            The Node to test with.
+
+                            Note: otherNode is not optional, but can be set to null.
+
+                            Return value
+                            A boolean value that is true if otherNode is contained in the node, false if not.
+
+                            If the otherNode parameter is null, contains() always returns false.
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: textarea</td>
+                <td>
+                    <textarea style="width: 200px; height: 50px;">
+                        this is the textarea control. check if you can find the word position.
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: a</td>
+                <td>
+                    <a href="https://www.bing.com" onclick="()=>{}">
+                        <span>https://www.bing.com</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: button</td>
+                <td>
+                    <div>
+                        <button onclick="calculateAndDraw('line')">line client rects occupied by the range using all
+                            text, input and textarea nodes</button>
+                        <br />
+                        <button onclick="calculateAndDraw('word')">word client rects occupied by the range using all
+                            text, input and textarea nodes</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: label & checkbox</td>
+                <td>
+                    <label for="cheese">Do you like cheese?</label>
+                    <input type="checkbox" name="cheese" id="cheese" value="this is the checkbox value"
+                        placeholder="this is placeholder" />
+                </td>
+            </tr>
+            <tr>
+                <td>tag: dl dt</td>
+                <td>
+                    <div>
+                        <legend>example legend tag</legend>
+                        <caption>example caption tag</caption>
+                        <h1>caption h1 dl dt p em example:</h1>
+                        <p>Cryptids of <em>Cornwall</em>:</p>
+                        <p><s>There will be a few tickets available at the box office tonight.</s></p>
+                        <p>Gradually add the <span class="ingredient">olive oil</span> while running the blender slowly.
+                        </p>
+                        <p>
+                            ... the most important rule, the rule you can never forget, no matter how much he cries, no
+                            matter how much he begs:
+                            <strong>never feed him after midnight</strong>.
+                        </p>
+                        <p>
+                            Almost every developer's favorite molecule is
+                            C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>, also known as
+                            "caffeine."
+                        </p>
+                        <details>
+                            <summary>I have keys but no doors. I have space but no room. You can enter but can’t leave.
+                                What
+                                am I?</summary>
+                            A keyboard.
+                        </details>
+                        <p>The <em>Pythagorean theorem</em> is often expressed as the following equation:</p>
+                        <p>
+                            <var>a<sup>2</sup></var> + <var>b<sup>2</sup></var> = <var>c<sup>2</sup></var>
+                        </p>
+                        <p>
+                            The concert starts at <time datetime="20:00">20:00</time> and you'll be able to enjoy the
+                            band
+                            for at least
+                            <time datetime="PT2H30M">2h 30m</time>.
+                        </p>
+                        <dl>
+                            <dt>Beast of Bodmin</dt>
+                            <dd>A large feline inhabiting <i>Bodmin</i> Moor.</dd>
+                            <hr />
+                            <dt>Morgawr</dt>
+                            <dd>A sea serpent.</dd>
+                            <hr />
+                            <dt>Owlman</dt>
+                            <dd>A giant owl-like creature.</dd>
+                        </dl>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: ul & ol & menu</td>
+                <td>
+                    <ul>
+                        <li>Neil Armstrong</li>
+                        <li>Alan Bean</li>
+                        <li>Peter Conrad</li>
+                        <li>Edgar Mitchell</li>
+                        <li>Alan Shepard</li>
+                    </ul>
+                    <br>
+                    <ol>
+                        <li>Mix flour, baking powder, sugar, and salt.</li>
+                        <li>In another bowl, mix eggs, milk, and oil.</li>
+                        <li>Stir both mixtures together.</li>
+                        <li>Fill muffin tray 3/4 full.</li>
+                        <li>Bake for 20 minutes.</li>
+                    </ol>
+                    <br>
+                    <menu>
+                        <li><button id="save">Save for later</button></li>
+                        <li><button id="share">Share this news</button></li>
+                    </menu>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: select</td>
+                <td>
+                    <select id="pet-select">
+                        <option value="">--Please choose an option--</option>
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                        <option value="hamster">Hamster</option>
+                        <option value="parrot">Parrot</option>
+                        <option value="spider">Spider</option>
+                        <option value="goldfish">Goldfish</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>tag: ruby</td>
+                <td>
+                    <ruby> 漢 <rp>(</rp>
+                        <rt>kan</rt>
+                        <rp>)</rp> 字 <rp>(</rp>
+                        <rt>ji</rt>
+                        <rp>)</rp>
+                    </ruby>
+                </td>
+            </tr>
+            <tr>
+                <td>input type button</td>
+                <td>
+                    <div>
+                        <input class="styled" type="button" id="inputbtn" value="Add to favorites" />
+                        <label for="inputbtn" placeholder="this is placeholder">Input button label for Add to
+                            favorites</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type checkbox</td>
+                <td>
+                    <div>
+                        <div>
+                            <input type="checkbox" id="scales" name="scales" placeholder="this is placeholder"
+                                checked />
+                            <label for="scales">Scales</label>
+                        </div>
+
+                        <div>
+                            <input type="checkbox" id="horns" name="horns" placeholder="this is placeholder" />
+                            <label for="horns">Horns</label>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type color</td>
+                <td>
+                    <div>
+                        <p>Choose your monster's colors:</p>
+                        <div>
+                            <input type="color" id="head" name="head" value="#e66465"
+                                placeholder="this is placeholder" />
+                            <label for="head">Head</label>
+                        </div>
+
+                        <div>
+                            <input type="color" id="body" name="body" value="#f6b73c"
+                                placeholder="this is placeholder" />
+                            <label for="body">Body</label>
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type date</td>
+                <td>
+                    <div>
+                        <label for="start">Start date:</label>
+                        <input type="date" id="start" name="trip-start" value="2018-07-22" min="2018-01-01"
+                            max="2018-12-31" placeholder="this is placeholder" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type datetime-local</td>
+                <td>
+                    <div>
+                        <label for="meeting-time">Choose a time for your appointment:</label>
+                        <input type="datetime-local" id="meeting-time" name="meeting-time" value="2018-06-12T19:30"
+                            min="2018-06-07T00:00" max="2018-06-14T00:00" placeholder="this is placeholder" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type email</td>
+                <td>
+                    <div>
+                        <label for="email">Enter your example.com email:</label>
+                        <input type="email" id="email" pattern=".+@example\.com" size="30"
+                            placeholder="this is placeholder" required />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type file</td>
+                <td>
+                    <div>
+                        <label for="avatar">Choose a profile picture:</label>
+                        <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg"
+                            placeholder="this is placeholder" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type month</td>
+                <td>
+                    <div>
+                        <label for="start">Start month:</label>
+                        <input type="month" id="start" name="start" min="2018-03" value="2018-05"
+                            placeholder="this is placeholder" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type number</td>
+                <td>
+                    <div>
+                        <label for="tentacles">Number of tentacles (10-100):</label>
+
+                        <input type="number" id="tentacles" name="tentacles" min="10" max="100"
+                            placeholder="this is placeholder" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type password</td>
+                <td>
+                    <div>
+                        <label for="pass">Password (8 characters minimum):</label>
+                        <input type="password" id="pass" name="password" minlength="8" placeholder="this is placeholder"
+                            required />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type radio</td>
+                <td>
+                    <div>
+                        <fieldset>
+                            <legend>Select a maintenance drone:</legend>
+                            <div>
+                                <input type="radio" id="huey" name="drone" value="huey"
+                                    placeholder="this is placeholder" checked />
+                                <label for="huey">Huey</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="dewey" name="drone" value="dewey"
+                                    placeholder="this is placeholder" />
+                                <label for="dewey">Dewey</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="louie" name="drone" value="louie"
+                                    placeholder="this is placeholder" />
+                                <label for="louie">Louie</label>
+                            </div>
+                        </fieldset>
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type range</td>
+                <td>
+                    <div>
+                        <p>Audio settings:</p>
+                        <div>
+                            <input type="range" id="volume" name="volume" min="0" max="11"
+                                placeholder="this is placeholder" />
+                            <label for="volume">Volume</label>
+                        </div>
+                        <div>
+                            <input type="range" id="cowbell" name="cowbell" min="0" max="100" value="90" step="10"
+                                placeholder="this is placeholder" />
+                            <label for="cowbell">Cowbell</label>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>input type inside form</td>
+                <td>
+                    <div>
+                        <form>
+                            <div class="controls">
+                                <label for="id">User ID:</label>
+                                <input type="text" id="id" name="id" value="text example"
+                                    placeholder="this is placeholder" />
+                                <label for="phone">
+                                    Enter your phone number:<br />
+                                    <small>Format: 123-456-7890</small>
+                                </label>
+                                <input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                                    placeholder="this is placeholder" required />
+                                <label for="site-search">Search the site:</label>
+
+                                <input type="search" id="site-search" name="q" placeholder="this is placeholder" />
+                                <label for="appt">Choose a time for your meeting:</label>
+
+                                <input type="time" id="appt" name="appt" min="09:00" max="18:00"
+                                    placeholder="this is placeholder" required />
+                                <label for="url">Enter an https:// URL:</label>
+                                <input type="url" name="url" id="url" placeholder="https://example.com"
+                                    pattern="https://.*" size="30" required />
+                                <label for="camp-week">Choose a week in May or June:</label>
+
+                                <input type="week" name="week" id="camp-week" min="2018-W18" max="2018-W26"
+                                    placeholder="this is placeholder" required />
+
+                                <input type="reset" value="Reset" placeholder="this is placeholder" />
+                                <input type="submit" value="Submit" placeholder="this is placeholder" />
+                            </div>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>no script</td>
+                <td>
+                    <div>
+                        <noscript>
+                            <!-- anchor linking to external file -->
+                            <a href="https://www.mozilla.org/">External Link</a>
+                        </noscript>
+                        <p>Rocks!</p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script src="texthelper.js"></script>
+<script src="highlighthelper.js"></script>
+<script src="capture_all_text.js"></script>
+<script>
+    var component = document.getElementById('shadowdiv1');
+    var shadow = component.attachShadow({
+        mode: 'open'
+    });
+    shadow.innerHTML =
+        `<div>Optical character recognition or optical character reader (OCR) is the electronic or mechanical conversion of images of typed, handwritten or printed text into machine-encoded text, whether from a scanned document, a photo of a document, a scene photo (for example the text on signs and billboards in a landscape photo) or from subtitle text superimposed on an image (for example: from a television broadcast).[1]
+
+Widely used as a form of data entry from printed paper data records – whether passport documents, invoices, bank statements, computerized receipts, business cards, mail, printed data, or any suitable documentation – it is a common method of digitizing printed texts so that they can be electronically edited, searched, stored more compactly, displayed online, and used in machine processes such as cognitive computing, machine translation, (extracted) text-to-speech, key data and text mining. OCR is a field of research in pattern recognition, artificial intelligence and computer vision.
+
+Early versions needed to be trained with images of each character, and worked on one font at a time. Advanced systems capable of producing a high degree of accuracy for most fonts are now common, and with support for a variety of image file format inputs.[2] Some systems are capable of reproducing formatted output that closely approximates the original page including images, columns, and other non-textual components.
+
+
+        </div>`;
+
+    var elt = document.getElementById('info');
+    elt.addEventListener('click', () => {
+        if (elt.style.display !== "none") {
+            elt.style.display = "none";
+        }
+    }, true);
+
+    var div_clip_rect = document.getElementById('div_clip_rect');
+    var div_clip_rect_label = document.getElementById('div_clip_rect_label');
+    if (div_clip_rect && div_clip_rect_label) {
+        var rect = div_clip_rect.parentElement.getBoundingClientRect();
+        var label_rect = div_clip_rect_label.getBoundingClientRect();
+        div_clip_rect.style.left = (window.scrollX + rect.left) + "px";
+        div_clip_rect.style.top = (window.scrollY + rect.top) + "px";
+        div_clip_rect.style.maxHeight = label_rect.height + "px";
+        div_clip_rect.style.overflow = "scroll";
+        div_clip_rect.style.clip = "rect(10px," + rect.width / 2 + "px," + rect.height / 2 + "px,10px)";
+        div_clip_rect.style.position = "absolute";
+    }
+</script>
+
+</html>

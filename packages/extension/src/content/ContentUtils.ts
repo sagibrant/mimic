@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file ContentUtils.ts
  * @description 
@@ -22,19 +22,34 @@
 
 import { Utils } from "@/common/Common";
 import { LocatorUtils } from "@/common/LocatorUtils";
-import { RectInfo } from "@/types/api";
-import { Selector } from "@/types/message";
+import { RectInfo } from "@/types/types";
+import { MessageData, Selector } from "@/types/protocol";
+import { Dispatcher } from "@/common/Messaging/Dispatcher";
+import { ObjectRepository } from "./ObjectRepository";
+import { FrameHandler } from "./handlers/FrameHandler";
 
 export class ContentUtils {
 
   /**
-   * Recursively traverse a root (document, element, or shadow root) with TreeWalker to find out matched nodes
+   * Recursively traverse a root (document, element, or shadow root) with TreeWalker to find out matched elements
    * @param node the current node
    * @param selectors the selectors
-   * @returns the filtered nodes
+   * @returns the filtered elements
    */
-  static traverseSelectorAll(node: Node, selectors: Selector[]): Element[] {
+  static traverseSelectorAllElements(node: Node, selectors: Selector[]): Element[] {
     const result: Element[] = [];
+
+    // First, check the starting node itself if it's an Element with shadowRoot
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const elem = node as Element;
+      // Process open shadow root of the starting node if it exists
+      const shadowRoot = ContentUtils.getShadowRoot(elem);
+      if (shadowRoot) {
+        const childNodes = ContentUtils.traverseSelectorAllElements(shadowRoot, selectors);
+        result.push(...childNodes);
+      }
+    }
+
     const treeWalker = document.createTreeWalker(
       node,
       NodeFilter.SHOW_ELEMENT, // Only consider Element nodes
@@ -50,8 +65,9 @@ export class ContentUtils {
           result.push(elem);
         }
         // Recursively check open shadow roots
-        if (elem.shadowRoot && elem.shadowRoot instanceof ShadowRoot && elem.shadowRoot.mode === 'open') {
-          const childNodes = ContentUtils.traverseSelectorAll(elem.shadowRoot, selectors);
+        const shadowRoot = ContentUtils.getShadowRoot(elem);
+        if (shadowRoot) {
+          const childNodes = ContentUtils.traverseSelectorAllElements(shadowRoot, selectors);
           result.push(...childNodes);
         }
       }
@@ -61,8 +77,26 @@ export class ContentUtils {
     return result;
   }
 
+  /**
+   * Recursively traverse a root (document, element, or shadow root) with TreeWalker to find out matched frames elements
+   * @param node the current node
+   * @param selectors the selectors
+   * @returns the filtered frame elements
+   */
   static traverseSelectorAllFrames(node: Node, selectors: Selector[]): Element[] {
     const result: Element[] = [];
+
+    // First, check the starting node itself if it's an Element with shadowRoot
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const elem = node as Element;
+      // Process open shadow root of the starting node if it exists
+      const shadowRoot = ContentUtils.getShadowRoot(elem);
+      if (shadowRoot) {
+        const childNodes = ContentUtils.traverseSelectorAllFrames(shadowRoot, selectors);
+        result.push(...childNodes);
+      }
+    }
+
     const treeWalker = document.createTreeWalker(
       node,
       NodeFilter.SHOW_ELEMENT, // Only consider Element nodes
@@ -74,13 +108,13 @@ export class ContentUtils {
     while (currentNode) {
       if (currentNode.nodeType === Node.ELEMENT_NODE) {
         const elem = currentNode as Element;
-        if (LocatorUtils.matchSelectors(elem, selectors)
-          && (elem.tagName === 'IFRAME' || elem.tagName === 'FRAME' || (elem.tagName === 'OBJECT' && 'contentWindow' in elem))) {
+        if (ContentUtils.elemIsIframe(elem) && LocatorUtils.matchSelectors(elem, selectors)) {
           result.push(elem);
         }
         // Recursively check open shadow roots
-        if (elem.shadowRoot && elem.shadowRoot instanceof ShadowRoot && elem.shadowRoot.mode === 'open') {
-          const childNodes = ContentUtils.traverseSelectorAllFrames(elem.shadowRoot, selectors);
+        const shadowRoot = ContentUtils.getShadowRoot(elem);
+        if (shadowRoot) {
+          const childNodes = ContentUtils.traverseSelectorAllFrames(shadowRoot, selectors);
           result.push(...childNodes);
         }
       }
@@ -88,6 +122,128 @@ export class ContentUtils {
       currentNode = treeWalker.nextNode();
     }
     return result;
+  }
+
+  /**
+ * Recursively traverse a root (document, element, or shadow root) with TreeWalker to find out matched text nodes
+ * @param node the current node
+ * @param selectors the selectors
+ * @returns the filtered text nodes
+ */
+  static traverseSelectorAllTextNodes(node: Node, selectors: Selector[]): Node[] {
+    const result: Node[] = [];
+
+    // First, check the starting node itself if it's an Element with shadowRoot
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const elem = node as Element;
+      // Process open shadow root of the starting node if it exists
+      const shadowRoot = ContentUtils.getShadowRoot(elem);
+      if (shadowRoot) {
+        const childNodes = ContentUtils.traverseSelectorAllTextNodes(shadowRoot, selectors);
+        result.push(...childNodes);
+      }
+    }
+
+    const treeWalker = document.createTreeWalker(
+      node,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, // Only consider Element nodes
+      undefined // No custom filter here (we'll check attributes manually)
+    );
+
+    // Traverse all elements in the root
+    let currentNode: Node | null = treeWalker.nextNode();
+    while (currentNode) {
+      if (currentNode.nodeType === Node.TEXT_NODE) {
+        const text = currentNode as Node;
+        if (LocatorUtils.matchSelectors(text, selectors)) {
+          result.push(text);
+        }
+      }
+      else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+        const elem = currentNode as Element;
+        // Recursively check open shadow roots
+        const shadowRoot = ContentUtils.getShadowRoot(elem);
+        if (shadowRoot) {
+          const childNodes = ContentUtils.traverseSelectorAllTextNodes(shadowRoot, selectors);
+          result.push(...childNodes);
+        }
+      }
+      currentNode = treeWalker.nextNode();
+    }
+    return result;
+  }
+
+  /**
+  * Recursively traverse a root (document, element, or shadow root) with TreeWalker to find out matched shadow roots
+  * @param node the current node
+  * @param mode open or closed
+  * @returns the filtered shadow roots
+  */
+  static traverseGetAllShadowRoot(node: Node, mode?: 'open' | 'closed'): ShadowRoot[] {
+    const result: ShadowRoot[] = [];
+
+    // First, check the starting node itself if it's an Element with shadowRoot
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const elem = node as Element;
+      // Process open shadow root of the starting node if it exists
+      const shadowRoot = ContentUtils.getShadowRoot(elem, mode);
+      if (shadowRoot) {
+        result.push(shadowRoot);
+        const childShadowRoots = ContentUtils.traverseGetAllShadowRoot(shadowRoot, mode);
+        result.push(...childShadowRoots);
+      }
+    }
+
+    const treeWalker = document.createTreeWalker(
+      node,
+      NodeFilter.SHOW_ELEMENT, // Only consider Element nodes
+      undefined // No custom filter here (we'll check attributes manually)
+    );
+
+    // Traverse all elements in the root
+    let currentNode: Node | null = treeWalker.nextNode();
+    while (currentNode) {
+      if (currentNode.nodeType === Node.ELEMENT_NODE) {
+        const elem = currentNode as Element;
+        // Recursively check open shadow roots
+        const shadowRoot = ContentUtils.getShadowRoot(elem, mode);
+        if (shadowRoot) {
+          result.push(shadowRoot);
+          const childShadowRoots = ContentUtils.traverseGetAllShadowRoot(shadowRoot, mode);
+          result.push(...childShadowRoots);
+        }
+      }
+
+      currentNode = treeWalker.nextNode();
+    }
+    return result;
+  }
+
+  /**
+   * Get the shadowroot from node
+   * @param node dom node
+   * @returns ShadowRoot or null
+   */
+  static getShadowRoot(node: Node, mode?: 'open' | 'closed'): ShadowRoot | null {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return null;
+    }
+    const elem = node as Element;
+    let openShadowRoot = null;
+    if (elem.shadowRoot && elem.shadowRoot instanceof ShadowRoot && elem.shadowRoot.mode === 'open') {
+      openShadowRoot = elem.shadowRoot;
+    }
+    if (mode === 'open' || (!mode && openShadowRoot)) {
+      return openShadowRoot;
+    }
+    if (!openShadowRoot
+      && (!mode || mode === 'closed')
+      && (elem instanceof HTMLElement && typeof chrome !== 'undefined'
+        && !Utils.isNullOrUndefined(chrome?.dom) && Utils.isFunction(chrome.dom.openOrClosedShadowRoot))) {
+      let closedShadowRoot = chrome.dom.openOrClosedShadowRoot(elem);
+      return closedShadowRoot?.mode === 'closed' ? closedShadowRoot : null;
+    }
+    return null;
   }
 
   /**
@@ -155,6 +311,34 @@ export class ContentUtils {
       return false;
     }
 
+    // display:contents is not rendered, but its child nodes are. 
+    // So the rect for display:contents is zero, but the children will be visible and not zero rect
+    if (style.display === 'contents') {
+      // display:contents is not rendered itself, but its child nodes are.
+      let hasVisibleChild = false;
+      for (let child = elem.firstChild; child; child = child?.nextSibling || null) {
+        if (!child) break;
+        if (child.nodeType === Node.ELEMENT_NODE && ContentUtils.isVisibleBasedOnCSS(child as Element)) {
+          hasVisibleChild = true;
+          break;
+        }
+        else if (child.nodeType === Node.TEXT_NODE) {
+          const doc = child.ownerDocument ?? document;
+          const range = doc.createRange();
+          range.selectNode(child);
+          const rect = range.getBoundingClientRect();
+          if (ContentUtils.isRectangeVisible(rect)) {
+            hasVisibleChild = true;
+            break;
+          }
+        }
+      }
+      if (!hasVisibleChild) {
+        return false;
+      }
+    }
+
+    // handle style with clip
     if (style.position === 'absolute' || style.position === 'fixed') {
       let rect: RectInfo | undefined = undefined;
       let clip = style.clip;
@@ -198,35 +382,13 @@ export class ContentUtils {
         return false;
       }
     }
-    return true;
-  }
 
-  /**
-   * check if the visible area of the give node is zero or not, *the child nodes may still visible if the child's position is fixed or absolute
-   * @param {Node} node 
-   * @returns {boolean}
-   */
-  static isVisibleAreaZero(node: Node): boolean {
-    if (!node) {
-      return false;
-    }
-    let elem = ContentUtils.getElementByNode(node);
-    if (!elem || elem.nodeType !== Node.ELEMENT_NODE) {
-      return false;
-    }
-    let style = getComputedStyle(elem, null);
-    if (!style) {
-      return false;
-    }
-    // for display:contents, the rect is all zero, but the children will be visible
-    if (style.display === 'contents') {
-      return false;
-    }
     let rect = elem.getBoundingClientRect();
     if (!ContentUtils.isRectangeVisible(rect) && !style.overflow.includes('visible')) {
-      return true;
+      return false;
     }
-    return false;
+
+    return true;
   }
 
   /**
@@ -252,21 +414,21 @@ export class ContentUtils {
 
     // checking the parents if the position depends on the parent
     if (style.position !== 'fixed' && style.position !== 'absolute') {
-      let isParentVisibleAreaZero = false;
+      let isParentNotVisible = false;
       let parent = elem.parentElement;
       while (parent) {
         const parentStyle = getComputedStyle(parent, null);
         if (parentStyle && (parentStyle.position === 'fixed' || parentStyle.position === 'absolute')) {
-          isParentVisibleAreaZero = false;
+          isParentNotVisible = false;
           break;
         }
-        if (ContentUtils.isVisibleAreaZero(parent)) {
-          isParentVisibleAreaZero = true;
+        if (!ContentUtils.isVisibleBasedOnCSS(parent)) {
+          isParentNotVisible = true;
           break;
         }
         parent = parent.parentElement;
       }
-      if (isParentVisibleAreaZero) {
+      if (isParentNotVisible) {
         return false;
       }
     }
@@ -391,6 +553,23 @@ export class ContentUtils {
       (tagName === "OBJECT" && 'contentWindow' in elem);
   }
 
+  static getFrameUrl(elem: Element): string {
+    if (!ContentUtils.elemIsIframe(elem)) {
+      return '';
+    }
+    let url = '';
+    if (elem.tagName === 'IFRAME' || elem.tagName === 'FRAME') {
+      url = (elem as HTMLIFrameElement).src;
+    }
+    else if (elem.tagName === 'OBJECT') {
+      url = (elem as HTMLObjectElement).data;
+    }
+    if (Utils.isEmpty(url) && 'url' in elem) {
+      url = (elem as any)['url'];
+    }
+    return url;
+  }
+
   static isSpecialUninjectablePage(): boolean {
     const protocol = location.protocol;
     if (protocol === "chrome-extension:" || protocol === "chrome:" || protocol === "edge:") {
@@ -399,7 +578,179 @@ export class ContentUtils {
     return false;
   }
 
+  static getLogicName(elem: Element): string {
+
+    let name: string | undefined | null = undefined;
+
+    if (elem.hasAttribute('name')) {
+      name = elem.getAttribute('name');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('acc_name')) {
+      name = elem.getAttribute('acc_name');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('aria-label')) {
+      name = elem.getAttribute('aria-label');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('aria-labelledby')) {
+      name = elem.getAttribute('aria-labelledby');
+      if (name && elem.tagName) {
+        return name + '_' + elem.tagName;
+      }
+    }
+
+    if (elem.hasAttribute('title')) {
+      name = elem.getAttribute('title');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('id')) {
+      name = elem.getAttribute('id');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('alt')) {
+      name = elem.getAttribute('alt');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('placeholder')) {
+      name = elem.getAttribute('placeholder');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.hasAttribute('role')) {
+      name = elem.getAttribute('role');
+      if (name) {
+        return name;
+      }
+    }
+
+    if (elem.tagName === 'INPUT' && !Utils.isEmpty(elem.nodeValue)) {
+      name = elem.nodeValue;
+      if (name) {
+        return name;
+      }
+    }
+
+    if (!Utils.isEmpty(elem.textContent)) {
+      name = elem.textContent;
+      if (name) {
+        return name;
+      }
+    }
+
+    return elem.tagName ?? 'element';
+  }
+
+  static getAttributes(elem: Element): Record<string, unknown> {
+    const attrs: Record<string, unknown> = {};
+    const attrNames = elem.getAttributeNames();
+    for (const attrName of attrNames) {
+      const attrValue = elem.getAttribute(attrName);
+      attrs[attrName] = attrValue;
+    }
+    return attrs;
+  }
+
+  static async highlightRect(rect: RectInfo): Promise<void> {
+    // outlineColor = {r:108, g:170, b:78, a:0};
+    // color = {r:108, g:170, b:78, a:0.4};
+    // outlineColor =  {r:18, g:110, b:198, a: 0};
+    // color = {r:18, g:110, b:198, a: 0.4};
+    // outlineColor = {r:240, g:125, b:10, a:0};
+    // color = {r:240, g:125, b:10, a:0.4};
+    const outlineColor = { r: 255, g: 210, b: 88, a: 0 };
+    const color = { r: 255, g: 210, b: 88, a: 0.4 };
+    let rect_elem = document.createElement('canvas');
+    rect_elem.style.backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+    rect_elem.style.border = `4px solid rgba(${outlineColor.r}, ${outlineColor.g}, ${outlineColor.b}, ${outlineColor.a})`;
+    rect_elem.style.boxSizing = 'content-box';
+    rect_elem.style.left = (rect.left - 4 > 0 ? rect.left - 4 : 0) + 'px';
+    rect_elem.style.top = (rect.top - 4 > 0 ? rect.top - 4 : 0) + 'px';
+    rect_elem.style.width = rect.width + 'px';
+    rect_elem.style.height = rect.height + 'px';
+    rect_elem.style.margin = '0px';
+    rect_elem.style.padding = '0px';
+    rect_elem.style.position = 'fixed';
+    rect_elem.style.zIndex = '999999999';
+    rect_elem.dir = 'ltr';
+    document.body.appendChild(rect_elem);
+    for (let i = 0; i < 3; i++) {
+      rect_elem.style.display = 'block';
+      await Utils.wait(300);
+      rect_elem.style.display = 'none';
+      await Utils.wait(200);
+    }
+    document.body.removeChild(rect_elem);
+  }
+
   static iframeXpathSelector: string = "//iframe | //frame | //object";
   static iframeCssSelector: string = 'iframe,frame,object';
+
+  static async sendEvent(msgData: MessageData, timeout?: number): Promise<void> {
+    await ContentUtils.dispatcher.sendEvent(msgData, timeout);
+  }
+
+  static async sendRequest(msgData: MessageData, timeout?: number): Promise<MessageData> {
+    const result = await ContentUtils.dispatcher.sendRequest(msgData, timeout);
+    return result;
+  }
+
+  /** ==================================================================================================================== **/
+  /** ==================================================== properties ==================================================== **/
+  /** ==================================================================================================================== **/
+  private static _dispatcher: Dispatcher;
+  private static _repo: ObjectRepository;
+  private static _frame: FrameHandler;
+
+  static set dispatcher(dispatcher: Dispatcher) {
+    ContentUtils._dispatcher = dispatcher;
+  }
+  static get dispatcher() {
+    if (Utils.isNullOrUndefined(ContentUtils._dispatcher)) {
+      throw new Error('The dispatcher is not ready');
+    }
+    return ContentUtils._dispatcher;
+  }
+
+  static set repo(repo: ObjectRepository) {
+    ContentUtils._repo = repo;
+  }
+  static get repo() {
+    if (Utils.isNullOrUndefined(ContentUtils._repo)) {
+      throw new Error('The repo is not ready');
+    }
+    return ContentUtils._repo;
+  }
+
+  static set frame(frame: FrameHandler) {
+    ContentUtils._frame = frame;
+  }
+  static get frame() {
+    if (Utils.isNullOrUndefined(ContentUtils._frame)) {
+      throw new Error('The frame is not ready');
+    }
+    return ContentUtils._frame;
+  }
 
 }

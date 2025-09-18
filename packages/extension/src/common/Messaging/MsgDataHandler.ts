@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file MsgDataHandler.ts
  * @description 
@@ -20,9 +20,9 @@
  * limitations under the License.
  */
 
-import { AODesc, AutomationObject, InvokeAction, MessageData, queryActionName, Rtid } from "@/types/message";
+import { AODesc, AutomationObject, InvokeAction, MessageData, queryActionName, recordActionName, RecordedStep, Rtid } from "@/types/protocol";
 import { EventEmitter, EventMap } from "../EventEmitter";
-import { RtidUtil, Utils } from "../Common";
+import { RtidUtils, Utils } from "../Common";
 
 /**
  * Callback type for delivering handler results
@@ -33,7 +33,7 @@ export type ResultCallback = (result: MessageData) => void;
  * The base class for handling communication messages
  */
 export interface IMsgDataHandler {
-  readonly id: Rtid;
+  readonly rtid: Rtid;
 
   /**
    * Handles a message and invokes a result callback when done.
@@ -47,12 +47,12 @@ export interface IMsgDataHandler {
  * the base class for MessageData handler
  */
 export abstract class MsgDataHandlerBase<T extends EventMap = any> extends EventEmitter<T> implements IMsgDataHandler {
-  readonly id: Rtid;
+  readonly rtid: Rtid;
   readonly config: Record<string, unknown>;
 
   constructor(rtid: Rtid) {
     super();
-    this.id = rtid;
+    this.rtid = rtid;
     this.config = {};
   }
 
@@ -63,20 +63,20 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
    * @returns handled or not
    */
   handle(data: MessageData, resultCallback?: ResultCallback): boolean {
-    if (!RtidUtil.isRtidEqual(data.dest, this.id)) {
+    if (!RtidUtils.isRtidEqual(data.dest, this.rtid)) {
       return false;
     }
     this.logger.debug('handle: ==> handle the msgData:\r\n', data);
     this._handle(data).then((res) => {
       if (res && resultCallback) {
-        this.logger.debug('handle: <== resultCallback result:\r\n', res);
+        this.logger.debug('handle: <== resultCallback, result:\r\n', res);
         resultCallback(res);
       }
       else {
-        this.logger.debug('handle: <==');
+        this.logger.debug('handle: <== no resultCallback, result:\r\n', res);
       }
     }).catch((error) => {
-      this.logger.error(`handle: failed on the message data: \r\n error: ${error instanceof Error ? error.message : error}, \r\n msgData: ${JSON.stringify(data)} `);
+      this.logger.error('handle: ==x error on the message data:', data, error);
       if (resultCallback) {
         const resData: MessageData = {
           ...Utils.deepClone(data),
@@ -90,69 +90,20 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
     return true;
   }
 
-  /**
-   * query property value 
-   * @param propName property name
-   * @returns property value
-   */
-  abstract queryProperty(propName: string): Promise<unknown>;
-
-  /**
-   * query property values
-   * @param props property array
-   * @returns property values
-   */
-  async queryProperties(props: string[]): Promise<Record<string, unknown>> {
-    const result: Record<string, unknown> = {};
-    for (const propName of props) {
-      try {
-        const propValue = await this.queryProperty(propName);
-        result.propName = propValue;
-      }
-      catch (error) {
-        this.logger.warn(`queryProperties: ${error instanceof Error ? error.message : error}`)
-      }
-    }
-    return result;
-  }
-
-  /**
-   * query automation objects
-   * @param desc description for objects
-   * @returns automation objects
-   */
-  abstract queryObjects(desc: AODesc): Promise<AutomationObject[]>;
-
-  /**
-   * invoke a function with name and arguments
-   * @param funcName function name to invoke
-   * @param args function arguements
-   * @returns function call result
-   */
-  async invokeFunction(funcName: string, args?: unknown[]): Promise<unknown> {
-    if (Utils.isEmpty(funcName)) {
-      throw new Error(`invokeFunction: '${funcName}' is not valid`);
-    }
-    if (!(funcName in this)) {
-      throw new Error(`invokeFunction: fail to find '${funcName}'`);
-    }
-    const func = (this as any)[funcName];
-    if (!Utils.isFunction(func)) {
-      throw new Error(`invokeFunction: '${funcName}' is not a function`);
-    }
-    const result = await func.apply(this, args);
-    return result;
-  }
-
 
   async getAO(): Promise<AutomationObject> {
     return {
       type: 'agent',
       name: 'agent',
-      rtid: this.id,
+      rtid: this.rtid,
       runtimeInfo: {}
     };
   }
+
+  /** ==================================================================================================================== **/
+  /** ================================================== handle methods ================================================== **/
+  /** ========================================== config, query, command, record ========================================== **/
+  /** ==================================================================================================================== **/
 
   /**
    * internal message data handle function
@@ -161,7 +112,7 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
   private async _handle(data: MessageData): Promise<MessageData | undefined> {
     const { type, action } = data;
     if (Utils.isNullOrUndefined(type) || Utils.isNullOrUndefined(action)) {
-      throw new Error('_handle: type or action is null or undefined');
+      throw new Error('Invalid type or action');
     }
 
     if (type === 'config') {
@@ -181,14 +132,14 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
           ...Utils.deepClone(data),
           status: 'OK'
         };
-        if (!Utils.isNullOrUndefined(result)) {
+        if (result !== undefined) {
           resData.result = result;
         }
         const ao = await this.getAO();
         resData.objects = [ao];
         return resData;
       }
-      // if not wait or invoke which is in generalActionName
+      // if not invoke, handle as command action
       const result = await this._handleCommandActions(data);
       return result;
     }
@@ -197,47 +148,49 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
       return result;
     }
 
-    throw new Error(`_handle: unsupported MessageData.type - ${type}`);
+    throw new Error(`Unsupported type - ${type}`);
   }
 
+  /** handle the config action */
   protected async _handleConfigActions(data: MessageData): Promise<MessageData | undefined> {
     const { type, action } = data;
 
     if (type != 'config') {
-      throw new Error(`_handleConfigActions: unexpected MessageData.type - ${type}`);
+      throw new Error(`Invalid type - ${type}`);
     }
 
     const resData: MessageData = {
       ...Utils.deepClone(data)
     };
 
-    if (action.name === 'set') {
-      const name = action.params?.name as string
+    if (action.name === 'set' && typeof action.params?.name === 'string') {
+      const name = action.params.name as string
       const value = action.params?.value;
       this.config[name] = value;
       resData.status = 'OK';
     }
-    else if (action.name === 'get') {
-      const name = action.params?.name as string
+    else if (action.name === 'get' && typeof action.params?.name === 'string') {
+      const name = action.params.name as string
       const value = this.config[name];
-      const result = {} as Record<string, unknown>;
+      const result: Record<string, unknown> = {};
       result[name] = value;
       resData.result = result;
       resData.status = 'OK';
     }
 
     if (Utils.isNullOrUndefined(resData.status)) {
-      throw new Error(`_handleConfigActions: failed to handle action ${action.name}`);
+      throw new Error(`Unsupported action name - ${action.name}`);
     }
 
     return resData;
   }
 
+  /** handle the query action */
   protected async _handleQueryActions(data: MessageData): Promise<MessageData | undefined> {
     const { type, action, target } = data;
 
     if (type != 'query') {
-      throw new Error(`_handleQueryActions: unexpected MessageData.type - ${type}`);
+      throw new Error(`Invalid type - ${type}`);
     }
 
     const resData: MessageData = {
@@ -271,7 +224,7 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
     else if (actionName === 'query_property' && typeof action.params?.name === 'string') {
       const propName = action.params?.name as string
       const propValue = await this.queryProperty(propName);
-      const result = {} as Record<string, unknown>;
+      const result: Record<string, unknown> = {};
       result[propName] = propValue;
       resData.result = result;
       resData.status = 'OK';
@@ -284,13 +237,106 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
     }
 
     if (Utils.isNullOrUndefined(resData.status)) {
-      throw new Error(`_handleQueryActions: failed to handle action ${action.name}`);
+      throw new Error(`Unsupported action name - ${action.name}`);
     }
 
     return resData;
   }
 
-  protected abstract _handleCommandActions(data: MessageData): Promise<MessageData | undefined>;
-  protected abstract _handleRecordActions(data: MessageData): Promise<MessageData | undefined>;
+  /** handle the command action */
+  protected async _handleCommandActions(data: MessageData): Promise<MessageData | undefined> {
+    throw new Error("Method not implemented.");
+  }
+
+  /** handle the record action */
+  protected async _handleRecordActions(data: MessageData): Promise<MessageData | undefined> {
+    const { type, action } = data;
+
+    if (type != 'record') {
+      throw new Error(`Invalid type - ${type}`);
+    }
+
+    const resData: MessageData = {
+      ...Utils.deepClone(data)
+    };
+
+    const actionName = action.name as recordActionName;
+
+    if (actionName === 'record_step') {
+      const step = action.params?.step as RecordedStep;
+      if (!step) {
+        throw new Error(`Invalid record step`);
+      }
+      await this.recordStep(step);
+      resData.status = 'OK';
+    }
+
+    if (Utils.isNullOrUndefined(resData.status)) {
+      throw new Error(`Unsupported action name - ${action.name}`);
+    }
+
+    return resData;
+  }
+
+  /**
+   * query property value 
+   * @param propName property name
+   * @returns property value
+   */
+  protected abstract queryProperty(propName: string): Promise<unknown>;
+
+  /**
+   * query property values
+   * @param props property array
+   * @returns property values
+   */
+  protected async queryProperties(props: string[]): Promise<Record<string, unknown>> {
+    const result: Record<string, unknown> = {};
+    for (const propName of props) {
+      try {
+        const propValue = await this.queryProperty(propName);
+        result[propName] = propValue;
+      } catch (error) {
+        this.logger.warn('queryProperty error -', propName, error);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * query automation objects
+   * @param desc description for objects
+   * @returns automation objects
+   */
+  protected abstract queryObjects(desc: AODesc): Promise<AutomationObject[]>;
+
+  /**
+   * invoke a function with name and arguments
+   * @param funcName function name to invoke
+   * @param args function arguements
+   * @returns function call result
+   */
+  protected async invokeFunction(funcName: string, args?: unknown[]): Promise<unknown> {
+    if (Utils.isEmpty(funcName)) {
+      throw new Error(`No function name - '${funcName}'`);
+    }
+    if (!(funcName in this)) {
+      throw new Error(`Unknown function name - '${funcName}'`);
+    }
+    const func = (this as any)[funcName];
+    if (!Utils.isFunction(func)) {
+      throw new Error(`Invalid function name - '${funcName}'`);
+    }
+    const result = await func.apply(this, args);
+    return result;
+  }
+
+  /**
+   * record the step
+   * @param step the recorded step information from child
+   */
+  protected async recordStep(step: RecordedStep): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 
 }

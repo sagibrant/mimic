@@ -1,12 +1,12 @@
 {
     "browser": "Edge",
     "extensions": [{
-            "id": "imcoelekoapmlngkdofleambknkkkicp",
+            "id": "ilcdijkgbkkllhojpgbiajmnbdiadppj",
             "unpacked": "v2/Extension",
             "minVersion": 79
         },
         {
-            "id": "imcoelekoapmlngkdofleambknkkkicp",
+            "id": "ilcdijkgbkkllhojpgbiajmnbdiadppj",
             "unpacked": "v3/Extension",
             "minVersion": 96
         }

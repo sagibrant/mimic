@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    // Basic configuration
+    "target": "ESNext",                                 // Compile to modern JavaScript
+    "module": "ESNext",                                 // Use ES modules
+    "lib": ["DOM", "ESNext"],                           // Access to browser APIs and modern JS features
+    "moduleResolution": "Node",                         // Use Node.js module resolution
+    "baseUrl": ".",                                     // Base directory to resolve non-relative module names
+    "outDir": "./dist",                                 // Output directory for compiled files
+    "rootDir": "../../",                                    // Root directory of source files
+
+    // Type checking
+    "strict": false,                                     // Enable all strict type-checking options
+    "noImplicitAny": true,                              // Disallow implicit any types
+    "strictNullChecks": true,                           // Enable strict null checks
+
+    // Module handling
+    "esModuleInterop": true,                            // Enable interoperability between ES and CommonJS
+    "allowSyntheticDefaultImports": true,               // Allow default imports from modules with no default export
+    "resolveJsonModule": true,                          // Allow importing JSON files
+    "isolatedModules": true,                            // Ensure each file can be safely transpiled independently
+    "importHelpers": false,                             // Disable importing helpers from tslib to reduce bundle size 
+    
+    // "sourceMap": true,                                 // Disable source map generation
+    // "inlineSourceMap": true,                           // Disable inline source maps
+    // "inlineSources": true,                             // Disable inline sources in source maps
+    
+    // Additional checks
+    "noUnusedLocals": true,                             // Report unused locals
+    // "noUnusedParameters": true,                         // Report unused parameters
+    "noImplicitReturns": true,                          // Report function missing return statements
+    "noFallthroughCasesInSwitch": true,                 // Report unsafe switch statements
+    
+    // Experimental features
+    "experimentalDecorators": true,                     // Enable experimental decorators
+    "useDefineForClassFields": true,                    // Use ES spec-defined class fields
+
+    // Type definitions
+    "skipLibCheck": true,                               // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true,           // Ensure consistent casing in file names
+    "typeRoots": ["./node_modules/@types"],             // Specify where to find type definitions
+    "types": ["node"],      // Include type definitions including Chrome extension API types
+
+    // Vue specific configuration
+    "jsx": "preserve",                                  // Preserve JSX for Vue compiler
+    "jsxImportSource": "vue",                           // Specify Vue as JSX import source
+    "allowJs": true,
+    "plugins": [ { "name": "@vitejs/plugin-vue" } ]                // Use Vue TypeScript plugin for better integration
+  },
+  "include": ["./**/*.ts", "../../packages/extension/src/execution/Task.ts", "./**/*.js"],           // Include all TypeScript and Vue files
+  "exclude": ["node_modules", "dist"]                   // Exclude node_modules and output directory
+}

@@ -1,6 +1,6 @@
 /**
  * @copyright 2025 Sagi All Rights Reserved.
- * @author: Sagi <sagibrant@163.com>
+ * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file SafariWebExtensionAPI.ts
  * @description 
@@ -19,9 +19,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ChromiumExtensionAPI } from "./ChromiumExtensionAPI";
+import { ChromeExtensionAPI } from "./ChromeExtensionAPI";
 
-export class SafariWebExtensionAPI extends ChromiumExtensionAPI {
+export class SafariWebExtensionAPI extends ChromeExtensionAPI {
   constructor() {
     super();
   }
