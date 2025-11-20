@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build::extension::clean": "npm --prefix packages/extension run build::clean",
-    "build::extension::edge": "npm --prefix packages/extension run build::edge::v3 --",
-    "build::extension::chrome": "npm --prefix packages/extension run build::chrome::v3 --",
+    "build::extension::edge": "npm --prefix packages/extension run build::edge::v3::unpacked --",
+    "build::extension::chrome": "npm --prefix packages/extension run build::chrome::v3::unpacked --",
     "build::test": "npm --prefix tests/extension run build",
     "build": "npm run build::test && npm run build::extension::clean && (npm run build::extension::edge & npm run build::extension::chrome & wait)",
     "test": "echo \"Error: no test specified\" && exit 1"

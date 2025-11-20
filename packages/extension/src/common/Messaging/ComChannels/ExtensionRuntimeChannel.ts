@@ -75,7 +75,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     this._listener = undefined;
   }
 
-  postMessage(msg: Message): void {
+  postMessage(_msg: Message): void {
     throw new Error("Method not implemented.");
   }
 

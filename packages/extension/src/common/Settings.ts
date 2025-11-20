@@ -134,7 +134,7 @@ export class SettingUtils {
         captureScreenshot: false
       },
       recordSettings: {
-        recordNavigation: false
+        recordNavigation: true
       }
     };
   }

@@ -78,11 +78,11 @@ export class PostMessageChannel extends ChannelBase {
     this.logger.debug('postMessage: <<<<<< msg=', msg);
   }
 
-  async sendEvent(msg: Message): Promise<void> {
+  async sendEvent(_msg: Message): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  async sendRequest(msg: Message): Promise<Message> {
+  async sendRequest(_msg: Message): Promise<Message> {
     throw new Error("Method not implemented.");
   }
 

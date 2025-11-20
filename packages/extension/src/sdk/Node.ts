@@ -76,7 +76,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     const frame = await this.ownerFrame();
     let frameElem = await frame.ownerElement();
     while (frameElem) {
-      const frameRect = await frameElem.getBoundingClientRect();
+      const frameRect = await (frameElem as any as Node).getContentClientRect();
       rect.top += frameRect.top;
       rect.left += frameRect.left;
       rect.bottom += frameRect.top;
@@ -105,6 +105,11 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
 
   async getBoundingClientRect(): Promise<api.RectInfo> {
     const result = await this.invokeFunction(this._rtid, 'getBoundingClientRect', []);
+    return result as api.RectInfo;
+  }
+
+  async getContentClientRect(): Promise<api.RectInfo> {
+    const result = await this.invokeFunction(this._rtid, 'getContentClientRect', []);
     return result as api.RectInfo;
   }
 
@@ -147,12 +152,17 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     }
   }
   async click(options?: api.ClickOptions & api.ActionOptions): Promise<void> {
-    const mode = options?.mode ?? await this.getDefaultInputMode();
+    let mode = options?.mode ?? await this.getDefaultInputMode('click');
     const force = options?.force ?? false;
     if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
       await this.checkStates(mode === 'cdp' ? ['visible', 'enabled'] : ['enabled']);
     }
-
+    if (Utils.isNullOrUndefined(options?.mode) && mode === 'cdp') {
+      const rect = await this.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        mode = 'event';
+      }
+    }
     if (mode === 'cdp') {
       const { x, y } = await this.getBoudingPoint(this, options?.position);
       const clickOption: api.ClickOptions = Utils.deepClone(options ?? {});
@@ -165,12 +175,17 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     }
   }
   async dblclick(options?: Omit<api.ClickOptions, 'clickCount'> & api.ActionOptions): Promise<void> {
-    const mode = options?.mode ?? await this.getDefaultInputMode();
+    let mode = options?.mode ?? await this.getDefaultInputMode('dblclick');
     const force = options?.force ?? false;
     if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
       await this.checkStates(mode === 'cdp' ? ['visible', 'enabled'] : ['enabled']);
     }
-
+    if (Utils.isNullOrUndefined(options?.mode) && mode === 'cdp') {
+      const rect = await this.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        mode = 'event';
+      }
+    }
     if (mode === 'cdp') {
       const { x, y } = await this.getBoudingPoint(this, options?.position);
       const clickOption: api.ClickOptions = Object.assign({}, options, { clickCount: 2 });
@@ -325,7 +340,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     const offsetY = Utils.isNullOrUndefined(offset?.y) ? boundingBox.height / 2 : offset.y;
     const x = boundingBox.x + offsetX;
     const y = boundingBox.y + offsetY;
-    return { x: x, y: y };
+    return { x: Math.round(x), y: Math.round(y) };
   }
   private async isDebuggerAttached(): Promise<boolean> {
     const tabRtid = RtidUtils.getTabRtid(this._rtid.tab);
@@ -340,7 +355,19 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
         const attached = await this.isDebuggerAttached();
         defaultInputMode = attached ? 'cdp' : 'event';
       }
+      else if (methodName === 'click' || methodName === 'dblclick') {
+        // use cdp click when href is a javascript: URL 
+        const requireCDPClick = await this.requireCDPClick();
+        if (requireCDPClick) {
+          const attached = await this.isDebuggerAttached();
+          defaultInputMode = attached ? 'cdp' : 'event';
+        }
+      }
     }
     return defaultInputMode;
+  }
+  protected async requireCDPClick(): Promise<boolean> {
+    const result = await this.invokeFunction(this._rtid, 'requireCDPClick', []);
+    return result as boolean;
   }
 }

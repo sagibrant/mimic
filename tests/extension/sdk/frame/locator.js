@@ -102,7 +102,7 @@ if (page) {
       const attrs = await elem.getAttributes();
       console.log("await elem.getAttributes()", attrs);
       expect(attrs).not.toBeNullOrUndefined();
-      expect(attrs['src']).not.toBeNullOrUndefined();
+      expect(attrs.src).not.toBeNullOrUndefined();
     }
   }
 

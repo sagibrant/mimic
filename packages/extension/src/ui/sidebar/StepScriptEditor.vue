@@ -74,6 +74,8 @@ import { StepScriptEditorHelper } from './StepScriptEditorHelper';
 import { OpenAI, OpenAIError } from 'openai';
 import { AIMessage, AIMessageContent, AIUtils } from '@/common/AIUtils';
 import { Utils } from '@/common/Common';
+import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
+import { JSHINT, LintOptions, LintError } from 'jshint';
 
 // Define component props with type annotations
 const props = defineProps({
@@ -146,6 +148,61 @@ const editorExtensions = computed(() => isDark.value ?
   ]
 );
 
+const codeLinter = linter(async (view: EditorView): Promise<Diagnostic[]> => {
+  const diagnostics: Diagnostic[] = [];
+  const doc = view.state.doc;
+  const codeContent = doc.toString().trim();
+  if (!codeContent) return diagnostics;
+
+  //  or add /* jshint -W083 */
+  const codes = `(async () => {
+${codeContent}
+})();`;
+
+  const lintOptions: LintOptions = {
+    esversion: 11,
+    browser: true,
+    devel: true,
+    undef: true,
+    unused: true,
+    eqeqeq: true,
+    curly: true,
+    globals: {
+      ai: true,
+      browser: true,
+      page: true,
+      BrowserLocator: true,
+      expect: true,
+      wait: true
+    }
+    // '-W083': true
+  };
+
+  const isPassed = JSHINT(codes, lintOptions);
+
+  if (!isPassed && JSHINT.errors) {
+    JSHINT.errors.forEach((err: LintError | null) => {
+      if (!err) return;
+      const targetLineNum = err.line - 1;
+      if (targetLineNum < 1 || targetLineNum > doc.lines) return;
+      const targetLine = doc.line(targetLineNum);
+      const errorStart = targetLine.from + (err.character - 1);
+      const errorEnd = err.evidence
+        ? errorStart + err.evidence.length
+        : errorStart + 1;
+
+      diagnostics.push({
+        from: errorStart,
+        to: errorEnd,
+        message: err.reason,
+        severity: err.code && err.code.startsWith('W') ? 'warning' : (err.code && err.code.startsWith('E') ? 'error' : "info")
+      });
+    });
+  }
+
+  return diagnostics;
+}, { delay: 1000 });
+
 const variableTypes = new Map<string, string>();
 variableTypes.set('ai', 'AIClient');
 variableTypes.set('browser', 'Browser');
@@ -184,7 +241,7 @@ const createCompletions = (typeName: string): Completion[] => {
       label,
       type: "function",
       info,
-      apply: (view, completion, from, to) => {
+      apply: (view, _completion, from, to) => {
         const insertText = `${method.name}(${paramsStr})`;
         view.dispatch({
           changes: { from, to, insert: insertText },
@@ -256,6 +313,8 @@ const createCompletionSource = () => {
 const createAutocompleteExtension = (): Extension => {
   return [
     javascript(),
+    codeLinter,
+    lintGutter(),
     autocompletion({
       override: [createCompletionSource()],
       activateOnTyping: true,
@@ -426,7 +485,7 @@ const sendMessage = async (userInput: string): Promise<AIMessageContent> => {
     const summary = aiMessageContents.length > 0 ? aiMessageContents[aiMessageContents.length - 1].answer : '';
     const language = await AIUtils.getLanguage();
     const systemPrompt = AIUtils.getSystemPrompt(language);
-    let userPrompt = AIUtils.getUserPrompt(language, userInput, pageUrl, pageHtml, inspectedNodeJsonDetails, existingCode, summary);
+    let userPrompt = AIUtils.getUserPrompt(userInput, pageUrl, pageHtml, inspectedNodeJsonDetails, existingCode, summary);
     for (let i = 0; i < 2; i++) {
       const response = await openai.chat.completions.create({
         model: ai_model,
@@ -479,7 +538,7 @@ Do not add any useless prefix like \`\`\`json or other extra styles, text, Markd
 Output the result in plain text which in the JSON format: { script: string, answer: string }
 Do not add any useless prefix like \`\`\`json or other extra styles, text, Markdown, or code blocks. Make sure the whole output can be parsed by JSON.parse.
 `
-          userPrompt = AIUtils.getUserPrompt(language, userInputEx, pageUrl, pageHtml, inspectedNodeJsonDetails, existingCode, summaryEx);
+          userPrompt = AIUtils.getUserPrompt(userInputEx, pageUrl, pageHtml, inspectedNodeJsonDetails, existingCode, summaryEx);
         }
       }
     }

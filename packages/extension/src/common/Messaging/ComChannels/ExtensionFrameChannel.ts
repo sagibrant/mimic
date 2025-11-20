@@ -38,7 +38,7 @@ export class ExtensionFrameChannel extends ChannelBase {
     this._status = ChannelStatus.CONNECTED;
   }
 
-  postMessage(msg: Message): void {
+  postMessage(_msg: Message): void {
     throw new Error("Method not implemented.");
   }
 

@@ -349,6 +349,104 @@ if (elem_tables) {
   }
 }
 
+const url_frame = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/index.html";
+await page.navigate(url_frame);
+console.log("await page.navigate(url_frame);");
+await page.sync();
+console.log("await page.sync();");
+{
+  let value = '';
+  // closed shadowdom
+  {
+    // click in the closed shadowdom with js link (require cdp)
+    await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "DIV" }]).nth(1).click();
+    console.log(`await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "DIV" }]).nth(1).click()`);
+    value = await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).value();
+    expect(value).toEqual('ttt1');
+    // fill in the closed shadowdom
+    await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).fill('abc');
+    console.log(`await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).fill('abc')`);
+    value = await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).value();
+    expect(value).toEqual('abc');
+  }
+
+  // opened shadowdom
+  {
+    // visible js links
+    {
+      // click in the opened shadowdom with js links
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('js link click');
+
+      // click in the opened shadowdom with image in js links
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('js link click');
+
+      // click in the opened shadowdom with js links with role
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('role based js link click');
+
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+    }
+    // hide the links in the opened shadowdom
+    await page.frame().nth(2).element('#btn1').click();
+    console.log(`await page.frame().nth(2).element('#btn1').click()`);
+
+    // invisible js links (require click in main world)
+    {
+      // click in the opened shadowdom with js links
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('js link click');
+
+      // click in the opened shadowdom with image in js links
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('js link click');
+
+      // click in the opened shadowdom with js links with role
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click();
+      console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click()`);
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('role based js link click');
+
+      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
+      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      expect(value).toEqual('');
+    }
+  }
+
+  // file upload
+  {
+    await page.frame().nth(3).element('#avatar').setFileInputFiles(["/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png"]);
+    console.log(`await page.frame().nth(3).element('#avatar').setFileInputFiles(["/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png"])`);
+    value = await page.frame().nth(3).element('#avatar').value();
+    expect(value).toEqual('C:\\fakepath\\logo_450x800.png');
+  }
+}
+
 console.log("element methods <==");
 
 await page.bringToFront();

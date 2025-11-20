@@ -4,10 +4,10 @@
     "target": "ESNext",                                 // Compile to modern JavaScript
     "module": "ESNext",                                 // Use ES modules
     "lib": ["DOM", "ESNext"],                           // Access to browser APIs and modern JS features
-    "moduleResolution": "Node",                         // Use Node.js module resolution
+    "moduleResolution": "bundler",                         // Use Node.js module resolution
     "baseUrl": ".",                                     // Base directory to resolve non-relative module names
     "outDir": "./dist",                                 // Output directory for compiled files
-    "rootDir": "./",                                    // Root directory of source files
+    "rootDir": ".",                                     // Root directory of source files
 
     // Type checking
     "strict": true,                                     // Enable all strict type-checking options
@@ -29,10 +29,11 @@
     
     // Additional checks
     "noUnusedLocals": true,                             // Report unused locals
-    // "noUnusedParameters": true,                         // Report unused parameters
+    "noUnusedParameters": false,                        // Disable unused parameters check
     "noImplicitReturns": true,                          // Report function missing return statements
     "noFallthroughCasesInSwitch": true,                 // Report unsafe switch statements
-    
+    "noUncheckedSideEffectImports": true,
+
     // Experimental features
     "experimentalDecorators": true,                     // Enable experimental decorators
     "useDefineForClassFields": true,                    // Use ES spec-defined class fields

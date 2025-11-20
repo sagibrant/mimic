@@ -46,6 +46,7 @@
 	],
 	"web_accessible_resources": [
 		"assets/**/*.*",
-		"ui/**/*.*"
+		"ui/**/*.*",
+		"*.js"
 	]
 }

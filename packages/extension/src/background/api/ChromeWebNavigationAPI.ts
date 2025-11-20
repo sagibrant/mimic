@@ -138,7 +138,7 @@ export class ChromeWebNavigationAPI extends EventEmitter<WebNavigationEvents> {
         frameId: details.frameId,
         frameType: details.frameType,
         parentFrameId: details.parentFrameId,
-        documentId: details.documentId,
+        documentId: (details as any).documentId,
         parentDocumentId: details.parentDocumentId,
         timeStamp: details.timeStamp
       });

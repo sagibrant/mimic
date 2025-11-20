@@ -101,7 +101,6 @@ if (page) {
   console.log("element locator using css selector or xpath ======>");
   {
     {
-      const url_frame1_shadowclosed = 'file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/shadowclosed.html';
       const elems_container1 = await page.element({ selector: '#container1' }).all();
       console.log("await page.element({ selector: '#container1' }).all()", elems_container1);
       expect(elems_container1).toHaveLength(1);
@@ -286,8 +285,6 @@ console.log("element locator in frame1_shadowclosed <==");
 // frame2_shadowopen 'file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/shadowopen.html'
 console.log("element locator in frame2_shadowopen =======>");
 {
-  const url_frame2_shadowopen = 'file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/shadowopen.html';
-
   // btn1 outside the shadowdom
   let count = await page.frame({ selector: '#frame2' })
     .filter({ name: 'id', value: 'frame2' })

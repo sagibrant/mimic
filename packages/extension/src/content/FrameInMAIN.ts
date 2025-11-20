@@ -20,6 +20,9 @@
  * limitations under the License.
  */
 
+import { ClickOptions } from "@/types/types";
+import { EventSimulator } from "./EventSimulator";
+
 export class FrameInMAIN {
 
   private readonly _callbacks: Record<string, (result: any) => void> = {};
@@ -61,7 +64,7 @@ export class FrameInMAIN {
     }
   }
 
-  setRuntimeElement(elem: Element | null) {
+  setElement(elem: Element | null) {
     if (elem) {
       const gogogo_testid = this.generateUUID();
       elem.setAttribute('gogogo-testid', gogogo_testid);
@@ -70,6 +73,13 @@ export class FrameInMAIN {
     else {
       this.send('updateRuntimeElement', []);
     }
+  }
+
+  clickElement(elem: Element, options?: ClickOptions) {
+    if (!elem) return;
+    const gogogo_testid = this.generateUUID();
+    elem.setAttribute('gogogo-testid', gogogo_testid);
+    this.send('clickRuntimeElement', [gogogo_testid, options], undefined, undefined, elem);
   }
 
   send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: any) => void), target?: EventTarget) {
@@ -83,17 +93,16 @@ export class FrameInMAIN {
       msg.callbackId = callback;
     }
     if (this._source === 'content') {
-      const event = new CustomEvent('_Content_To_MAIN_EVENT_', { detail: msg });
+      const event = new CustomEvent('_Content_To_MAIN_EVENT_', { detail: msg, bubbles: true, cancelable: true, composed: true });
       target.dispatchEvent(event);
-
     }
     else {
-      const event = new CustomEvent('_MAIN_To_Content_EVENT_', { detail: msg });
+      const event = new CustomEvent('_MAIN_To_Content_EVENT_', { detail: msg, bubbles: true, cancelable: true, composed: true });
       target.dispatchEvent(event);
     }
   }
 
-  async onEvent(event: any) {
+  private async onEvent(event: any) {
     var msg = event.detail;
     if (typeof (msg) !== "object") {
       return;
@@ -117,23 +126,35 @@ export class FrameInMAIN {
     // invoke function
     if (funcName && funcName in this && typeof (this as any)[funcName] === 'function') {
       // adjust the params for some functions
-      if (funcName === 'updateRuntimeElement' && event.target && event.target.nodeType === Node.ELEMENT_NODE) {
-        const elem = event.target as Element;
+      if (['updateRuntimeElement', 'clickRuntimeElement'].includes(funcName)) {
+        let target = event.target;
+        if (event.composedPath) {
+          const path = event.composedPath();
+          if (path && path.length > 0) {
+            target = path[0];
+          }
+        }
+        if (!target || target.nodeType !== Node.ELEMENT_NODE) {
+          console.warn(`${funcName}: the target is invalid`, target);
+          return;
+        }
+
+        const elem = target as Element;
         const gogogo_testid = params && params.length >= 1 ? params[0] : undefined;
         if (gogogo_testid) {
           if (!elem.hasAttribute('gogogo-testid')) {
-            console.warn('updateRuntimeElement: the gogogo-testid is missing', elem);
+            console.warn(`${funcName}: the gogogo-testid is missing`, elem);
             return;
           }
           const testid = elem.getAttribute('gogogo-testid');
           elem.removeAttribute('gogogo-testid');
           if (testid !== gogogo_testid) {
-            console.warn('updateRuntimeElement: the gogogo-testid is not matched', elem);
+            console.warn(`${funcName}: the gogogo-testid is not matched`, elem);
             return;
           }
+          params.splice(0, 1);
         }
-        params.splice(0);
-        params.push(elem);
+        params.splice(0, 0, elem);
       }
 
       const func = (this as any)[funcName] as Function;
@@ -163,6 +184,12 @@ export class FrameInMAIN {
     }
     else if (window.gogogo) {
       delete (window as any).gogogo;
+    }
+  }
+
+  protected async clickRuntimeElement(elem: Element, options?: ClickOptions) {
+    if (elem && elem instanceof Element) {
+      await EventSimulator.simulateClick(elem, options);
     }
   }
 }

@@ -605,7 +605,7 @@ for (const inputMode of inputModes) {
             expect(expectedLabels).toContain(label);
           }
         }
-      }
+      };
 
       let multiple = await page.element("#select").multiple();
       console.log(`await page.element("#select").multiple()`, multiple);

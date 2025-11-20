@@ -22,12 +22,25 @@
  */
 
 import { createApp } from 'vue';
+// PrimeVue
+import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
+import ConfirmDialog from 'primevue/confirmdialog';
+import ConfirmationService from 'primevue/confirmationservice';
+import 'primeicons/primeicons.css';
+import '../../assets/css/global.css';
+
 import Sidebar from './Sidebar.vue';
 import { SidebarDispatcher } from './SidebarDispatcher';
 import { SidebarHandler } from './SidebarHandler';
 import { StepEngine } from './StepEngine';
 import { SettingUtils } from '@/common/Settings';
 import { SidebarUtils } from './SidebarUtils';
+
 
 await SettingUtils.init();
 const dispatcher = new SidebarDispatcher();
@@ -41,5 +54,28 @@ await dispatcher.init();
 
 // Create and mount the Vue application
 const app = createApp(Sidebar);
+app.use(PrimeVue, {
+  ripple: true,
+  theme: {
+    preset: Aura,
+    options: {
+      darkModeSelector: 'system',
+      order: 'theme, base, primevue'
+    }
+  }
+}).use(ConfirmationService);
+// Register PrimeVue components globally to avoid repetitive imports
+app.component('Button', Button);
+app.component('InputText', InputText);
+app.component('Select', Select);
+app.component('Dialog', Dialog);
+app.component('ConfirmDialog', ConfirmDialog);
 app.mount('#app');
 
+// Sync system light/dark preference with PrimeVue theme surface classes
+const syncThemeScheme = (isDark: boolean) => {
+  document.documentElement.classList.toggle('p-theme-dark', isDark);
+};
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+syncThemeScheme(mediaQuery.matches);
+mediaQuery.addEventListener('change', (e) => syncThemeScheme(e.matches));

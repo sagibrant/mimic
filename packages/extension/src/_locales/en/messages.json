@@ -81,7 +81,12 @@
     "sidebar_btn_title_bottom_collapse":  { "message": "Collapse" },
     "sidebar_btn_title_bottom_expand":  { "message": "Expand" },
 
-    "sidebar_btn_action_demo_confirm_cleanupTasks": { "message": "Load Demo Tasks will clean up all the existing tasks. Are you sure to to continue?" },
+    "sidebar_confirm_header":  { "message": "Confirmation" },
+    "sidebar_confirm_accept":  { "message": "OK" },
+    "sidebar_confirm_cancel":  { "message": "Cancel" },
+
+    "sidebar_btn_action_load_demo_confirm_header": { "message": "Load Demo Task" },
+    "sidebar_btn_action_load_demo_confirm_text": { "message": "Load Demo Task will clean up all the existing tasks. Are you sure to to continue?" },
     "sidebar_btn_action_load_error_invalid_file": { "message": "The selected file is not a valid task file." },
     "sidebar_btn_action_load_error": { "message": "Fail to load the task file." },
     "sidebar_btn_action_save_notification": { "message": "Tasks are saved." },
@@ -98,7 +103,8 @@
     "sidebar_btn_action_tree_add_node_prompt_enter_node_name": { "message": "Enter node name:" },
     "sidebar_btn_action_tree_add_node_alert_enter_node_name_invalid": { "message": "The node name is invalid." },
     "sidebar_btn_action_tree_add_node_failed": { "message": "Fail to add task node." },
-    "sidebar_btn_action_tree_delete_node_confirm": { "message": "Are you sure you want to delete the selected node?" },
+    "sidebar_btn_action_tree_delete_node_confirm_header": { "message": "Delete the selected node" },
+    "sidebar_btn_action_tree_delete_node_confirm_text": { "message": "Are you sure you want to delete the selected node?" },
     "sidebar_btn_action_tree_delete_node_failed": { "message": "Fail to delete task node." },
 
     "sidebar_btn_action_steps_add_step_new_step_label": { "message": "new step" },

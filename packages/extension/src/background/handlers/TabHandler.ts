@@ -369,6 +369,15 @@ export class TabHandler extends MsgDataHandlerBase {
     if (Utils.isNullOrUndefined(frame)) {
       return 'Removed';
     }
+    // if bg sleep and active again, the this._frameDict is empty
+    if (Utils.isEmpty(this._frameDict)) {
+      if (frame.errorOccurred) {
+        return 'ErrorOccurred';
+      }
+      else {
+        return 'DOMContentLoaded';
+      }
+    }
     const frameDetails = this._frameDict[frameId];
     if (frameDetails && !Utils.isNullOrUndefined(frameDetails.lastWebNavigationStatus)) {
       // ErrorOccurred : "net::ERR_BLOCKED_BY_RESPONSE"
@@ -442,7 +451,7 @@ export class TabHandler extends MsgDataHandlerBase {
   }
   async handleInspectNodeRequested(source: DebuggerSession, backendNodeId: number): Promise<void> {
     const details = await this._cdpDOM.getNodeDetails(backendNodeId, source);
-    BackgroundUtils.dispatchEvent('nodeInspected', details);
+    await BackgroundUtils.dispatchEvent('nodeInspected', details);
   }
   async getJavaScriptDialog(): Promise<any> {
     return this._browserAPI.cdpAPI.getJavascriptDialog(this._tabId);
@@ -906,7 +915,9 @@ export class TabHandler extends MsgDataHandlerBase {
     else {
       step.frameScript = undefined;
     }
-    // send record event to sidebar
-    await BackgroundUtils.dispatchEvent('stepRecorded', step);
+    // send record event to browser 
+    const rtid = RtidUtils.getBrowserRtid();
+    const msgData = MsgUtils.createMessageData('record', rtid, { name: 'record_step', params: { step: step } });
+    await BackgroundUtils.sendEvent(msgData);
   }
 }

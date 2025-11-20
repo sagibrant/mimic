@@ -90,7 +90,7 @@ export class AIClient extends ChannelBase implements api.AIClient {
       this._history.push({ content: this._systemPrompt, role: 'system' });
     }
     messages.push(...this._history);
-    const newMessage: ChatCompletionMessageParam = { content: message, role: 'user' };
+    const newMessage: ChatCompletionMessageParam = { content: message, role: role };
     messages.push(newMessage);
     const response = await this._openai.chat.completions.create({
       model: this._model,

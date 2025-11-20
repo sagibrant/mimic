@@ -84,7 +84,7 @@ extension/
 │   │   │   ├── 2025/
 │   │   │   │   ├── apiKey.txt
 │   │   │   │   ├── apiSecret.txt
-│   ├── webpack.config.js
+│   ├── webpack.config.cjs
 │   ├── UnpackedExtensionPlugin.js
 │   ├── CrxPackPlugin.js
 │   ├── XpiPackPlugin.js
@@ -100,29 +100,29 @@ extension/
 > build for `dev` extensions
 
 ```bat
-    C:\xxx\extension> npm run build::dev -- version=2025.04.11.1 
+    C:\xxx\extension> npm run build::dev -- --env version=2025.04.11.1 
 ```
 
 > build for `chrome`
 
 ```bat
-    C:\xxx\extension> npm run build::chrome -- version=2025.04.11.1 
+    C:\xxx\extension> npm run build::chrome -- --env version=2025.04.11.1 
 ```
 
 > build for `edge`
 
 ```bat
-    C:\xxx\extension> npm run build::edge -- version=2025.04.11.1 
+    C:\xxx\extension> npm run build::edge -- --env version=2025.04.11.1 
 ```
 
 > build for `firefox` (packed version can be only triggered in product mode as it will reserve the build number)
 
 ```bat
-    C:\xxx\extension> npm run build::firefox -- version=2025.04.11.1 
+    C:\xxx\extension> npm run build::firefox -- --env version=2025.04.11.1 
 ```
 
 > build for `product` (should only triggered by pipleline as it will reserve the build number)
 
 ```bat
-    C:\xxx\extension> npm run build::product -- version=2025.04.11.1 
+    C:\xxx\extension> npm run build::product -- --env version=2025.04.11.1 
 ```

@@ -67,7 +67,8 @@
 		{
 			"resources": [
 				"assets/**/*.*",
-				"ui/**/*.*"
+				"ui/**/*.*",
+				"*.js"
 			],
 			"matches": [
 				"<all_urls>"

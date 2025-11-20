@@ -271,6 +271,10 @@ export class Element extends Node implements api.Element {
     await this.invokeFunction(this._rtid, 'scrollIntoViewIfNeeded', []);
   }
   async check(options?: api.ActionOptions): Promise<void> {
+    let checked = await this.checked();
+    if (checked) {
+      return;
+    }
     const mode = options?.mode ?? await this.getDefaultInputMode();
     const force = options?.force ?? false;
     if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
@@ -278,59 +282,52 @@ export class Element extends Node implements api.Element {
     }
 
     if (mode === 'cdp') {
-      let checked = await this.checked();
-      if (checked) {
-        return;
-      }
-      await this.click(options);
-      checked = await this.checked();
-      if (checked) {
-        return;
-      }
       const rect = await this.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) {
         await this.invokeFunction(this._rtid, 'check', []);
-        checked = await this.checked();
-        if (checked) {
-          return;
-        }
       }
-      await this.setProperty('checked', true);
+      else {
+        await this.click(options);
+      }
     }
     else {
       await this.invokeFunction(this._rtid, 'check', []);
     }
+
+    checked = await this.checked();
+    if (checked) {
+      return;
+    }
+    await this.setProperty('checked', true);
   }
   async uncheck(options?: api.ActionOptions): Promise<void> {
+    let checked = await this.checked();
+    if (!checked) {
+      return;
+    }
     const mode = options?.mode ?? await this.getDefaultInputMode();
     const force = options?.force ?? false;
     if (!force && SettingUtils.getReplaySettings().autoActionCheck) {
       await this.checkStates(mode === 'cdp' ? ['visible', 'enabled'] : ['enabled']);
     }
-
     if (mode === 'cdp') {
-      let checked = await this.checked();
-      if (!checked) {
-        return;
-      }
-      await this.click(options);
-      checked = await this.checked();
-      if (!checked) {
-        return;
-      }
       const rect = await this.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) {
         await this.invokeFunction(this._rtid, 'uncheck', []);
-        checked = await this.checked();
-        if (!checked) {
-          return;
-        }
       }
-      await this.setProperty('checked', false);
+      else {
+        await this.click(options);
+      }
     }
     else {
       await this.invokeFunction(this._rtid, 'uncheck', []);
     }
+
+    checked = await this.checked();
+    if (!checked) {
+      return;
+    }
+    await this.setProperty('checked', false);
   }
   async selectOption(values: string | string[] | number | number[] | api.Element | api.Element[]): Promise<void> {
     const elems = Array.isArray(values) ? values : [values];
@@ -358,11 +355,11 @@ export class Element extends Node implements api.Element {
   /** ==================================================================================================================== */
   async $0(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
-      get: async (target, prop) => {
+      get: async (_target, _prop) => {
         //console.log(`getting ${prop} from ${target}`);
       },
 
-      set: (target, prop, value, receiver) => {
+      set: (_target, _prop, _value, _receiver) => {
         //console.log(`setting ${prop} from ${target} to ${value}`);
         return true;
       },

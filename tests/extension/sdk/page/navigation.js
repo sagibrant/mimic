@@ -61,8 +61,6 @@ console.log("current page", page);
 const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
 const url_keyboard = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/keyboard.html";
 const url_cn_bing = "https://cn.bing.com/";
-const url_cn_bing_translate = "https://cn.bing.com/translator?setlang=zh-cn/";
-const url_baidu = "https://www.baidu.com/";
 
 const checkPageUrl = async (url) => {
   const page = await browser.page({ active: true, lastFocusedWindow: true }).get();

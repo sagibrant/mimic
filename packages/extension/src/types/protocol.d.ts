@@ -354,6 +354,9 @@ export interface TabDescription {
  * Defines the recorded step
  */
 export interface RecordedStep {
+  await: boolean;
+
+  browserScript?: string;
   pageScript?: string;
   frameScript?: string;
   elementScript?: string;

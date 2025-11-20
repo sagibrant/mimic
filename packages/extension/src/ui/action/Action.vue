@@ -29,10 +29,10 @@ import { SettingUtils } from '@/common/Settings';
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
 // State with proper typing
-const isRecording = ref(false);
+const isRecording = ref<boolean>(false);
 
-const isRecordSupported = ref(false);
-const isStoreSupported = ref(false);
+const isRecordSupported = ref<boolean>(false);
+const isStoreSupported = ref<boolean>(false);
 
 // Cleanup function for storage listener
 let storageChangeListener: (changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => void;
@@ -46,13 +46,13 @@ const t = (key: string): string => {
 onMounted(() => {
   // Load initial state from storage
   chrome.storage.local.get(['isRecording']).then((result) => {
-    isRecording.value = result.isRecording || false;
+    isRecording.value = result.isRecording as boolean || false;
   });
 
   // Setup storage change listener
   storageChangeListener = (changes, areaName) => {
     if (areaName === 'local' && 'isRecording' in changes) {
-      isRecording.value = changes.isRecording.newValue;
+      isRecording.value = changes.isRecording.newValue as boolean
     }
   };
 

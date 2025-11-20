@@ -90,6 +90,7 @@ export class BackgroundDispatcher extends Dispatcher {
       return this._backgroundListeningChannel;
     }
     else {
+      this.logger.error("Unsupported context type for getChannel", msg);
       throw new Error(`Unsupported context type ${contextType}`);
     }
   }

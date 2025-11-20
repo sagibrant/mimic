@@ -86,7 +86,7 @@ export class StepEngine {
     await this.invokeFunction(tabRtid, 'toggleInspectMode', []);
   }
 
-  async highlight(desc: AODesc): Promise<boolean> {
+  async highlight(_desc: AODesc): Promise<boolean> {
     const tabRtid = await this.activePageRtid();
     await this.invokeFunction(tabRtid, 'highlight', []);
     this._logger.warn('highlight Not supported');
@@ -94,6 +94,7 @@ export class StepEngine {
   }
 
   async runScript(script: string, isolated: boolean = true, timeout: number = 60000): Promise<any> {
+    if (!script) return;
     const rtid = RtidUtils.getAgentRtid();
     rtid.context = 'external';
     rtid.external = 'sandbox-handler';

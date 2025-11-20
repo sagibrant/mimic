@@ -51,7 +51,7 @@ export class Recorder {
     for (const event of this._recordingEvents) {
       window.addEventListener(event, this._hanleEventFunc, true);
     }
-    const shadowRoots = ContentUtils.traverseGetAllShadowRoot(document, 'closed');
+    const shadowRoots = ContentUtils.traverseGetAllShadowRoot(document);
     for (const shadowRoot of shadowRoots) {
       for (const event of this._recordingEvents) {
         shadowRoot.addEventListener(event, this._hanleEventFunc, true);
@@ -66,7 +66,7 @@ export class Recorder {
       for (const event of this._recordingEvents) {
         window.removeEventListener(event, this._hanleEventFunc, true);
       }
-      const shadowRoots = ContentUtils.traverseGetAllShadowRoot(document, 'closed');
+      const shadowRoots = ContentUtils.traverseGetAllShadowRoot(document);
       for (const shadowRoot of shadowRoots) {
         for (const event of this._recordingEvents) {
           shadowRoot.removeEventListener(event, this._hanleEventFunc, true);
@@ -121,21 +121,22 @@ class RecordObject {
     this._logger = new Logger(prefix);
 
     this._events = [];
-    this._events.push(event);
 
-    if (event.type === 'focus') {
-      const elem = this.getInterestedElement(event);
-      if (elem && elem instanceof HTMLElement && elem.contentEditable === 'true') {
-        this._cachedTextContent = elem.textContent;
-      }
+    const elem = this.getInterestedElement(event);
+    if (elem && elem instanceof HTMLElement && elem.contentEditable === 'true') {
+      this._cachedTextContent = elem.textContent;
     }
   }
 
   async receiveEvent(event: Event) {
-    if (this._events.length <= 0 || this._events[this._events.length - 1] !== event) {
-      this._events.push(event);
+    if (this._events.length > 0 && this._events[this._events.length - 1] === event) {
+      return;
     }
+    this._events.push(event);
     switch (event.type) {
+      case 'focus': {
+        break;
+      }
       case 'click': {
         await this.recordClick(event as MouseEvent);
         break;
@@ -187,6 +188,7 @@ class RecordObject {
     if (!aoDesc.queryInfo) return;
     const scripts = await this.generateElementScript(aoDesc);
     const recordedStep: RecordedStep = {
+      await: true,
       elementRtid: ao.rtid,
       element: details,
       elementScript: scripts,
@@ -270,6 +272,7 @@ class RecordObject {
     if (!aoDesc.queryInfo) return;
     const scripts = await this.generateElementScript(aoDesc);
     const recordedStep: RecordedStep = {
+      await: true,
       elementRtid: ao.rtid,
       element: details,
       elementScript: scripts,

@@ -43,7 +43,7 @@ export class SandboxDispatcher extends Dispatcher {
     this._sandboxToSidebarChannel.startListening();
   }
 
-  protected override getChannel(msg: Message): IChannel {
+  protected override getChannel(_msg: Message): IChannel {
     return this._sandboxToSidebarChannel;
   }
 }

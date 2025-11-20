@@ -170,8 +170,13 @@ export class Frame extends AutomationObject implements api.Frame {
 
   async sync(timeout: number = 5000): Promise<void> {
     const check = async () => {
-      const status = await this.status();
-      return status === 'Completed';
+      try {
+        const readyState = await this.readyState();
+        return readyState === 'complete';
+      }
+      catch {
+        return false;
+      }
     };
     const result = await Utils.waitChecked(check, timeout);
     if (!result) {
@@ -218,11 +223,11 @@ export class Frame extends AutomationObject implements api.Frame {
 
   async document(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
-      get: async (target, prop) => {
+      get: async (_target, _prop) => {
         //console.log(`getting ${prop} from ${target}`);
       },
 
-      set: (target, prop, value, receiver) => {
+      set: (_target, _prop, _value, _receiver) => {
         //console.log(`setting ${prop} from ${target} to ${value}`);
         return true;
       },

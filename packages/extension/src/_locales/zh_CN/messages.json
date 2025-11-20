@@ -81,7 +81,12 @@
     "sidebar_btn_title_bottom_collapse":  { "message": "收缩" },
     "sidebar_btn_title_bottom_expand":  { "message": "展开" },
 
-    "sidebar_btn_action_demo_confirm_cleanupTasks": { "message": "加载演示任务将清空当前所有任务，请确认是否继续？" },
+    "sidebar_confirm_header":  { "message": "确认" },
+    "sidebar_confirm_accept":  { "message": "确认" },
+    "sidebar_confirm_cancel":  { "message": "取消" },
+
+    "sidebar_btn_action_load_demo_confirm_header": { "message": "加载演示任务" },
+    "sidebar_btn_action_load_demo_confirm_text": { "message": "加载演示任务将清空当前所有任务，请确认是否继续？" },
     "sidebar_btn_action_load_error_invalid_file": { "message": "该文件不是有效的任务文件。" },
     "sidebar_btn_action_load_error": { "message": "无法加载任务文件。" },
     "sidebar_btn_action_save_notification": { "message": "所有任务已保存。" },
@@ -98,7 +103,8 @@
     "sidebar_btn_action_tree_add_node_prompt_enter_node_name": { "message": "请输入任务节点名称：" },
     "sidebar_btn_action_tree_add_node_alert_enter_node_name_invalid": { "message": "无效的任务节点名称。" },
     "sidebar_btn_action_tree_add_node_failed": { "message": "添加新任务节点失败。" },
-    "sidebar_btn_action_tree_delete_node_confirm": { "message": "请确认是否删除当前选中的任务？" },
+    "sidebar_btn_action_tree_delete_node_confirm_header": { "message": "删除当前选中的任务" },
+    "sidebar_btn_action_tree_delete_node_confirm_text": { "message": "请确认是否删除当前选中的任务？" },
     "sidebar_btn_action_tree_delete_node_failed": { "message": "删除任务节点失败。" },
 
     "sidebar_btn_action_steps_add_step_new_step_label": { "message": "新步骤" },

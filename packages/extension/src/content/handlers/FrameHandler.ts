@@ -78,11 +78,14 @@ export class FrameHandler extends MsgDataHandlerBase {
     try {
       let ready = this._main.isReady();
       if (!ready) {
-        const code_FrameInMAIN = FrameInMAIN.toString() + `\n\n`;
+        const codeUrl = chrome.runtime.getURL('frame-in-main-loader.js');
+        const response = await fetch(codeUrl);
+        if (!response.ok) {
+          throw new Error(`resource error: status - ${response.status}`);
+        }
+        const codes = await response.text();
         const script = `(function(){
-          ${code_FrameInMAIN}
-          let frameInMain = new FrameInMAIN();
-          frameInMain.init();
+          ${codes}
         })()`;
         const frameId = this.rtid.frame;
         await this._invokeTabMethod('executeScript', [script, frameId]);

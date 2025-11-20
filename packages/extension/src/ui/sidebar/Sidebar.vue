@@ -1,5 +1,21 @@
 <template>
   <div class="sidebar-container">
+    <ConfirmDialog :style="{ width: '20rem' }"></ConfirmDialog>
+    <Dialog v-model:visible="isAddTaskNodeDialogVisible" modal header="Add a Task or Group" :style="{ width: '20rem' }">
+        <div class="flex items-center gap-4 mb-4">
+            <label for="add_new_node_type" class="font-semibold w-24">Type</label>
+            <Select id="add_new_node_type" v-model="selectedAddTaskNodeType" :options="addTaskNodeTypes" optionLabel="name" defaultValue="task" class="flex-auto" fluid />
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+            <label for="add_new_node_name" class="font-semibold w-24">Name</label>
+            <InputText id="add_new_node_name" class="flex-auto" autocomplete="off" fluid />
+        </div>
+        <div class="flex justify-end gap-2">
+            <Button type="button" label="Cancel" severity="secondary" @click="isAddTaskNodeDialogVisible = false"></Button>
+            <Button type="button" label="Save" @click="isAddTaskNodeDialogVisible = false"></Button>
+        </div>
+    </Dialog>
+
     <!-- Header with menus -->
     <header class="sidebar-header">
       <!-- Task menus -->
@@ -73,7 +89,7 @@
             {{ t('sidebar_btn_label_steps_delete_step') }}
           </button>
           <span class="menu-divider"></span>
-          <button class="command-btn" :disabled="!(activeTaskId && isIdle && selectedStepUid)" @click="handleRecord"
+          <button class="command-btn" :disabled="!(activeTaskId && isIdle)" @click="handleRecord"
             :title="t('sidebar_btn_title_steps_record')">
             {{ t('sidebar_btn_label_steps_record') }}
           </button>
@@ -163,7 +179,24 @@ import { TaskUtils } from '../../execution/TaskUtils';
 import { Utils } from '@/common/Common';
 import { SettingUtils } from '@/common/Settings';
 import { SidebarUtils } from './SidebarUtils';
+import { useConfirm } from "primevue/useconfirm";
 
+/**
+ * Get localized text by key
+ * @param key - The key of the text to localize
+ * @returns Localized text string
+ */
+const t = (key: string) => {
+  return chrome.i18n.getMessage(key) || key; // Fallback to key if message not found
+};
+
+const primevueConfirm = useConfirm();
+const isAddTaskNodeDialogVisible = ref(false);
+const selectedAddTaskNodeType = ref<'group'|'task'>('group');
+const addTaskNodeTypes = ref([
+    { name: t('sidebar_btn_action_tree_add_node_task'), code: 'task' },
+    { name: t('sidebar_btn_action_tree_add_node_group'), code: 'group' }
+]);
 
 /**
  * Union type representing either a task or a task group in the tree
@@ -258,14 +291,6 @@ const isInspectStarted = ref(false);
 const inspectedNodeDetails = computed(() => selectedStep.value?.objects?.length ? selectedStep.value.objects[0] : null);
 
 // Methods
-/**
- * Get localized text by key
- * @param key - The key of the text to localize
- * @returns Localized text string
- */
-const t = (key: string) => {
-  return chrome.i18n.getMessage(key) || key; // Fallback to key if message not found
-};
 
 /**
  * Show a notification message
@@ -295,14 +320,33 @@ const handleDemoTask = () => {
   }
   const task = findTaskNode(n => n.type === 'task');
   if (task) {
-    if (!confirm(t('sidebar_btn_action_demo_confirm_cleanupTasks'))) {
-      return;
-    }
+    primevueConfirm.require({
+      message: t('sidebar_btn_action_load_demo_confirm_text'),
+      header: t('sidebar_btn_action_load_demo_confirm_header'),
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: {
+        label: t('sidebar_confirm_cancel'),
+        severity: 'secondary',
+        outlined: true
+      },
+      acceptProps: {
+        label: t('sidebar_confirm_accept')
+      },
+      accept: () => {
+        taskResults.splice(0);
+        const asset = createDemoTaskAsset();
+        initTaskData(asset.root);
+      },
+      reject: () => {
+        return;
+      }
+    });
   }
-  taskResults.splice(0);
-
-  const asset = createDemoTaskAsset();
-  initTaskData(asset.root);
+  else {
+    taskResults.splice(0);
+    const asset = createDemoTaskAsset();
+    initTaskData(asset.root);
+  }
 };
 
 const createDemoTaskAsset = () => {
@@ -672,6 +716,9 @@ onMounted(async () => {
   SidebarUtils.handler.on('stepRecorded', ({ step }) => {
     if (selectedStep.value) {
       const scripts: string[] = [];
+      if (step.browserScript) {
+        scripts.push(step.browserScript);
+      }
       if (step.pageScript) {
         scripts.push(step.pageScript);
       }
@@ -684,7 +731,7 @@ onMounted(async () => {
       if (step.actionScript) {
         scripts.push(step.actionScript);
       }
-      const stepScript = 'await ' + scripts.join('.') + ';'
+      const stepScript = (step.await ? 'await ' : '') + scripts.join('.') + ';'
       if (stepScriptEditor.value) {
         stepScriptEditor.value.addStepScript(stepScript);
       }
@@ -925,7 +972,7 @@ const saveStepDescription = (stepUid: string) => {
  * Handle click on a step result from the steps panel
  * @param uid - UID of the selected step
  */
-const handleStepResultClick = (uid: string) => {
+const handleStepResultClick = (_uid: string) => {
   // todo: display results in a better ui
   // sidebarBottomType.value = 'result';
 };
@@ -996,6 +1043,7 @@ const handleAddTaskNode = () => {
 
   const t_task = t('sidebar_btn_action_tree_add_node_task');
   const t_group = t('sidebar_btn_action_tree_add_node_group');
+  isAddTaskNodeDialogVisible.value = true;
   let nodeType = prompt(t('sidebar_btn_action_tree_add_node_prompt_enter_node_type'), t_task);
   if (!nodeType || (nodeType !== t_group && nodeType !== t_task)) {
     alert(t('sidebar_btn_action_tree_add_node_alert_enter_node_type_invalid'));
@@ -1072,35 +1120,49 @@ const handleDeleteTaskNode = () => {
     return;
   }
 
-  if (!confirm(t('sidebar_btn_action_tree_delete_node_confirm'))) {
-    return;
-  }
+  primevueConfirm.require({
+    message: t('sidebar_btn_action_tree_delete_node_confirm_text'),
+    header: t('sidebar_btn_action_tree_delete_node_confirm_header'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: t('sidebar_confirm_cancel'),
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: t('sidebar_confirm_accept')
+    },
+    accept: () => {
+      // Remove node from tree
+      const removeNodeFromTree = (node: TaskNode, targetId: string): boolean => {
+        if (node.type === 'group' && node.children) {
+          const index = node.children.findIndex(child => child.id === targetId);
+          if (index !== -1) {
+            node.children.splice(index, 1);
+            return true;
+          }
 
-  // Remove node from tree
-  const removeNodeFromTree = (node: TaskNode, targetId: string): boolean => {
-    if (node.type === 'group' && node.children) {
-      const index = node.children.findIndex(child => child.id === targetId);
-      if (index !== -1) {
-        node.children.splice(index, 1);
-        return true;
-      }
-
-      for (const child of node.children) {
-        if (removeNodeFromTree(child, targetId)) {
-          return true;
+          for (const child of node.children) {
+            if (removeNodeFromTree(child, targetId)) {
+              return true;
+            }
+          }
         }
+        return false;
+      };
+
+      if (removeNodeFromTree(taskTree.value, activeTaskNodeId.value)) {
+        // taskTree.value = { ...taskTree.value }; // Trigger reactivity
+        initTaskData(taskTree.value);
+      } else {
+        showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'));
       }
+    },
+    reject: () => {
+      return;
     }
+  });
 
-    return false;
-  };
-
-  if (removeNodeFromTree(taskTree.value, activeTaskNodeId.value)) {
-    // taskTree.value = { ...taskTree.value }; // Trigger reactivity
-    initTaskData(taskTree.value);
-  } else {
-    showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'));
-  }
 };
 
 
@@ -1108,7 +1170,7 @@ const handleDeleteTaskNode = () => {
 /**
  * Add new step
  */
-const handleAddStep = () => {
+const handleAddStep = (payload: MouseEvent | undefined, edit: boolean = true) => {
   if (!(isIdle.value && activeTaskId.value)) {
     return;
   }
@@ -1139,7 +1201,7 @@ const handleAddStep = () => {
   activeSteps.value = [...task.steps];
   handleStepSelect(newStep.uid);
 
-  // Enter edit mode for the new step
+  if (!edit) return;
   nextTick(() => {
     handleStepDescriptionDblClick(newStep.uid);
   });
@@ -1190,7 +1252,7 @@ const handleDragStart = (uid: string) => {
  * Handle drag over event (required to allow drop)
  * @param uid - UID of the step being dragged over
  */
-const handleDragOver = (uid: string) => {
+const handleDragOver = (_uid: string) => {
   // Prevent default to allow drop
 };
 
@@ -1279,6 +1341,12 @@ const handleRecord = async () => {
   if (!task || task.type !== 'task') {
     return;
   }
+
+  if (!selectedStepUid.value) {
+    handleAddStep(undefined, false);
+  }
+
+  if (!selectedStepUid.value) return;
 
   toggleUIMode('record');
   await SidebarUtils.engine.startRecording();

@@ -26,9 +26,30 @@
     mode: 'closed'
   });
   shadow.innerHTML =
-    `<br/> 
-        <input type="text" name="aaa"></input>
-        <br/> `;
+    `<br />
+      <a href="javascript:jsclick('ttt')" for="text_aaa">
+        <div>Click me!</div>
+      </a>
+      <br />
+      <input type="text" name="aaa" id="text_aaa"></input>
+    <br />
+     `;
+  window.text_aaa_clickNum = 1;
+  window.text_aaa = shadow.getElementById("text_aaa");
+  var script = document.createElement('script');
+  script.textContent = `
+      function jsclick(msg) {
+        console.warn(msg, arguments);
+        if(window.text_aaa) {
+          let clickNum = window.text_aaa_clickNum ?? 1;
+          window.text_aaa.value = msg + clickNum;
+          window.text_aaa_clickNum = clickNum + 1;
+        }
+      }
+    `;
+  shadow.appendChild(script);
+
+
 </script>
 
 </html>

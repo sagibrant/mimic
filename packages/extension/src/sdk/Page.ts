@@ -268,7 +268,7 @@ export class Page extends AutomationObject implements api.Page {
   override on(event: string, listener: Listener): this {
     return super.on(event, listener);
   }
-  emit(event: 'close' | 'dialog' | 'domcontentloaded', data?: any) {
+  emit(event: 'close' | 'dialog' | 'domcontentloaded', _data?: any) {
     if (event === 'close') {
       super.emit('close', this);
     }
@@ -286,11 +286,11 @@ export class Page extends AutomationObject implements api.Page {
 
   async document(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
-      get: async (target, prop) => {
+      get: async (_target, _prop) => {
         //console.log(`getting ${ prop } from ${ target } `);
       },
 
-      set: (target, prop, value, receiver) => {
+      set: (_target, _prop, _value, _receiver) => {
         //console.log(`setting ${ prop } from ${ target } to ${ value } `);
         return true;
       },

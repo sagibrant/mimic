@@ -85,6 +85,7 @@ export class SandboxHandler extends MsgDataHandlerBase {
         // Explicitly pass allowed globals to prevent unintended access
         const func = new Function(
           // Whitelist allowed global variables (e.g., fetch, console)
+          // but fetch is not working in sandbox, to be supported in future for external resources
           'fetch', 'console', 'ai', 'browser', 'page', 'expect', 'wait', 'BrowserLocator',
           `return (async () => { ${script} })()`
         );
@@ -194,11 +195,11 @@ export class SandboxHandler extends MsgDataHandlerBase {
   /** ==================================================================================================================== **/
   /** ====================================================== query ======================================================= **/
   /** ==================================================================================================================== **/
-  protected override async queryProperty(propName: string): Promise<unknown> {
+  protected override async queryProperty(_propName: string): Promise<unknown> {
     throw new Error("Method not implemented.");
   }
 
-  protected override async queryObjects(desc: AODesc): Promise<AutomationObject[]> {
+  protected override async queryObjects(_desc: AODesc): Promise<AutomationObject[]> {
     throw new Error("Method not implemented.");
   }
 }

@@ -21,7 +21,7 @@
  */
 
 import { BrowserInfo, BrowserUtils, RtidUtils, Utils } from "../../common/Common";
-import { AODesc, AutomationObject, QueryInfo, RegExpSpec, Selector } from "../../types/protocol";
+import { AODesc, AutomationObject, QueryInfo, RecordedStep, RegExpSpec, Selector } from "../../types/protocol";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { WindowHandler } from "./WindowHandler";
 import { TabHandler } from "./TabHandler";
@@ -51,6 +51,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
   private _activeTabId: number = -1;
   private _activeWindowId: number = -1;
   readonly config: Record<string, unknown> & BrowserConfig;
+  private _recordingTabId?: number;
 
   constructor(browserAPI: ChromeExtensionAPI) {
     const rtid = RtidUtils.getBrowserRtid();
@@ -59,30 +60,30 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
     this._windows = {};
     this._tabs = {};
     this.config = { attachDebugger: false, isRecording: false };
-    this._browserAPI.cdpAPI.on('javascriptDialogOpening', ({ source, method, params }) => {
+    this._browserAPI.cdpAPI.on('javascriptDialogOpening', async ({ source, params }) => {
       const { tabId } = source;
       if (Utils.isNullOrUndefined(tabId)) {
         return;
       }
       // notify the dialogOpened to sidebar
-      BackgroundUtils.dispatchEvent('dialogOpened', { ...(params as any), tabId: tabId });
+      await BackgroundUtils.dispatchEvent('dialogOpened', { ...(params as any), tabId: tabId });
     });
-    this._browserAPI.cdpAPI.on('javascriptDialogClosed', ({ source, method, params }) => {
+    this._browserAPI.cdpAPI.on('javascriptDialogClosed', async ({ source }) => {
       const { tabId } = source;
       if (Utils.isNullOrUndefined(tabId)) {
         return;
       }
       // notify the dialogClosed to sidebar
-      BackgroundUtils.dispatchEvent('dialogClosed', tabId);
+      await BackgroundUtils.dispatchEvent('dialogClosed', tabId);
     });
-    this._browserAPI.cdpAPI.on('inspectNodeRequested', ({ source, method, params }) => {
+    this._browserAPI.cdpAPI.on('inspectNodeRequested', async ({ source, params }) => {
       const { backendNodeId } = params as any;
       const tabInfo = this._browserAPI.cdpAPI.getTabInfo(source);
       if (Utils.isNullOrUndefined(tabInfo) || Utils.isNullOrUndefined(backendNodeId) || typeof backendNodeId !== 'number') {
         return;
       }
       const tab = this._tabs[tabInfo.id];
-      tab.handleInspectNodeRequested(source, backendNodeId);
+      await tab.handleInspectNodeRequested(source, backendNodeId);
     });
   }
 
@@ -111,7 +112,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
         this.config.isRecording = typeof config.isRecording === 'boolean' ? config.isRecording : false;
       }
     } catch (error) {
-      console.error('load Error:', error);
+      this.logger.error('load Error:', error);
     }
   }
 
@@ -122,7 +123,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
         browser_config: strValue
       });
     } catch (error) {
-      console.error('save Error:', error);
+      this.logger.error('save Error:', error);
     }
   }
 
@@ -157,6 +158,20 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
     return tabs;
   }
 
+  async lastFocusedWindow(): Promise<any> {
+    const window = await this._browserAPI.windowAPI.getLastFocused(true);
+    return window;
+  }
+
+  async lastActivePage(): Promise<any> {
+    const window = await this._browserAPI.windowAPI.getLastFocused(true);
+    const tabs = window.tabs?.filter(tab => tab.active).map(tab => Utils.deepClone(tab));
+    if (tabs && tabs.length === 1) {
+      return tabs[0];
+    }
+    return null;
+  }
+
   get autoAttachDebugger(): boolean {
     return this.config.attachDebugger;
   }
@@ -176,6 +191,10 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       }
     }
     await this.saveConfig();
+    const tab = await this.lastActivePage();
+    if (tab) {
+      this._recordingTabId = tab.id;
+    }
   }
 
   async stopRecording(): Promise<void> {
@@ -189,11 +208,12 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       }
     }
     await this.saveConfig();
+    this._recordingTabId = undefined;
   }
 
   private _registerListeners(): void {
     // window events
-    this._browserAPI.windowAPI.on('onCreated', ({ window }) => {
+    this._browserAPI.windowAPI.on('onCreated', async ({ window }) => {
       this.logger.debug('onCreated: window -', window);
       // if the DevTool created, then then windowId = -1
       if (Utils.isNullOrUndefined(window.id) || window.id < 0) {
@@ -202,10 +222,10 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this._addNewWindow(window);
 
       // notify the new window to sidebar
-      BackgroundUtils.dispatchEvent('windowCreated', window);
+      await BackgroundUtils.dispatchEvent('windowCreated', window);
     });
 
-    this._browserAPI.windowAPI.on('onFocusChanged', ({ windowId }) => {
+    this._browserAPI.windowAPI.on('onFocusChanged', async ({ windowId }) => {
       this.logger.debug('onFocusChanged: windowId -', windowId);
       // if focus on the DevTool, then then windowId = -1
       if (Utils.isNullOrUndefined(windowId) || windowId < 0) {
@@ -214,7 +234,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this._activeWindowId = windowId;
     });
 
-    this._browserAPI.windowAPI.on('onRemoved', ({ windowId }) => {
+    this._browserAPI.windowAPI.on('onRemoved', async ({ windowId }) => {
       this.logger.debug('onRemoved: windowId -', windowId);
       if (Utils.isNullOrUndefined(windowId) || Utils.isNullOrUndefined(this._windows[windowId])) {
         return;
@@ -224,14 +244,14 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this.emit('windowRemoved', { window: window });
 
       // notify the window close to sidebar
-      BackgroundUtils.dispatchEvent('windowRemoved', windowId);
+      await BackgroundUtils.dispatchEvent('windowRemoved', windowId);
     });
 
-    this._browserAPI.windowAPI.on('onBoundsChanged', ({ window }) => {
+    this._browserAPI.windowAPI.on('onBoundsChanged', async ({ }) => {
     });
 
     // tab events
-    this._browserAPI.tabAPI.on('onCreated', ({ tab }) => {
+    this._browserAPI.tabAPI.on('onCreated', async ({ tab }) => {
       this.logger.debug('onCreated: tab -', tab);
       if (Utils.isNullOrUndefined(tab.id)) {
         return;
@@ -239,10 +259,28 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this._addNewTab(tab);
 
       // notify the new page to sidebar
-      BackgroundUtils.dispatchEvent('pageCreated', tab);
+      await BackgroundUtils.dispatchEvent('pageCreated', tab);
+
+      if (this.config.isRecording
+        && SettingUtils.getRecordSettings().recordNavigation
+        && ['chrome://newtab/', 'edge://newtab/'].includes(tab.url || tab.pendingUrl || '')) {
+        const step = { await: true, browserScript: 'browser', actionScript: `openNewPage()` };
+        await this.recordStep(step);
+        if (this._recordingTabId !== tab.id) {
+          const lastActivePage = await this.lastActivePage();
+          if (lastActivePage.id === tab.id) {
+            this._recordingTabId = tab.id;
+            const reset_page_step = {
+              await: false,
+              pageScript: 'page = await browser.lastActivePage()',
+            };
+            await this.recordStep(reset_page_step);
+          }
+        }
+      }
     });
 
-    this._browserAPI.tabAPI.on('onUpdated', ({ tabId, changeInfo }) => {
+    this._browserAPI.tabAPI.on('onUpdated', async ({ tabId, changeInfo }) => {
       this.logger.debug('onUpdated: tabId -', tabId, ' changeInfo - ', changeInfo);
       if (Utils.isNullOrUndefined(tabId) || Utils.isNullOrUndefined(this._tabs[tabId])) {
         return;
@@ -254,7 +292,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       tab.favIconUrl = !Utils.isNullOrUndefined(changeInfo.favIconUrl) ? changeInfo.favIconUrl : tab.favIconUrl;
     });
 
-    this._browserAPI.tabAPI.on('onActivated', ({ activeInfo }) => {
+    this._browserAPI.tabAPI.on('onActivated', async ({ activeInfo }) => {
       this.logger.debug('onActivated: activeInfo -', activeInfo);
       if (Utils.isNullOrUndefined(activeInfo)) {
         return;
@@ -266,7 +304,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this._activeTabId = activeInfo.tabId;
     });
 
-    this._browserAPI.tabAPI.on('onRemoved', ({ tabId }) => {
+    this._browserAPI.tabAPI.on('onRemoved', async ({ tabId }) => {
       this.logger.debug('onRemoved: tabId -', tabId);
       if (Utils.isNullOrUndefined(tabId) || Utils.isNullOrUndefined(this._tabs[tabId])) {
         return;
@@ -277,10 +315,10 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       this.emit('tabRemoved', { tab: tab });
 
       // notify the page close to sidebar
-      BackgroundUtils.dispatchEvent('pageRemoved', tabId);
+      await BackgroundUtils.dispatchEvent('pageRemoved', tabId);
     });
 
-    this._browserAPI.tabAPI.on('onZoomChange', ({ zoomChangeInfo }) => {
+    this._browserAPI.tabAPI.on('onZoomChange', async ({ zoomChangeInfo }) => {
       this.logger.debug('onZoomChange: zoomChangeInfo -', zoomChangeInfo);
       if (Utils.isNullOrUndefined(zoomChangeInfo)) {
         return;
@@ -293,35 +331,36 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
     });
 
     // webNavigation events
-    this._browserAPI.webNavigationAPI.on('onErrorOccurred', (ev) => {
+    this._browserAPI.webNavigationAPI.on('onErrorOccurred', async (ev) => {
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
       }
       tab.updateFrameDetails(ev.frameId, { status: 'ErrorOccurred', ev: ev });
     });
-    this._browserAPI.webNavigationAPI.on('onBeforeNavigate', (ev) => {
+    this._browserAPI.webNavigationAPI.on('onBeforeNavigate', async (ev) => {
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
       }
       tab.updateFrameDetails(ev.frameId, { status: 'BeforeNavigate', ev: ev });
     });
-    this._browserAPI.webNavigationAPI.on('onCommitted', (ev) => {
+    this._browserAPI.webNavigationAPI.on('onCommitted', async (ev) => {
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
       }
       tab.updateFrameDetails(ev.frameId, { status: 'Committed', ev: ev });
 
-      if (SettingUtils.getRecordSettings().recordNavigation
+      if (this.config.isRecording
+        && SettingUtils.getRecordSettings().recordNavigation
         && ev.transitionQualifiers && ev.transitionQualifiers.includes('from_address_bar')
         && ev.url) {
-        const step = { pageScript: 'page', actionScript: `navigate('${ev.url}')` };
-        BackgroundUtils.dispatchEvent('stepRecorded', step);
+        const step = { await: true, pageScript: 'page', actionScript: `navigate('${ev.url}')` };
+        await this.recordStep(step);
       }
     });
-    this._browserAPI.webNavigationAPI.on('onDOMContentLoaded', (ev) => {
+    this._browserAPI.webNavigationAPI.on('onDOMContentLoaded', async (ev) => {
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
@@ -330,7 +369,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
 
       // notify the page DOMContentLoaded to sidebar
       if (ev.frameId === 0) {
-        BackgroundUtils.dispatchEvent('pageDOMContentLoaded', ev.tabId);
+        await BackgroundUtils.dispatchEvent('pageDOMContentLoaded', ev.tabId);
       }
     });
     this._browserAPI.webNavigationAPI.on('onCompleted', async (ev) => {
@@ -341,7 +380,9 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       tab.updateFrameDetails(ev.frameId, { status: 'Completed', ev: ev });
 
       if (tab && this.config.attachDebugger && ev.frameId === 0) {
-        this.attachDebuggerToTab(ev.tabId);
+        Utils.wait(500).then(async () => {
+          await this.attachDebuggerToTab(ev.tabId);
+        });
       }
     });
   }
@@ -591,7 +632,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
    * @param incognito - Whether the new window should be an incognito (private) window.
    * @returns Promise resolving to the created window object, or undefined on failure
    */
-  async openNewWindow(url?: string | string[], tabId?: number, incognito?: boolean): Promise<WindowInfo | undefined> {
+  async openNewWindow(url?: string | string[], _tabId?: number, incognito?: boolean): Promise<WindowInfo | undefined> {
     const window = await this._browserAPI.windowAPI.create(url, undefined, incognito);
     return Utils.deepClone(window);
   }
@@ -909,6 +950,26 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
     let tabs = await this._browserAPI.tabAPI.queryTab(queryInfo);
     tabs = LocatorUtils.filterObjects(tabs, filters);
     return tabs.map(tab => Utils.deepClone(tab));
+  }
+
+  /** record the step with page & frame information */
+  protected override async recordStep(step: RecordedStep): Promise<void> {
+    if (step.elementRtid) {
+      const tabId = step.elementRtid.tab;
+      if (tabId !== this._recordingTabId) {
+        const tab = await this.lastActivePage();
+        if (tabId === tab.id) {
+          this._recordingTabId = tabId;
+          const reset_page_step = {
+            await: false,
+            pageScript: 'page = await browser.lastActivePage()',
+          };
+          await BackgroundUtils.dispatchEvent('stepRecorded', reset_page_step);
+        }
+      }
+    }
+    // send record event to sidebar
+    await BackgroundUtils.dispatchEvent('stepRecorded', step);
   }
 
 }

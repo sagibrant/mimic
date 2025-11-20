@@ -71,7 +71,7 @@ const printFrame = async (frame, printChild) => {
   console.log("current frame: ==>", frame);
 
   // print all frame properties
-  url = await frame.url();
+  let url = await frame.url();
   console.log("await frame.url()", url);
   expect(url).not.toBeNullOrUndefined();
 

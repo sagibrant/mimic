@@ -126,6 +126,40 @@ export class NodeHandler extends MsgDataHandlerBase {
     }
   }
 
+  getContentClientRect(): RectInfo {
+    if (!this._node.isConnected) {
+      throw new Error('Node is not connected to the DOM');
+    }
+    if (this._node.nodeType === Node.TEXT_NODE) {
+      return this.getBoundingClientRect();
+    }
+    else {
+      const elem = this.elem;
+      if (!elem) {
+        throw new Error('Not ready for getContentClientRect');
+      }
+      const boundingClientRect = elem.getBoundingClientRect();
+      const elemRect: Partial<RectInfo> = {};
+      elemRect.left = boundingClientRect.left;
+      elemRect.top = boundingClientRect.top;
+      elemRect.right = boundingClientRect.right;
+      elemRect.bottom = boundingClientRect.bottom;
+      // border offset
+      const client_rect: Partial<RectInfo> = {};
+      client_rect.left = elem.clientLeft;
+      client_rect.top = elem.clientTop;
+      client_rect.width = elem.clientWidth;
+      client_rect.height = elem.clientHeight;
+      // padding offset
+      var style = window.getComputedStyle(elem);
+      elemRect.left = elemRect.left + client_rect.left + parseInt(style.paddingLeft, 10);
+      elemRect.top = elemRect.top + client_rect.top + parseInt(style.paddingTop, 10);
+      elemRect.right = elemRect.left + client_rect.width;
+      elemRect.bottom = elemRect.top + client_rect.height;
+      return Utils.fixRectange(elemRect);
+    }
+  }
+
   async highlight(): Promise<void> {
     const elem = this.elem;
     if (!elem) {
@@ -194,6 +228,14 @@ export class NodeHandler extends MsgDataHandlerBase {
     return true;
   }
 
+  requireCDPClick() {
+    const node = this._node;
+    if (this._hasJsUrl(node) && this._isInShadowRoot(node, 'closed')) {
+      return true;
+    }
+    return false;
+  }
+
   /** ==================================================================================================================== */
   /** ================================================== mouse actions =================================================== */
   /** ==================================================================================================================== */
@@ -214,7 +256,16 @@ export class NodeHandler extends MsgDataHandlerBase {
     const { position } = options || {};
     const { x, y } = this._getClientPoint(this, position);
     const clickOption = Object.assign({}, options, { position: { x, y } });
-    await EventSimulator.simulateClick(elem, clickOption);
+    if (this._hasJsUrl(elem) && !this._isInShadowRoot(elem, 'closed')) {
+      const isReady = await ContentUtils.frame.installFrameInMAIN();
+      if (!isReady) {
+        throw new Error('The frame is not ready in MAIN world');
+      }
+      ContentUtils.frame.main.clickElement(elem, clickOption);
+    }
+    else {
+      await EventSimulator.simulateClick(elem, clickOption);
+    }
   }
   async wheel(options?: { deltaX?: number, deltaY?: number }): Promise<void> {
     const elem = this.elem;
@@ -492,6 +543,35 @@ export class NodeHandler extends MsgDataHandlerBase {
       y = rect.y + offset.y;
     }
     return { x, y }
+  }
+
+  protected _hasJsUrl(node: Node | null): boolean {
+    while (node) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const elem = node as Element;
+        if (elem.tagName === 'A') {
+          let href = (elem as HTMLAnchorElement).href || '';
+          if (href.toLowerCase().startsWith('javascript:')) {
+            return true;
+          }
+        }
+      }
+      node = node.parentNode;
+    }
+    return false;
+  }
+
+  protected _isInShadowRoot(node: Node | null, mode?: 'open' | 'closed'): boolean {
+    while (node) {
+      if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE && node instanceof ShadowRoot) {
+        const root = node as ShadowRoot;
+        if (!mode || mode === root.mode) {
+          return true
+        }
+      }
+      node = node.parentNode;
+    }
+    return false;
   }
 
 }

@@ -162,8 +162,6 @@ for (const inputMode of inputModes) {
       await editor.scrollIntoViewIfNeeded();
       console.log("await editor.scrollIntoViewIfNeeded()");
 
-      const text = '👋你好呀🤣，这是带unicode的文本！';
-
       await page.element("#input_fill").fill('', defaultOptions);
       console.log(`
         await page.element("#input_fill").fill('', ${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})

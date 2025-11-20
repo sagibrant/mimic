@@ -176,7 +176,7 @@ export class Utils {
    * Get the last chrome api error
    * @returns last chrome api error
    */
-  static getLastError(): chrome.runtime.LastError | chrome.extension.LastError | undefined {
+  static getLastError(): chrome.runtime.LastError | undefined {
     if (typeof (chrome) === "undefined")
       return undefined;
 
@@ -467,7 +467,7 @@ export class Utils {
       throw new Error('requestAnimationFrame is not a valid function');
     }
     const end_time = performance.now() + timeout;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       let lastExecution: number | undefined = undefined;
       const rafFunc = async () => {
         // time out

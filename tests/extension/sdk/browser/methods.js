@@ -161,7 +161,7 @@ console.log("browser", browser);
   expect(filter_url_cookies_after_clear).toHaveLength(filter_url_cookies_after_add.length - 3);
   cookie_name_test_cookie_nam2 = filter_url_cookies_after_clear.filter(c => c.name === 'test_cookie_name2');
   expect(cookie_name_test_cookie_nam2).toHaveLength(0);
-  cookie_name_test_cookie_nam3 = filter_url_cookies_after_clear.filter(c => c.name === 'test_cookie_name3');
+  let cookie_name_test_cookie_nam3 = filter_url_cookies_after_clear.filter(c => c.name === 'test_cookie_name3');
   expect(cookie_name_test_cookie_nam3).toHaveLength(0);
 
   // remove all cookies

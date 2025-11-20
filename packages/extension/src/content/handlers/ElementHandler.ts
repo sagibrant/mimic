@@ -231,13 +231,13 @@ export class ElementHandler extends NodeHandler {
     if (this.checked()) {
       return;
     }
-    await EventSimulator.simulateClick(this._elem);
+    await this.click();
   }
   async uncheck(): Promise<void> {
     if (!this.checked()) {
       return;
     }
-    await EventSimulator.simulateClick(this._elem);
+    await this.click();
   }
   selectOption(values: (string | number | Rtid)[]): void {
     const select = this._elem as HTMLSelectElement;
@@ -299,9 +299,9 @@ export class ElementHandler extends NodeHandler {
     if (!isReady) {
       throw new Error('The frame is not ready for setFileInputFiles');
     }
-    ContentUtils.frame.main.setRuntimeElement(this.elem);
+    ContentUtils.frame.main.setElement(this.elem);
     await this._invokeTabMethod('setFileInputFiles', [files]);
-    ContentUtils.frame.main.setRuntimeElement(null);
+    ContentUtils.frame.main.setElement(null);
   }
 
   /** ==================================================================================================================== **/

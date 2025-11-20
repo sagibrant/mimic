@@ -43,7 +43,7 @@ export class BackgroundUtils {
       }
     } as InvokeAction);
 
-    BackgroundUtils.sendEvent(msgData);
+    await BackgroundUtils.sendEvent(msgData);
   }
 
   static async sendEvent(msgData: MessageData, timeout?: number): Promise<void> {

@@ -48,7 +48,7 @@ export class CoodinateUtils {
         }
       }
     };
-    CoodinateUtils.onResizeListener = (ev: UIEvent) => {
+    CoodinateUtils.onResizeListener = (_ev: UIEvent) => {
       if (window.parent !== window) {
         return; // check if in page
       }

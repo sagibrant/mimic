@@ -474,10 +474,9 @@ export interface AIClient {
       - Global functions (use with JavaScript syntax):
         (1) expect(actual: unknown): Returns an Expect instance (defined in types.d.ts), e.g., await expect(1 === 1).toBeTruthy()
         (2) wait(timeout: number): Returns a Promise for waiting, e.g., await wait(2000)
-        (3) fetch: For network requests only (browser native API)
       - Prohibited Operations:
         (1) DO NOT use third-party libraries (Selenium, Playwright, Puppeteer—NONE are supported)
-        (2) DO NOT use browser native APIs except console and fetch (e.g., document, window, document.querySelector are forbidden)
+        (2) DO NOT use browser native APIs except console (e.g., document, window, document.querySelector, fetch are forbidden)
         (3) DO NOT use TypeScript-specific syntax (type annotations like "let x: string", interfaces, type aliases, enums)
         (4) DO NOT add unrequested logic (auto-navigation, extra wait time, redundant console.log—only implement user-specified features)
     - answer:
@@ -497,7 +496,6 @@ ${types}
   }
 
   static getUserPrompt(
-    language: string,
     userRequest: string,
     pageUrl: string,
     pageHTML: string,
@@ -670,7 +668,7 @@ ${inspectedNode}
           return result.total_tokens as number;
         }
         else {
-          const total_tokens = parseInt(result.total_tokens);
+          const total_tokens = parseInt(result.total_tokens as string);
           return total_tokens;
         }
       }

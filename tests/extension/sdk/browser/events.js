@@ -64,7 +64,6 @@ console.log("browser", browser);
 // browser events
 {
   const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
-  const url_keyboard = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/keyboard.html";
 
   let events_count = 0;
   const newWindowListener = async (window) => {

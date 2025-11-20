@@ -244,7 +244,7 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
   }
 
   /** handle the command action */
-  protected async _handleCommandActions(data: MessageData): Promise<MessageData | undefined> {
+  protected async _handleCommandActions(_data: MessageData): Promise<MessageData | undefined> {
     throw new Error("Method not implemented.");
   }
 
@@ -335,7 +335,7 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
    * record the step
    * @param step the recorded step information from child
    */
-  protected async recordStep(step: RecordedStep): Promise<void> {
+  protected async recordStep(_step: RecordedStep): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

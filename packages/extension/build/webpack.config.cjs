@@ -77,7 +77,7 @@ const now = new Date();
 const defaultVersion = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.${now.getHours()}`;
 
 module.exports = (env) => {
-  console.log(`${timestamp()} webpack.config.js:: ==>`);
+  console.log(`${timestamp()} webpack.config.cjs:: ==>`);
   console.log(`${timestamp()} env: ${JSON.stringify(env)}`);
   console.log(`${timestamp()} args: ${JSON.stringify(process.argv)}`);
 
@@ -91,15 +91,15 @@ module.exports = (env) => {
 
   // Clean tempDir if it exists
   if (fs.existsSync(tempDir)) {
-    console.log(`${timestamp()} webpack.config.js:: deleting existing temp directory - ${tempDir}`);
+    console.log(`${timestamp()} webpack.config.cjs:: deleting existing temp directory - ${tempDir}`);
     fse.removeSync(tempDir);
   }
 
-  console.log(`${timestamp()} webpack.config.js:: configuring - browser: ${browser}, manifestVersion: ${manifestVersion}, target: ${target}, version: ${version}, keyVersion: ${keyVersion}, outputPath: ${outputPath}, tempDir: ${tempDir}`);
+  console.log(`${timestamp()} webpack.config.cjs:: configuring - browser: ${browser}, manifestVersion: ${manifestVersion}, target: ${target}, version: ${version}, keyVersion: ${keyVersion}, outputPath: ${outputPath}, tempDir: ${tempDir}`);
 
   const publicKeyPath = browser !== 'firefox' ? path.resolve(rootDir, `build/${browser}/version/${keyVersion}/publicKey.txt`) : null;
   const privateKeyPath = browser !== 'firefox' ? path.resolve(rootDir, `build/${browser}/version/${keyVersion}/privateKey.pem`) : null;
-  console.log(`${timestamp()} webpack.config.js:: key paths - publicKeyPath: ${publicKeyPath || 'none'}, privateKeyPath: ${privateKeyPath || 'none'}`);
+  console.log(`${timestamp()} webpack.config.cjs:: key paths - publicKeyPath: ${publicKeyPath || 'none'}, privateKeyPath: ${privateKeyPath || 'none'}`);
 
   const config = {
     // Set development mode for easier debugging
@@ -129,6 +129,7 @@ module.exports = (env) => {
     entry: {
       background: path.resolve(rootDir, 'src/background.ts'),
       content: path.resolve(rootDir, 'src/content.ts'),
+      'frame-in-main-loader': path.resolve(rootDir, 'src/content/FrameInMAINLoader.ts'),
       'ui/action/main': path.resolve(rootDir, 'src/ui/action/main.ts'),
       'ui/options/main': path.resolve(rootDir, 'src/ui/options/main.ts'),
       'ui/sidebar/main': path.resolve(rootDir, 'src/ui/sidebar/main.ts'),
@@ -165,6 +166,12 @@ module.exports = (env) => {
          * - Widely adopted convention in Vue ecosystem (used in Vue CLI, Vite)
          */
         '@': path.resolve(rootDir, 'src')
+      },
+      fallback: {
+        assert: false, // ignore these errors to use jshint in sidebar
+        util: false,
+        path: false,
+        url: false
       }
     },
 
@@ -197,16 +204,35 @@ module.exports = (env) => {
           include: path.resolve(rootDir, 'src/ui'), // Only ui html
           exclude: /node_modules/,
         },
-        // 4. Process CSS files
+        // 4. css
         {
           test: /\.css$/,
-          // use: 'raw-loader',
           use: [
             'style-loader', // Injects CSS into the DOM via <style> tags
-            'css-loader'    // Translates CSS into CommonJS
+            'css-loader',    // Translates CSS into CommonJS
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  config: path.resolve(rootDir, "postcss.config.mjs")
+                }
+              }
+            }
           ],
-          include: path.resolve(rootDir, 'src/ui'), // Only ui css
-          exclude: /node_modules/
+          include: [
+            path.resolve(rootDir, 'src/assets'),  // assets css must before the ui css
+            path.resolve(rootDir, 'src/ui'),      // ui css
+            /node_modules\/primevue/,             // Allow PrimeVue/PrimeIcons styles from node_modules
+            /node_modules\/primeicons/
+          ]
+        },
+        // 5. Load font assets for PrimeIcons
+        {
+          test: /\.(woff2?|ttf|eot|svg)$/,
+          type: 'asset/resource',
+          include: [
+            /node_modules\/primeicons/
+          ]
         }
       ],
     },
@@ -230,9 +256,9 @@ module.exports = (env) => {
             from: path.resolve(rootDir, `build/${browser}/manifest/${manifestVersion}/manifest.json`),
             to: 'manifest.json',
             transform(content) {
-              console.log(`${timestamp()} webpack.config.js:: transforming manifest - from: ${path.resolve(rootDir, `build/${browser}/manifest/${manifestVersion}/manifest.json`)}`);
+              console.log(`${timestamp()} webpack.config.cjs:: transforming manifest - from: ${path.resolve(rootDir, `build/${browser}/manifest/${manifestVersion}/manifest.json`)}`);
               const manifest = JSON.parse(content);
-              console.log(`${timestamp()} webpack.config.js:: updating manifest version - ${version}`);
+              console.log(`${timestamp()} webpack.config.cjs:: updating manifest version - ${version}`);
               manifest.version = version;
               return JSON.stringify(manifest, null, 2);
             },
@@ -295,7 +321,7 @@ module.exports = (env) => {
       // new NonceInjectorPlugin('sha256-1a+QSYaIcbLzT8/xYNz/8ej9tw5aFA+7aw83m2KBrxE='), // Replace with the nonce value
       ...(target === 'unpacked'
         ? [
-          console.log(`${timestamp()} webpack.config.js:: adding UnpackedExtensionPlugin`),
+          console.log(`${timestamp()} webpack.config.cjs:: adding UnpackedExtensionPlugin`),
           new UnpackedExtensionPlugin({ outputPath, tempDir, publicKeyPath }),
         ]
         : []),
@@ -303,19 +329,19 @@ module.exports = (env) => {
         ? [
           ...(target === 'packed'
             ? [
-              console.log(`${timestamp()} webpack.config.js:: adding CrxPackPlugin`),
+              console.log(`${timestamp()} webpack.config.cjs:: adding CrxPackPlugin`),
               new CrxPackPlugin({ browser, manifestVersion, keyVersion, outputPath, keyPath: privateKeyPath, tempDir }),
             ]
             : target === 'store'
               ? [
-                console.log(`${timestamp()} webpack.config.js:: adding ZipStorePlugin for store`),
+                console.log(`${timestamp()} webpack.config.cjs:: adding ZipStorePlugin for store`),
                 new ZipStorePlugin({ browser, manifestVersion, keyVersion, outputPath, privateKeyPath, tempDir }),
               ]
               : []),
         ]
         : browser === 'firefox' && target === 'packed'
           ? [
-            console.log(`${timestamp()} webpack.config.js:: adding XpiPackPlugin`),
+            console.log(`${timestamp()} webpack.config.cjs:: adding XpiPackPlugin`),
             new XpiPackPlugin({
               outputPath,
               apiKeyPath: path.resolve(rootDir, `build/firefox/version/${keyVersion}/apiKey.txt`),
@@ -325,7 +351,7 @@ module.exports = (env) => {
           ]
           : browser === 'firefox' && target === 'store'
             ? [
-              console.log(`${timestamp()} webpack.config.js:: adding ZipStorePlugin for store (Firefox)`),
+              console.log(`${timestamp()} webpack.config.cjs:: adding ZipStorePlugin for store (Firefox)`),
               new ZipStorePlugin({ browser, manifestVersion, keyVersion, outputPath, tempDir }),
             ]
             : []),
@@ -378,15 +404,15 @@ module.exports = (env) => {
     apply: (compiler) => {
       compiler.hooks.done.tap('CleanupTempPlugin', (stats) => {
         if (stats.hasErrors()) {
-          console.log(`${timestamp()} webpack.config.js:: build failed, keeping temp directory - ${tempDir}`);
+          console.log(`${timestamp()} webpack.config.cjs:: build failed, keeping temp directory - ${tempDir}`);
         } else {
-          console.log(`${timestamp()} webpack.config.js:: build succeeded, removing temp directory - ${tempDir}`);
+          console.log(`${timestamp()} webpack.config.cjs:: build succeeded, removing temp directory - ${tempDir}`);
           fse.removeSync(tempDir);
         }
       });
     },
   });
 
-  console.log(`${timestamp()} webpack.config.js:: <==`);
+  console.log(`${timestamp()} webpack.config.cjs:: <==`);
   return config;
 };

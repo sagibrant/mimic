@@ -69,11 +69,11 @@ export class SidebarHandler extends MsgDataHandlerBase<SidebarEvents> {
   /** ==================================================================================================================== **/
   /** ====================================================== query ======================================================= **/
   /** ==================================================================================================================== **/
-  protected override async queryProperty(propName: string): Promise<unknown> {
+  protected override async queryProperty(_propName: string): Promise<unknown> {
     throw new Error("Method not implemented.");
   }
 
-  protected override async queryObjects(desc: AODesc): Promise<AutomationObject[]> {
+  protected override async queryObjects(_desc: AODesc): Promise<AutomationObject[]> {
     throw new Error("Method not implemented.");
   }
 

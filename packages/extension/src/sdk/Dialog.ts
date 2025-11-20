@@ -104,7 +104,7 @@ export class Dialog extends ChannelBase implements api.Dialog {
     }
     await this.invokeFunction(tabRtid, 'handleJavaScriptDialog', promptText === undefined ? [true] : [true, promptText]);
   }
-  async dismiss(promptText?: string): Promise<void> {
+  async dismiss(): Promise<void> {
     const tabRtid = await this.tabRtid();
     await this.invokeFunction(tabRtid, 'handleJavaScriptDialog', [false]);
   }
