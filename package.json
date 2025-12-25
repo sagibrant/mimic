@@ -14,16 +14,51 @@
     "build::extension::chrome": "npm --prefix packages/extension run build::chrome::v3::unpacked --",
     "build::test": "npm --prefix tests/extension run build",
     "build": "npm run build::test && npm run build::extension::clean && (npm run build::extension::edge & npm run build::extension::chrome & wait)",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint:prettier": "prettier --write \"**/*.{js, ts, mjs, cjs, json, tsx, css, less, scss, vue, html, md}\"",
+    "lint:eslint": "eslint",
+    "lint:spellcheck": "cspell lint \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,css,less,scss,vue,html,md}\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sagibrant/gogogo.git"
   },
+  "keywords": [],
   "author": "Sagi",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/sagibrant/gogogo/issues"
   },
-  "homepage": "https://github.com/sagibrant/gogogo#readme"
+  "homepage": "https://github.com/sagibrant/gogogo#readme",
+  "packageManager": "pnpm@10.26.2",
+  "engines": {
+    "node": ">=23.11.0",
+    "npm": ">=11.6.2",
+    "pnpm": ">=10.26.2"
+  },
+  "devDependencies": {
+    "@cspell/dict-lorem-ipsum": "^4.0.5",
+    "@eslint/js": "^9.39.2",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^25.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
+    "cspell": "^9.4.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-tailwindcss": "^3.18.2",
+    "eslint-plugin-vue": "^10.6.2",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.7.4",
+    "rimraf": "^6.1.2",
+    "rollup": "^4.24.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0"
+  }
 }

@@ -3,9 +3,9 @@
  * @author: Sagi <sagibrant@hotmail.com>
  * @license Apache-2.0
  * @file locator.js
- * @description 1. locator test 
- * 
- * 
+ * @description 1. locator test
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,36 +53,36 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("browser locator => ");
+console.log('browser locator => ');
 // global browser instance
-console.log("browser", browser);
+console.log('browser', browser);
 const browserLocator = new BrowserLocator();
-console.log("browserLocator", browserLocator);
+console.log('browserLocator', browserLocator);
 expect(browserLocator).not.toBeNullOrUndefined();
 
 const browsers = await browserLocator.all();
 expect(browsers).not.toBeNullOrUndefined();
-console.log("browserLocator.all()", browsers);
+console.log('browserLocator.all()', browsers);
 
 for (const browser of browsers) {
   const name = browser.name();
-  console.log("browser.name()", name);
+  console.log('browser.name()', name);
   expect(['edge', 'chrome']).toContain(name);
 
   const version = browser.version();
-  console.log("browser.version()", version);
+  console.log('browser.version()', version);
   expect(version).not.toBeNullOrUndefined();
 
   const majorVersion = browser.majorVersion();
-  console.log("browser.majorVersion()", majorVersion);
+  console.log('browser.majorVersion()', majorVersion);
   expect(majorVersion > 130).toBeTruthy();
 }
-console.log("browser locator <= ");
+console.log('browser locator <= ');
 
 await page.bringToFront();
 
-console.warn("all passed");
+console.warn('all passed');

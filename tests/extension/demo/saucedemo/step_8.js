@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file step_8.js
  * @description 8. Reset and Logout
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 
 await page.element('#react-burger-menu-btn').highlight();
 await page.element('#react-burger-menu-btn').click();
-let exists = await page.element('div.bm-menu').text('Reset App State').count() === 1;
+let exists = (await page.element('div.bm-menu').text('Reset App State').count()) === 1;
 while (!exists) {
   await wait(500);
-  exists = await page.element('div.bm-menu').text('Reset App State').count() === 1;
+  exists = (await page.element('div.bm-menu').text('Reset App State').count()) === 1;
 }
 await page.element('div.bm-menu').text('Reset App State').highlight();
 await page.element('div.bm-menu').text('Reset App State').click();

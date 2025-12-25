@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file events.js
  * @description 5. events test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,31 +52,31 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("events =>");
-console.log("current page", page);
-const url_index = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/index.html";
+console.log('events =>');
+console.log('current page', page);
+const url_index = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/index.html';
 
 await page.navigate(url_index);
-console.log("await page.navigate(url_index)", url_index);
+console.log('await page.navigate(url_index)', url_index);
 let page_status = await page.status();
-console.log("await page.status()", page_status);
+console.log('await page.status()', page_status);
 while (page_status !== 'complete') {
   await page.sync();
-  console.log("await page.sync()");
+  console.log('await page.sync()');
   page_status = await page.status();
-  console.log("await page.status()", page_status);
+  console.log('await page.status()', page_status);
 }
 expect(page_status).toBe('complete');
 let page_url = await page.url();
-console.log("await page.url()", page_url);
+console.log('await page.url()', page_url);
 expect(page_url).toEqual(url_index);
 
 const dialog = page.dialog();
-console.log("page.dialog()", dialog);
+console.log('page.dialog()', dialog);
 expect(dialog).not.toBeNullOrUndefined();
 
 try {
@@ -84,57 +84,78 @@ try {
   // dialog
   {
     await browser.attachDebugger();
-    console.log("await browser.attachDebugger()");
+    console.log('await browser.attachDebugger()');
     await wait(300);
-    console.log("await wait(300)");
+    console.log('await wait(300)');
   }
 
   // alert_button
   {
     const btn = await page.element().filter({ name: 'id', value: 'alert_button' }).get();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'alert_button'}).get()
-    `, btn);
+    `,
+      btn
+    );
     expect(btn).not.toBeNullOrUndefined();
     await page.element().filter({ name: 'id', value: 'alert_button' }).scrollIntoViewIfNeeded();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'alert_button'}).scrollIntoViewIfNeeded()
-    `, btn);
+    `,
+      btn
+    );
 
     let dialogHandled = false;
-    const dialogOpenListener = async (dialog) => {
+    const dialogOpenListener = async dialog => {
       console.log(` dialogOpenListener for alert ==> `, dialog);
 
       expect(dialog).toBe(page.dialog());
 
       let opened = await dialog.opened();
-      console.log(`
+      console.log(
+        `
         await page.dialog().opened()
-      `, opened);
+      `,
+        opened
+      );
       expect(opened).toBeTruthy();
 
       opened = await page.dialog().opened();
-      console.log(`
+      console.log(
+        `
         await page.dialog().opened()
-      `, opened);
+      `,
+        opened
+      );
       expect(opened).toBeTruthy();
 
       const type = await page.dialog().type();
-      console.log(`
+      console.log(
+        `
         await page.dialog().type()
-      `, type);
+      `,
+        type
+      );
       expect(type).toBe('alert');
 
       const message = await page.dialog().message();
-      console.log(`
+      console.log(
+        `
         await page.dialog().message()
-      `, message);
+      `,
+        message
+      );
       expect(message).toBe('this is the alert message');
 
       const defaultValue = await page.dialog().defaultValue();
-      console.log(`
+      console.log(
+        `
         await page.dialog().defaultValue()
-      `, defaultValue);
+      `,
+        defaultValue
+      );
       expect(defaultValue).toBe('');
 
       await page.dialog().accept();
@@ -143,15 +164,21 @@ try {
       `);
 
       opened = await dialog.opened();
-      console.log(`
+      console.log(
+        `
         await page.dialog().opened()
-      `, opened);
+      `,
+        opened
+      );
       expect(opened).toBeFalsy();
 
       const value = await page.element().filter({ name: 'id', value: 'alert_button' }).value();
-      console.log(`
+      console.log(
+        `
         await page.element().filter({ name: 'id', value: 'alert_button' }).value()
-      `, value);
+      `,
+        value
+      );
       expect(value).toEqual('alert dialog is clicked');
 
       dialogHandled = true;
@@ -172,66 +199,90 @@ try {
     let wait_count = 0;
     if (!dialogHandled && wait_count < 3) {
       await wait(300);
-      console.log("await wait(300)");
+      console.log('await wait(300)');
       wait_count++;
     }
     expect(dialogHandled).toBeTruthy();
 
     const opened = await page.dialog().opened();
-    console.log(`
+    console.log(
+      `
         await page.dialog().opened()
-      `, opened);
+      `,
+      opened
+    );
     expect(opened).toBeFalsy();
   }
 
   // confirm_button
   {
     const btn = await page.element().filter({ name: 'id', value: 'confirm_button' }).get();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'confirm_button'}).get()
-    `, btn);
+    `,
+      btn
+    );
     expect(btn).not.toBeNullOrUndefined();
     await page.element().filter({ name: 'id', value: 'confirm_button' }).scrollIntoViewIfNeeded();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'confirm_button'}).scrollIntoViewIfNeeded()
-    `, btn);
+    `,
+      btn
+    );
 
     const actions = [true, false];
     for (const action of actions) {
       let dialogHandled = false;
-      const dialogOpenListener = async (dialog) => {
+      const dialogOpenListener = async dialog => {
         console.log(` dialogOpenListener for confirm ==> `, dialog);
 
         expect(dialog).toBe(page.dialog());
 
         let opened = await dialog.opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeTruthy();
 
         opened = await page.dialog().opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeTruthy();
 
         const type = await page.dialog().type();
-        console.log(`
+        console.log(
+          `
           await page.dialog().type()
-        `, type);
+        `,
+          type
+        );
         expect(type).toBe('confirm');
 
         const message = await page.dialog().message();
-        console.log(`
+        console.log(
+          `
           await page.dialog().message()
-        `, message);
+        `,
+          message
+        );
         expect(message).toBe('this is the confirm message');
 
         const defaultValue = await page.dialog().defaultValue();
-        console.log(`
+        console.log(
+          `
           await page.dialog().defaultValue()
-        `, defaultValue);
+        `,
+          defaultValue
+        );
         expect(defaultValue).toBe('');
 
         if (action) {
@@ -239,8 +290,7 @@ try {
           console.log(`
             await page.dialog().accept()
           `);
-        }
-        else {
+        } else {
           await page.dialog().dismiss();
           console.log(`
             await page.dialog().dismiss()
@@ -248,19 +298,24 @@ try {
         }
 
         opened = await dialog.opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeFalsy();
 
         const value = await page.element().filter({ name: 'id', value: 'confirm_button' }).value();
-        console.log(`
+        console.log(
+          `
           await page.element().filter({ name: 'id', value: 'confirm_button' }).value()
-        `, value);
+        `,
+          value
+        );
         if (action) {
           expect(value).toEqual('confirm dialog is accepted');
-        }
-        else {
+        } else {
           expect(value).toEqual('confirm dialog is dismissed');
         }
 
@@ -282,15 +337,18 @@ try {
       let wait_count = 0;
       if (!dialogHandled && wait_count < 3) {
         await wait(300);
-        console.log("await wait(300)");
+        console.log('await wait(300)');
         wait_count++;
       }
       expect(dialogHandled).toBeTruthy();
 
       const opened = await page.dialog().opened();
-      console.log(`
+      console.log(
+        `
         await page.dialog().opened()
-      `, opened);
+      `,
+        opened
+      );
       expect(opened).toBeFalsy();
     }
   }
@@ -298,49 +356,70 @@ try {
   // prompt_button
   {
     const btn = await page.element().filter({ name: 'id', value: 'prompt_button' }).get();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'prompt_button'}).get()
-    `, btn);
+    `,
+      btn
+    );
     expect(btn).not.toBeNullOrUndefined();
     await page.element().filter({ name: 'id', value: 'prompt_button' }).scrollIntoViewIfNeeded();
-    console.log(`
+    console.log(
+      `
       await page.element().filter({ name: 'id', value: 'prompt_button'}).scrollIntoViewIfNeeded()
-    `, btn);
+    `,
+      btn
+    );
 
     const promptTexts = [null, undefined, '', 'new text'];
     for (const text of promptTexts) {
       let dialogHandled = false;
-      const dialogOpenListener = async (dialog) => {
+      const dialogOpenListener = async dialog => {
         console.log(` dialogOpenListener for prompt ==> `, dialog);
         expect(dialog).toBe(page.dialog());
         let opened = await dialog.opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeTruthy();
 
         opened = await page.dialog().opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeTruthy();
 
         const type = await page.dialog().type();
-        console.log(`
+        console.log(
+          `
           await page.dialog().type()
-        `, type);
+        `,
+          type
+        );
         expect(type).toBe('prompt');
 
         const message = await page.dialog().message();
-        console.log(`
+        console.log(
+          `
           await page.dialog().message()
-        `, message);
+        `,
+          message
+        );
         expect(message).toBe('this is the default prompt message');
 
         const defaultValue = await page.dialog().defaultValue();
-        console.log(`
+        console.log(
+          `
           await page.dialog().defaultValue()
-        `, defaultValue);
+        `,
+          defaultValue
+        );
         expect(defaultValue).toBe('this is the default prompt message value');
 
         if (text === null) {
@@ -348,20 +427,17 @@ try {
           console.log(`
             await page.dialog().dismiss()
           `);
-        }
-        else if (text === undefined) {
+        } else if (text === undefined) {
           await page.dialog().accept();
           console.log(`
             await page.dialog().accept()
           `);
-        }
-        else if (text === '') {
+        } else if (text === '') {
           await page.dialog().accept('');
           console.log(`
             await page.dialog().accept('')
           `);
-        }
-        else {
+        } else {
           await page.dialog().accept(text);
           console.log(`
             await page.dialog().accept(${text})
@@ -369,25 +445,28 @@ try {
         }
 
         opened = await dialog.opened();
-        console.log(`
+        console.log(
+          `
           await page.dialog().opened()
-        `, opened);
+        `,
+          opened
+        );
         expect(opened).toBeFalsy();
 
         const value = await page.element().filter({ name: 'id', value: 'prompt_button' }).value();
-        console.log(`
+        console.log(
+          `
           await page.element().filter({ name: 'id', value: 'prompt_button' }).value()
-        `, value);
+        `,
+          value
+        );
         if (text === null) {
           expect(value).toBe('prompt dialog is clicked with value-null');
-        }
-        else if (text === undefined) {
+        } else if (text === undefined) {
           expect(value).toBe('prompt dialog is clicked with value-this is the default prompt message value');
-        }
-        else if (text === '') {
+        } else if (text === '') {
           expect(value).toBe('prompt dialog is clicked with value-');
-        }
-        else {
+        } else {
           expect(value).toBe(`prompt dialog is clicked with value-${text}`);
         }
 
@@ -409,47 +488,53 @@ try {
       let wait_count = 0;
       if (!dialogHandled && wait_count < 3) {
         await wait(300);
-        console.log("await wait(300)");
+        console.log('await wait(300)');
         wait_count++;
       }
       expect(dialogHandled).toBeTruthy();
 
       const opened = await page.dialog().opened();
-      console.log(`
+      console.log(
+        `
         await page.dialog().opened()
-      `, opened);
+      `,
+        opened
+      );
       expect(opened).toBeFalsy();
     }
   }
 
   {
     const opened = await page.dialog().opened();
-    console.log(`
+    console.log(
+      `
       await page.dialog().opened()
-    `, opened);
+    `,
+      opened
+    );
     expect(opened).toBeFalsy();
   }
   console.log('page dialog events <==== ');
 
-  console.log("page domcontentloaded & close events ====>");
+  console.log('page domcontentloaded & close events ====>');
   // page domcontentloaded & close
   {
-    const url_keyboard = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/keyboard.html";
+    const url_keyboard = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/keyboard.html';
     const newPage = await page.openNewPage('about:blank');
     console.log("await page.openNewPage('about:blank')", newPage);
     await newPage.sync();
-    console.log("await newPage.sync()");
+    console.log('await newPage.sync()');
 
     let pageDOMContentLoadedHandled = false;
-    const pageDOMContentLoadedListener = async (page) => {
+    const pageDOMContentLoadedListener = async page => {
       console.log(` pageDOMContentLoadedListener on page ==> `, page);
       expect(page).toBe(newPage);
 
       await page.sync();
-      console.log("await page.sync()");
+      console.log('await page.sync()');
 
       const status = await page.status();
-      console.log("await page.status()", status);
+      console.log('await page.status()', status);
       expect(['loading', 'complete']).toContain(status);
 
       page.off('domcontentloaded', pageDOMContentLoadedListener);
@@ -463,32 +548,35 @@ try {
     console.log("newPage.on('domcontentloaded', pageDOMContentLoadedListener)");
 
     await newPage.navigate(url_keyboard);
-    console.log("await newPage.navigate(url_keyboard)");
+    console.log('await newPage.navigate(url_keyboard)');
 
     await newPage.sync();
-    console.log("await newPage.sync()");
+    console.log('await newPage.sync()');
 
     let wait_count = 0;
     if (!pageDOMContentLoadedHandled && wait_count < 3) {
       await wait(300);
-      console.log("await wait(300)");
+      console.log('await wait(300)');
       wait_count++;
     }
     expect(pageDOMContentLoadedHandled).toBeTruthy();
 
     const status = await page.status();
-    console.log(`
+    console.log(
+      `
         await newPage.status()
-      `, status);
+      `,
+      status
+    );
     expect(status).toEqual('complete');
 
     let pageCloseHandled = false;
-    const pageCloseListener = async (page) => {
+    const pageCloseListener = async page => {
       console.log(` pageCloseListener on page ==> `, page);
       expect(page).toBe(newPage);
 
       const closed = await page.closed();
-      console.log("await page.closed()", closed);
+      console.log('await page.closed()', closed);
       expect(page).toBeTruthy();
 
       page.off('close', pageCloseListener);
@@ -502,35 +590,36 @@ try {
     console.log("newPage.on('close', pageCloseListener)");
 
     await newPage.close();
-    console.log("await newPage.close()");
+    console.log('await newPage.close()');
 
     wait_count = 0;
     if (!pageCloseHandled && wait_count < 3) {
       await wait(300);
-      console.log("await wait(300)");
+      console.log('await wait(300)');
       wait_count++;
     }
     expect(pageCloseHandled).toBeTruthy();
 
     const closed = await newPage.closed();
-    console.log(`
+    console.log(
+      `
         await newPage.closed()
-      `, closed);
+      `,
+      closed
+    );
     expect(closed).toBeTruthy();
   }
-  console.log("page domcontentloaded & close events <====");
-}
-catch (error) {
+  console.log('page domcontentloaded & close events <====');
+} catch (error) {
   console.error(error);
   throw error;
-}
-finally {
+} finally {
   await browser.detachDebugger();
-  console.log("await browser.detachDebugger()");
+  console.log('await browser.detachDebugger()');
   await page.bringToFront();
-  console.log("await page.bringToFront()");
+  console.log('await page.bringToFront()');
 }
 
-console.log("events <=");
+console.log('events <=');
 
-console.warn("all passed");
+console.warn('all passed');

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Step, Task, TaskAsset, TaskGroup } from '../../packages/extension/src/execution/Task';
+import { Step, Task, TaskAsset, TaskGroup } from '../../apps/extension/src/execution/Task';
 
 // Configuration - Output to the SAME directory as build-asset.ts
 const FLAG = '/** script flag **/';

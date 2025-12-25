@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file events.js
  * @description 3. events test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,48 +52,48 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("events =>");
+console.log('events =>');
 
 // global page instance
-console.log("page", page);
+console.log('page', page);
 
 // page events
 {
-  const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
-  const url_keyboard = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/keyboard.html";
+  const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
+  const url_keyboard = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/keyboard.html';
 
   const newWindow = await browser.openNewWindow(url_mouse);
-  console.log("await browser.openNewWindow(url_mouse)", newWindow);
+  console.log('await browser.openNewWindow(url_mouse)', newWindow);
   expect(newWindow).not.toBeNullOrUndefined();
 
   const newWindowPage = await newWindow.page({ active: true }).get();
-  console.log("await newWindow.page({active: true}).get()", newWindowPage);
+  console.log('await newWindow.page({active: true}).get()', newWindowPage);
   expect(newWindowPage).not.toBeNullOrUndefined();
 
   await newWindowPage.sync();
-  console.log("await newWindowPage.sync()");
+  console.log('await newWindowPage.sync()');
 
   const url = await newWindowPage.url();
-  console.log("await newWindowPage.url()", url);
+  console.log('await newWindowPage.url()', url);
   expect(url).toEqual(url_mouse);
 
   let events_count = 0;
-  const newPageListener = async (page) => {
+  const newPageListener = async page => {
     console.log(` newPageListener on window ==> `, page);
 
     await page.sync();
-    console.log("await page.sync())");
+    console.log('await page.sync())');
 
     const url = await page.url();
-    console.log("await page.url()", url);
+    console.log('await page.url()', url);
     expect(url).toEqual(url_keyboard);
 
     const window = await page.window();
-    console.log("await page.window()", window);
+    console.log('await page.window()', window);
     expect(window).not.toBeNullOrUndefined();
 
     window.off('page', newPageListener);
@@ -107,24 +107,24 @@ console.log("page", page);
   console.log("newWindow.on('page', newPageListener)");
 
   const newPage = await newWindow.openNewPage(url_keyboard);
-  console.log("await newWindow.openNewPage(url_keyboard)", newPage);
+  console.log('await newWindow.openNewPage(url_keyboard)', newPage);
   expect(newPage).not.toBeNullOrUndefined();
 
   await newPage.sync();
-  console.log("await newPage.sync())");
+  console.log('await newPage.sync())');
 
   let wait_count = 0;
   if (events_count < 1 && wait_count < 3) {
     await wait(1000);
-    console.log("await wait(1000)");
+    console.log('await wait(1000)');
     wait_count++;
   }
   expect(events_count).toBe(1);
 
-  const windowCloseListener = async (window) => {
+  const windowCloseListener = async window => {
     console.log(` windowCloseListener on window ==> `, window);
     const closed = await window.closed();
-    console.log("await window.closed()", closed);
+    console.log('await window.closed()', closed);
     expect(closed).toBeTruthy();
 
     window.off('close', windowCloseListener);
@@ -138,19 +138,19 @@ console.log("page", page);
   console.log("newWindow.on('close', windowCloseListener)");
 
   await newWindow.close();
-  console.log("await newWindow.close()");
+  console.log('await newWindow.close()');
 
   wait_count = 0;
   if (events_count < 2 && wait_count < 3) {
     await wait(1000);
-    console.log("await wait(1000)");
+    console.log('await wait(1000)');
     wait_count++;
   }
 
   expect(events_count).toEqual(2);
 
   const closed = await newWindow.closed();
-  console.log("await newWindow.closed()", closed);
+  console.log('await newWindow.closed()', closed);
   expect(closed).toBeTruthy();
 }
 
@@ -158,6 +158,6 @@ await page.bringToFront();
 await wait(300);
 await clean();
 
-console.log("events <=");
+console.log('events <=');
 
-console.log("all passed");
+console.log('all passed');

@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file methods.js
  * @description 1. methods test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,16 +52,16 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("text methods ======>");
-console.log("current page", page);
+console.log('text methods ======>');
+console.log('current page', page);
 const inputModes = ['default', 'event', 'cdp'];
 for (const inputMode of inputModes) {
   console.log(`inputMode ${inputMode} ======>`);
-  const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
+  const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
   await page.navigate(url_mouse);
   await page.sync();
 
@@ -70,18 +70,18 @@ for (const inputMode of inputModes) {
   try {
     if (inputMode === 'cdp') {
       await browser.attachDebugger();
-      console.log("await browser.attachDebugger()");
+      console.log('await browser.attachDebugger()');
       await wait(1000);
-      console.log("await wait(1000)");
+      console.log('await wait(1000)');
     }
     // start monitor
     {
-      const btn = await page.element("#btn_start_monitor").get();
+      const btn = await page.element('#btn_start_monitor').get();
       console.log(`await page.element("#btn_start_monitor").get()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
-      await page.element("#btn_start_monitor").click(defaultOptions);
+      console.log('await btn.scrollIntoViewIfNeeded()');
+      await page.element('#btn_start_monitor').click(defaultOptions);
       console.log(`
         await page.element("#btn_start_monitor").click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
@@ -89,21 +89,21 @@ for (const inputMode of inputModes) {
     // btn_mousemoved
     {
       await page.text(/Move mouse to m/).highlight();
-      console.log("await page.text(/Move mouse to m/).highlight()");
+      console.log('await page.text(/Move mouse to m/).highlight()');
 
       const btn = await page.text(/Move mouse to m/).ownerElement();
       console.log(`await page.text(/Move mouse to m/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Move mouse to m/).textContent();
-      console.log("await page.text(/Move mouse to m/).textContent()", textContent);
+      console.log('await page.text(/Move mouse to m/).textContent()', textContent);
       expect(textContent).toEqual('Move mouse to me!');
 
       if (inputMode === 'cdp') {
         const boundingBox = await btn.boundingBox();
-        console.log("await btn.boundingBox()", boundingBox);
+        console.log('await btn.boundingBox()', boundingBox);
 
         const x = boundingBox.x + boundingBox.width / 2;
         const y = boundingBox.y + boundingBox.height / 2;
@@ -113,7 +113,7 @@ for (const inputMode of inputModes) {
           x: x,
           y: y,
           button: 'left',
-          clickCount: 0
+          clickCount: 0,
         });
         console.log(`
           await page.text(/Move mouse to m/).sendCDPCommand('Input.dispatchMouseEvent', {
@@ -124,13 +124,12 @@ for (const inputMode of inputModes) {
             clickCount: 0
           });
         `);
-      }
-      else {
+      } else {
         await page.text(/Move mouse to m/).dispatchEvent('mousemove');
         console.log(`await page.text(/Move mouse to m/).dispatchEvent('mousemove')`);
       }
 
-      const output = await page.element("#output_mousemoved").innerText();
+      const output = await page.element('#output_mousemoved').innerText();
       console.log(`await page.element("#output_mousemoved").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -149,7 +148,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text('Press mouse on me!').ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text('Press mouse on me!').textContent();
       console.log("await page.text('Press mouse on me!').textContent()", textContent);
@@ -157,7 +156,7 @@ for (const inputMode of inputModes) {
 
       if (inputMode === 'cdp') {
         const boundingBox = await btn.boundingBox();
-        console.log("await btn.boundingBox()", boundingBox);
+        console.log('await btn.boundingBox()', boundingBox);
 
         const x = boundingBox.x + boundingBox.width / 2;
         const y = boundingBox.y + boundingBox.height / 2;
@@ -167,7 +166,7 @@ for (const inputMode of inputModes) {
           x: x,
           y: y,
           button: 'left',
-          clickCount: 1
+          clickCount: 1,
         });
         console.log(`
           await page.text('Press mouse on me!').sendCDPCommand('Input.dispatchMouseEvent', {
@@ -178,13 +177,12 @@ for (const inputMode of inputModes) {
             clickCount: 1
           });
         `);
-      }
-      else {
+      } else {
         await page.text('Press mouse on me!').dispatchEvent('mousedown');
         console.log(`await page.text('Press mouse on me!').dispatchEvent('mousedown')`);
       }
 
-      const output = await page.element("#output_mousedown").innerText();
+      const output = await page.element('#output_mousedown').innerText();
       console.log(`await page.element("#output_mousedown").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -199,15 +197,15 @@ for (const inputMode of inputModes) {
       console.log(`await page.text({ text: /Release mouse to me/ }).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text({ text: /Release mouse to me/ }).textContent();
-      console.log("await page.text({ text: /Release mouse to me/ }).textContent()", textContent);
+      console.log('await page.text({ text: /Release mouse to me/ }).textContent()', textContent);
       expect(textContent).toEqual('Release mouse to me!');
 
       if (inputMode === 'cdp') {
         const boundingBox = await btn.boundingBox();
-        console.log("await btn.boundingBox()", boundingBox);
+        console.log('await btn.boundingBox()', boundingBox);
 
         const x = boundingBox.x + boundingBox.width / 2;
         const y = boundingBox.y + boundingBox.height / 2;
@@ -217,7 +215,7 @@ for (const inputMode of inputModes) {
           x: x,
           y: y,
           button: 'left',
-          clickCount: 1
+          clickCount: 1,
         });
         console.log(`
           await page.text({ text: /Release mouse to me/ }).sendCDPCommand('Input.dispatchMouseEvent', {
@@ -228,13 +226,12 @@ for (const inputMode of inputModes) {
             clickCount: 1
           })
         `);
-      }
-      else {
+      } else {
         await page.text({ text: /Release mouse to me/ }).dispatchEvent('mouseup');
         console.log(`await page.text({ text: /Release mouse to me/ }).dispatchEvent('mouseup')`);
       }
 
-      const output = await page.element("#output_mouseup").innerText();
+      const output = await page.element('#output_mouseup').innerText();
       console.log(`await page.element("#output_mouseup").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -252,7 +249,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text({ text: 'Mouse wheel on me!' }).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text({ text: 'Mouse wheel on me!' }).textContent();
       console.log("await page.text({ text: 'Mouse wheel on me!' }).textContent()", textContent);
@@ -264,7 +261,7 @@ for (const inputMode of inputModes) {
           await page.text({ text: 'Mouse wheel on me!' }).wheel(${options ? JSON.stringify(options) : options})
       `);
 
-      const output = await page.element("#output_wheel").innerText();
+      const output = await page.element('#output_wheel').innerText();
       console.log(`await page.element("#output_wheel").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -279,10 +276,10 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Mouse Left Click on me/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Mouse Left Click on me/).textContent();
-      console.log("await page.text(/Mouse Left Click on me/).textContent()", textContent);
+      console.log('await page.text(/Mouse Left Click on me/).textContent()', textContent);
       expect(textContent).toEqual('Mouse Left Click on me!');
 
       await page.text(/Mouse Left Click on me/).click(defaultOptions);
@@ -290,7 +287,7 @@ for (const inputMode of inputModes) {
           await page.text(/Mouse Left Click on me/).click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      const output = await page.element("#output_click").innerText();
+      const output = await page.element('#output_click').innerText();
       console.log(`await page.element("#output_click").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -303,22 +300,22 @@ for (const inputMode of inputModes) {
 
     // btn_dblclick
     {
-      const btn = await page.text("Mouse Left DblClick on me!").ownerElement();
+      const btn = await page.text('Mouse Left DblClick on me!').ownerElement();
       console.log(`await page.text("Mouse Left DblClick on me!").ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
-      const textContent = await page.text("Mouse Left DblClick on me!").textContent();
+      const textContent = await page.text('Mouse Left DblClick on me!').textContent();
       console.log(`await page.text("Mouse Left DblClick on me!").textContent()`, textContent);
       expect(textContent).toEqual('Mouse Left DblClick on me!');
 
-      await page.text("Mouse Left DblClick on me!").dblclick(defaultOptions);
+      await page.text('Mouse Left DblClick on me!').dblclick(defaultOptions);
       console.log(`
           await page.text("Mouse Left DblClick on me!").dblclick(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      const output = await page.element("#output_dblclick").innerText();
+      const output = await page.element('#output_dblclick').innerText();
       console.log(`await page.element("#output_dblclick").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -336,7 +333,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Mouse Middle Click on me/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Mouse Middle Click on me/).textContent();
       console.log(`await page.text(/Mouse Middle Click on me/).textContent()`, textContent);
@@ -348,13 +345,13 @@ for (const inputMode of inputModes) {
           await page.text(/Mouse Middle Click on me/).click(${options ? JSON.stringify(options) : options})
       `);
       await wait(500);
-      console.log("await wait(500)");
+      console.log('await wait(500)');
       await page.text(/Mouse Middle Click on me/).click(options);
       console.log(`
           await page.text(/Mouse Middle Click on me/).click(${options ? JSON.stringify(options) : options})
       `);
 
-      const output = await page.element("#output_middleclick").innerText();
+      const output = await page.element('#output_middleclick').innerText();
       console.log(`await page.element("#output_middleclick").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -371,7 +368,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Mouse Right Click on me/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Mouse Right Click on me/).textContent();
       console.log(`await page.text(/Mouse Right Click on me/).textContent()`, textContent);
@@ -383,7 +380,7 @@ for (const inputMode of inputModes) {
           await page.text(/Mouse Right Click on me/).click(${options ? JSON.stringify(options) : options})
       `);
 
-      const output = await page.element("#output_rightclick").innerText();
+      const output = await page.element('#output_rightclick').innerText();
       console.log(`await page.element("#output_rightclick").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -401,7 +398,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Mouse hover on me/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Mouse hover on me/).textContent();
       console.log(`await page.text(/Mouse hover on me/).textContent()`, textContent);
@@ -412,7 +409,7 @@ for (const inputMode of inputModes) {
           await page.text(/Mouse hover on me/).hover(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      const output = await page.element("#output_hover").innerText();
+      const output = await page.element('#output_hover').innerText();
       console.log(`await page.element("#output_hover").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -428,7 +425,7 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Tap on m/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const textContent = await page.text(/Tap on m/).textContent();
       console.log(`await page.text(/Tap on m/).textContent()`, textContent);
@@ -439,7 +436,7 @@ for (const inputMode of inputModes) {
           await page.text(/Tap on m/).tap(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      const output = await page.element("#output_tap").innerText();
+      const output = await page.element('#output_tap').innerText();
       console.log(`await page.element("#output_tap").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -455,20 +452,20 @@ for (const inputMode of inputModes) {
       console.log(`await page.text(/Drag on me/).ownerElement()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
+      console.log('await btn.scrollIntoViewIfNeeded()');
 
       const btn_drop = await page.text(/Drop on me/).ownerElement();
       console.log(`await page.text(/Drop on me/).ownerElement()`, btn_drop);
       expect(btn_drop).not.toBeNullOrUndefined();
       await btn_drop.scrollIntoViewIfNeeded();
-      console.log("await btn_drop.scrollIntoViewIfNeeded()");
+      console.log('await btn_drop.scrollIntoViewIfNeeded()');
 
       await page.text(/Drag on me/).dragTo(btn_drop, defaultOptions);
       console.log(`
           await page.text(/Drag on me/).dragTo(btn_drop, ${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions});
       `);
 
-      const output = await page.element("#output_drag_drop").innerText();
+      const output = await page.element('#output_drag_drop').innerText();
       console.log(`await page.element("#output_drag_drop").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -486,39 +483,39 @@ for (const inputMode of inputModes) {
 
     // checkbox
     {
-      const checkbox = await page.text("checkbox").last().ownerElement();
+      const checkbox = await page.text('checkbox').last().ownerElement();
       console.log(`await page.text("checkbox").last().ownerElement()`, checkbox);
       expect(checkbox).not.toBeNullOrUndefined();
       await checkbox.scrollIntoViewIfNeeded();
-      console.log("await checkbox.scrollIntoViewIfNeeded()");
+      console.log('await checkbox.scrollIntoViewIfNeeded()');
 
-      const textContent = await page.text("checkbox").last().textContent();
+      const textContent = await page.text('checkbox').last().textContent();
       console.log(`await page.text("checkbox").last().textContent()`, textContent);
       expect(textContent).toEqual('checkbox');
 
-      let checked = await page.element("#checkbox").checked();
+      let checked = await page.element('#checkbox').checked();
       console.log(`await page.element("#checkbox").checked()`, checked);
       expect(checked).toBeFalsy();
 
-      await page.text("checkbox").last().click(defaultOptions);
+      await page.text('checkbox').last().click(defaultOptions);
       console.log(`
           await page.text("checkbox").last().click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      checked = await page.element("#checkbox").checked();
+      checked = await page.element('#checkbox').checked();
       console.log(`await page.element("#checkbox").checked()`, checked);
       expect(checked).toBeTruthy();
 
-      await page.text("checkbox").last().click(defaultOptions);
+      await page.text('checkbox').last().click(defaultOptions);
       console.log(`
           await page.text("checkbox").last().click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
 
-      checked = await page.element("#checkbox").checked();
+      checked = await page.element('#checkbox').checked();
       console.log(`await page.element("#checkbox").checked()`, checked);
       expect(checked).toBeFalsy();
 
-      const output = await page.element("#output_checkbox").innerText();
+      const output = await page.element('#output_checkbox').innerText();
       console.log(`await page.element("#output_checkbox").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -535,13 +532,15 @@ for (const inputMode of inputModes) {
       const radio_ids = ['huey', 'dewey', 'louie'];
       for (let i = 0; i < radio_labes.length; ++i) {
         let checked = await page.element(`input[id="${radio_ids[i]}"]`).checked();
-        console.log(`
+        console.log(
+          `
           await page.element('input[id="${radio_ids[i]}"]).checked();
-        `, checked);
+        `,
+          checked
+        );
         if (i === 0) {
           expect(checked).toBeTruthy();
-        }
-        else {
+        } else {
           expect(checked).toBeFalsy();
         }
         await page.text(radio_labes[i]).click(defaultOptions);
@@ -549,13 +548,16 @@ for (const inputMode of inputModes) {
             await page.text('${radio_labes[i]}').click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
         `);
         checked = await page.element(`input[id="${radio_ids[i]}"]`).checked();
-        console.log(`
+        console.log(
+          `
           await page.element('input[id="${radio_ids[i]}"]).checked();
-        `, checked);
+        `,
+          checked
+        );
         expect(checked).toBeTruthy();
       }
 
-      const output = await page.element("#output_radio").innerText();
+      const output = await page.element('#output_radio').innerText();
       console.log(`await page.element("#output_radio").innerText()`, output.slice(0, 10));
       expect(output.length > 0).toBeTruthy();
 
@@ -568,50 +570,52 @@ for (const inputMode of inputModes) {
 
     // select
     {
-      const select = await page.element("#select").get();
+      const select = await page.element('#select').get();
       console.log(`await page.element("#select").get()`, select);
       expect(select).not.toBeNullOrUndefined();
       await select.scrollIntoViewIfNeeded();
-      console.log("await select.scrollIntoViewIfNeeded()");
+      console.log('await select.scrollIntoViewIfNeeded()');
 
-      let textContent = await page.frame().nth(0).text("--Please choose an option--").textContent();
+      let textContent = await page.frame().nth(0).text('--Please choose an option--').textContent();
       console.log(`await page.frame().nth(0).text("--Please choose an option--").textContent()`, textContent);
       expect(textContent).toEqual('--Please choose an option--');
 
-      textContent = await page.frame().nth(0).element("#select").text(/Hamster/).textContent();
+      textContent = await page
+        .frame()
+        .nth(0)
+        .element('#select')
+        .text(/Hamster/)
+        .textContent();
       console.log(`await page.frame().nth(0).element("#select").text(/Hamster/).textContent()`, textContent);
       expect(textContent).toEqual('Hamster');
-
     }
-  }
-  catch (error) {
+  } catch (error) {
     throw error;
-  }
-  finally {
+  } finally {
     // btn_stop_monitor
     {
-      const btn = await page.element("#btn_stop_monitor").get();
+      const btn = await page.element('#btn_stop_monitor').get();
       console.log(`await page.element("#btn_stop_monitor").get()`, btn);
       expect(btn).not.toBeNullOrUndefined();
       await btn.scrollIntoViewIfNeeded();
-      console.log("await btn.scrollIntoViewIfNeeded()");
-      await page.element("#btn_stop_monitor").click(defaultOptions);
+      console.log('await btn.scrollIntoViewIfNeeded()');
+      await page.element('#btn_stop_monitor').click(defaultOptions);
       console.log(`
         await page.element("#btn_stop_monitor").click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
       `);
     }
     if (inputMode === 'cdp') {
       await browser.detachDebugger();
-      console.log("await browser.detachDebugger()");
+      console.log('await browser.detachDebugger()');
       await wait(1000);
-      console.log("await wait(1000)");
+      console.log('await wait(1000)');
     }
     console.log(`inputMode ${inputMode} <======`);
   }
 }
 
-console.log("text methods <======");
+console.log('text methods <======');
 
 await page.bringToFront();
 
-console.warn("all passed");
+console.warn('all passed');

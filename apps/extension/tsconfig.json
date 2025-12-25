@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types"],             // Specify where to find type definitions
+    "types": ["chrome", "firefox-webext-browser"],      // Include type definitions including Chrome extension API types
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],           // Include all TypeScript and Vue files
+  "exclude": ["node_modules", "dist"]                   // Exclude node_modules and output directory
+}

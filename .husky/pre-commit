@@ -1,0 +1,1 @@
+#! pnpm lint:prettier && pnpm lint:eslint && pnpm lint:spellcheck

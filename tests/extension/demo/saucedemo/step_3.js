@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file step_3.js
  * @description 3. Buy Backpack
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,14 @@
  * limitations under the License.
  */
 
-await page.element('div .inventory_item_name ').filter({ name: 'textContent', value: /Backpack/ }).highlight();
-await page.element('div .inventory_item_name ').filter({ name: 'textContent', value: /Backpack/ }).click();
+await page
+  .element('div .inventory_item_name ')
+  .filter({ name: 'textContent', value: /Backpack/ })
+  .highlight();
+await page
+  .element('div .inventory_item_name ')
+  .filter({ name: 'textContent', value: /Backpack/ })
+  .click();
 await page.sync();
 const count = await page.element('button#add-to-cart').count();
 if (count === 1) {

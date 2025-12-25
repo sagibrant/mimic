@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file step_2.js
  * @description 2. Login
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,20 @@
 await page.element('#login_credentials').first().text().nth(1).highlight();
 const username = await page.element('#login_credentials').first().text().nth(1).textContent();
 
-const password = await page.element().filter({ name: 'data-test', value: 'login-password', type: 'attribute' }).first().text().nth(1).textContent();
-await page.element().filter({ name: 'data-test', value: 'login-password', type: 'attribute' }).first().text().nth(1).highlight();
+const password = await page
+  .element()
+  .filter({ name: 'data-test', value: 'login-password', type: 'attribute' })
+  .first()
+  .text()
+  .nth(1)
+  .textContent();
+await page
+  .element()
+  .filter({ name: 'data-test', value: 'login-password', type: 'attribute' })
+  .first()
+  .text()
+  .nth(1)
+  .highlight();
 
 await page.element('#user-name').highlight();
 await page.element('#user-name').fill(username);

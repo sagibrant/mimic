@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file events.js
  * @description 3. events test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,25 +52,25 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("events =>");
+console.log('events =>');
 
 // global browser instance
-console.log("browser", browser);
+console.log('browser', browser);
 
 // browser events
 {
-  const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
+  const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
 
   let events_count = 0;
-  const newWindowListener = async (window) => {
+  const newWindowListener = async window => {
     console.log(` newWindowListener on browser ==> `, window);
 
     const url = await window.page({ active: true }).url();
-    console.log("await window.page({active: true}).url()", url);
+    console.log('await window.page({active: true}).url()', url);
     expect(url).toEqual(url_mouse);
 
     browser.off('window', newWindowListener);
@@ -79,14 +79,14 @@ console.log("browser", browser);
     events_count++;
     console.log(` newWindowListener on browser <== `);
   };
-  const newPageListener = async (page) => {
+  const newPageListener = async page => {
     console.log(` newPageListener on browser ==> `, page);
 
     await page.sync();
-    console.log("await page.sync())");
+    console.log('await page.sync())');
 
     const url = await page.url();
-    console.log("await page.url()", url);
+    console.log('await page.url()', url);
     expect(url).toEqual(url_mouse);
 
     browser.off('page', newPageListener);
@@ -102,20 +102,20 @@ console.log("browser", browser);
   console.log("browser.on('page', newPageListener)");
 
   const newWindow = await browser.openNewWindow(url_mouse);
-  console.log("await browser.openNewWindow(url_mouse)", newWindow);
+  console.log('await browser.openNewWindow(url_mouse)', newWindow);
   expect(newWindow).not.toBeNullOrUndefined();
 
   const newWindowPage = await newWindow.page({ active: true }).get();
-  console.log("await newWindow.page({active: true}).get())", newWindowPage);
+  console.log('await newWindow.page({active: true}).get())', newWindowPage);
   expect(newWindowPage).not.toBeNullOrUndefined();
 
   await newWindowPage.sync();
-  console.log("await newWindowPage.sync())");
+  console.log('await newWindowPage.sync())');
 
   let wait_count = 0;
   if (events_count < 2 && wait_count < 3) {
     await wait(1000);
-    console.log("await wait(1000)");
+    console.log('await wait(1000)');
     wait_count++;
   }
   expect(events_count).toBe(2);
@@ -124,16 +124,16 @@ console.log("browser", browser);
   console.log("browser.on('page', newPageListener)");
 
   const newPage = await browser.openNewPage(url_mouse);
-  console.log("await browser.openNewPage(url_mouse)", newPage);
+  console.log('await browser.openNewPage(url_mouse)', newPage);
   expect(newPage).not.toBeNullOrUndefined();
 
   await newPage.sync();
-  console.log("await newPage.sync())");
+  console.log('await newPage.sync())');
 
   wait_count = 0;
   if (events_count < 3 && wait_count < 3) {
     await wait(1000);
-    console.log("await wait(1000)");
+    console.log('await wait(1000)');
     wait_count++;
   }
   expect(events_count).toEqual(3);
@@ -143,6 +143,6 @@ await page.bringToFront();
 await wait(300);
 await clean();
 
-console.log("events <=");
+console.log('events <=');
 
-console.log("all passed");
+console.log('all passed');

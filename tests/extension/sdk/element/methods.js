@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file methods.js
  * @description 2. methods test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,13 +51,13 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("element methods ==>");
-console.log("current page", page);
-const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
+console.log('element methods ==>');
+console.log('current page', page);
+const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
 await page.navigate(url_mouse);
 await page.sync();
 const elements = await page.querySelectorAll('#btn_start_monitor');
@@ -227,38 +227,38 @@ console.log("await page.element('#checkbox').get()", elem);
 expect(elem).not.toBeNullOrUndefined();
 if (elem) {
   const validity = await elem.checkValidity();
-  console.log("await elem.checkValidity()", validity);
+  console.log('await elem.checkValidity()', validity);
   expect(validity).toBeTruthy();
 
   const visibility = await elem.checkVisibility();
-  console.log("await elem.checkVisibility()", visibility);
+  console.log('await elem.checkVisibility()', visibility);
   expect(visibility).toBeTruthy();
 
   await elem.scrollIntoViewIfNeeded();
-  console.log("await elem.scrollIntoViewIfNeeded()");
+  console.log('await elem.scrollIntoViewIfNeeded()');
 
   await elem.focus();
-  console.log("await elem.focus()");
+  console.log('await elem.focus()');
 
   await elem.check();
-  console.log("await elem.check()");
+  console.log('await elem.check()');
 
   let checked = await elem.checked();
-  console.log("await elem.checked()", checked);
+  console.log('await elem.checked()', checked);
   expect(checked).toBeTruthy();
 
   await elem.uncheck();
-  console.log("await elem.uncheck()");
+  console.log('await elem.uncheck()');
 
   checked = await elem.checked();
-  console.log("await elem.checked()", checked);
+  console.log('await elem.checked()', checked);
   expect(checked).toBeFalsy();
 
   await elem.blur();
-  console.log("await elem.blur()");
+  console.log('await elem.blur()');
 }
 
-// select 
+// select
 elem = await page.element('#select').get();
 console.log("await page.element('#select').get()", elem);
 expect(elem).not.toBeNullOrUndefined();
@@ -305,7 +305,7 @@ if (elem) {
   expect(selectedOptions).toHaveLength(1);
 
   let value = await selectedOptions[0].value();
-  console.log("await selectedOptions[0].value()", value);
+  console.log('await selectedOptions[0].value()', value);
   expect(value).toBe('cat');
 
   const options = await await page.element('#select').options();
@@ -349,24 +349,45 @@ if (elem_tables) {
   }
 }
 
-const url_frame = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/index.html";
+const url_frame = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/index.html';
 await page.navigate(url_frame);
-console.log("await page.navigate(url_frame);");
+console.log('await page.navigate(url_frame);');
 await page.sync();
-console.log("await page.sync();");
+console.log('await page.sync();');
 {
   let value = '';
   // closed shadowdom
   {
     // click in the closed shadowdom with js link (require cdp)
-    await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "DIV" }]).nth(1).click();
+    await page
+      .frame()
+      .nth(1)
+      .element()
+      .filter([{ name: 'tagName', value: 'DIV' }])
+      .nth(1)
+      .click();
     console.log(`await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "DIV" }]).nth(1).click()`);
-    value = await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).value();
+    value = await page
+      .frame()
+      .nth(1)
+      .element()
+      .filter([{ name: 'tagName', value: 'INPUT' }])
+      .value();
     expect(value).toEqual('ttt1');
     // fill in the closed shadowdom
-    await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).fill('abc');
+    await page
+      .frame()
+      .nth(1)
+      .element()
+      .filter([{ name: 'tagName', value: 'INPUT' }])
+      .fill('abc');
     console.log(`await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).fill('abc')`);
-    value = await page.frame().nth(1).element().filter([{ "name": "tagName", "value": "INPUT" }]).value();
+    value = await page
+      .frame()
+      .nth(1)
+      .element()
+      .filter([{ name: 'tagName', value: 'INPUT' }])
+      .value();
     expect(value).toEqual('abc');
   }
 
@@ -375,31 +396,102 @@ console.log("await page.sync();");
     // visible js links
     {
       // click in the opened shadowdom with js links
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'A' }])
+        .first()
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('js link click');
 
       // click in the opened shadowdom with image in js links
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'IMG' }])
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('js link click');
 
       // click in the opened shadowdom with js links with role
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'A' }])
+        .nth(1)
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('role based js link click');
 
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
     }
     // hide the links in the opened shadowdom
@@ -409,46 +501,123 @@ console.log("await page.sync();");
     // invisible js links (require click in main world)
     {
       // click in the opened shadowdom with js links
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'A' }])
+        .first()
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).first().click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('js link click');
 
       // click in the opened shadowdom with image in js links
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'IMG' }])
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "IMG" }]).click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('js link click');
 
       // click in the opened shadowdom with js links with role
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'A' }])
+        .nth(1)
+        .click();
       console.log(`await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "A" }]).nth(1).click()`);
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('role based js link click');
 
-      await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).fill('');
-      value = await page.frame().nth(2).element().filter([{ "name": "tagName", "value": "INPUT" }]).nth(1).value();
+      await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .fill('');
+      value = await page
+        .frame()
+        .nth(2)
+        .element()
+        .filter([{ name: 'tagName', value: 'INPUT' }])
+        .nth(1)
+        .value();
       expect(value).toEqual('');
     }
   }
 
   // file upload
   {
-    await page.frame().nth(3).element('#avatar').setFileInputFiles(["/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png"]);
-    console.log(`await page.frame().nth(3).element('#avatar').setFileInputFiles(["/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png"])`);
+    await page
+      .frame()
+      .nth(3)
+      .element('#avatar')
+      .setFileInputFiles(['/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png']);
+    console.log(
+      `await page.frame().nth(3).element('#avatar').setFileInputFiles(["/Users/sagi/Workspace/temp/extension_release_1/logo_450x800.png"])`
+    );
     value = await page.frame().nth(3).element('#avatar').value();
     expect(value).toEqual('C:\\fakepath\\logo_450x800.png');
   }
 }
 
-console.log("element methods <==");
+console.log('element methods <==');
 
 await page.bringToFront();
 
-console.warn("all passed");
+console.warn('all passed');

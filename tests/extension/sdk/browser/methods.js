@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file methods.js
  * @description 2. methods test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,66 +52,64 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("browser =>");
+console.log('browser =>');
 
 // global browser instance
-console.log("browser", browser);
+console.log('browser', browser);
 
 // aos
 {
   const windows = await browser.windows();
-  console.log("await browser.windows()", windows);
+  console.log('await browser.windows()', windows);
   expect(windows).not.toBeNullOrUndefined();
 
   const pages = await browser.pages();
-  console.log("await browser.pages()", pages);
+  console.log('await browser.pages()', pages);
   expect(pages).not.toBeNullOrUndefined();
 
   const window = await browser.lastFocusedWindow();
-  console.log("await browser.lastFocusedWindow()", window);
+  console.log('await browser.lastFocusedWindow()', window);
   expect(window).not.toBeNullOrUndefined();
 
   const lastActivePage = await browser.lastActivePage();
-  console.log("await browser.lastActivePage()", lastActivePage);
+  console.log('await browser.lastActivePage()', lastActivePage);
   expect(lastActivePage).not.toBeNullOrUndefined();
 }
-
 
 // browser info
 {
   const name = browser.name();
-  console.log("browser.name()", name);
+  console.log('browser.name()', name);
   expect(['edge', 'chrome']).toContain(name);
 
   const version = browser.version();
-  console.log("browser.version()", version);
+  console.log('browser.version()', version);
   expect(version).not.toBeNullOrUndefined();
 
   const majorVersion = browser.majorVersion();
-  console.log("browser.majorVersion()", majorVersion);
+  console.log('browser.majorVersion()', majorVersion);
   expect(majorVersion > 130).toBeTruthy();
 }
-
 
 // browser methods
 {
   // enable cdp
   await browser.attachDebugger();
-  console.log("await browser.attachDebugger()");
+  console.log('await browser.attachDebugger()');
   // set timeout
   const timeout = 5100;
   await browser.setDefaultTimeout(timeout);
-  console.log("await browser.setDefaultTimeout(timeout)", timeout);
+  console.log('await browser.setDefaultTimeout(timeout)', timeout);
 
   // get cookies
   const cookie_url = 'https://juejin.cn/';
   const cookie_url_domain = 'juejin.cn';
   const cookies = await browser.cookies();
-  console.log("await browser.cookies()", cookies);
+  console.log('await browser.cookies()', cookies);
   expect(cookies.length >= 0).toBeTruthy();
   // remove test cookies in case exists
   await browser.clearCookies({ name: /^test_cookie_name/ });
@@ -120,8 +118,13 @@ console.log("browser", browser);
   const filter_url_cookies = await browser.cookies(cookie_url);
   console.log(`await browser.cookies(${cookie_url})`, filter_url_cookies);
   expect(filter_url_cookies.length >= 0).toBeTruthy();
-  const filter_url_domain_cookies = filter_url_cookies.filter(c => c.domain === cookie_url_domain || c.domain === '.' + cookie_url_domain);
-  console.log(`filter_url_cookies.filter(c=>c.domain === '${cookie_url_domain}' || c.domain === '.' + '${cookie_url_domain}')`, filter_url_domain_cookies);
+  const filter_url_domain_cookies = filter_url_cookies.filter(
+    c => c.domain === cookie_url_domain || c.domain === '.' + cookie_url_domain
+  );
+  console.log(
+    `filter_url_cookies.filter(c=>c.domain === '${cookie_url_domain}' || c.domain === '.' + '${cookie_url_domain}')`,
+    filter_url_domain_cookies
+  );
   expect(filter_url_domain_cookies).toHaveLength(filter_url_cookies.length);
 
   // add cookies
@@ -131,14 +134,25 @@ console.log("browser", browser);
   console.log(`await browser.cookies('${cookie_url}')`, filter_url_cookies_after_add);
   expect(filter_url_cookies_after_add).toHaveLength(filter_url_cookies.length + 1);
 
-  await browser.addCookies([{ name: 'test_cookie_name2', value: 'test_cookie_value2', domain: cookie_url_domain, path: '/' }]);
-  console.log(`await browser.addCookies({ name: 'test_cookie_name2', value: 'test_cookie_value2', domain: ${cookie_url_domain} , path: '/'})`);
+  await browser.addCookies([
+    { name: 'test_cookie_name2', value: 'test_cookie_value2', domain: cookie_url_domain, path: '/' },
+  ]);
+  console.log(
+    `await browser.addCookies({ name: 'test_cookie_name2', value: 'test_cookie_value2', domain: ${cookie_url_domain} , path: '/'})`
+  );
   filter_url_cookies_after_add = await browser.cookies(cookie_url);
   console.log(`await browser.cookies('${cookie_url}')`, filter_url_cookies_after_add);
   expect(filter_url_cookies_after_add).toHaveLength(filter_url_cookies.length + 2);
 
-  await browser.addCookies({ name: 'test_cookie_name3', value: 'test_cookie_value3', domain: cookie_url_domain, path: '/' });
-  console.log(`await browser.addCookies({ name: 'test_cookie_name3', value: 'test_cookie_value3', domain: ${cookie_url_domain} , path: '/'})`);
+  await browser.addCookies({
+    name: 'test_cookie_name3',
+    value: 'test_cookie_value3',
+    domain: cookie_url_domain,
+    path: '/',
+  });
+  console.log(
+    `await browser.addCookies({ name: 'test_cookie_name3', value: 'test_cookie_value3', domain: ${cookie_url_domain} , path: '/'})`
+  );
   filter_url_cookies_after_add = await browser.cookies(cookie_url);
   console.log(`await browser.cookies('${cookie_url}')`, filter_url_cookies_after_add);
   expect(filter_url_cookies_after_add).toHaveLength(filter_url_cookies.length + 3);
@@ -173,44 +187,44 @@ console.log("browser", browser);
   // expect(filter_url_cookies_after_clear).toHaveLength(0);
 
   const windows = await browser.windows();
-  console.log("await browser.windows()", windows);
+  console.log('await browser.windows()', windows);
   expect(windows).not.toBeNullOrUndefined();
   // open new window
-  const url_keyboard = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/keyboard.html";
+  const url_keyboard = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/keyboard.html';
   const newWindow = await browser.openNewWindow(url_keyboard);
-  console.log("await browser.openNewWindow(url_keyboard)", newWindow);
+  console.log('await browser.openNewWindow(url_keyboard)', newWindow);
   expect(newWindow).not.toBeNullOrUndefined();
   // windows should + 1
   const new_windows = await browser.windows();
-  console.log("await browser.windows()", new_windows);
+  console.log('await browser.windows()', new_windows);
   expect(new_windows).not.toBeNullOrUndefined();
   console.log(`windows.length change from ${windows.length} to ${new_windows.length}`);
   expect(new_windows.length - windows.length).toBe(1);
 
   await newWindow.page({ active: true }).sync();
-  console.log("await newWindow.page({active: true}).sync()");
+  console.log('await newWindow.page({active: true}).sync()');
 
   const pages = await browser.pages();
-  console.log("await browser.pages()", pages);
+  console.log('await browser.pages()', pages);
   expect(pages).not.toBeNullOrUndefined();
   // open new page
-  const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
+  const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
   const newPage = await browser.openNewPage(url_mouse);
-  console.log("await browser.openNewPage(url_mouse)", newPage);
+  console.log('await browser.openNewPage(url_mouse)', newPage);
   expect(newPage).not.toBeNullOrUndefined();
   // page should + 1
   const new_pages = await browser.pages();
-  console.log("await browser.pages()", new_pages);
+  console.log('await browser.pages()', new_pages);
   expect(new_pages).not.toBeNullOrUndefined();
   console.log(`pages.length from ${pages.length} to ${new_pages.length}`);
   expect(new_pages.length - pages.length).toBe(1);
 
   await newPage.sync();
-  console.log("await newPage.sync()");
+  console.log('await newPage.sync()');
 
   // disable cdp
   await browser.detachDebugger();
-  console.log("await browser.detachDebugger()");
+  console.log('await browser.detachDebugger()');
 
   // close the browser
   // await browser.close();
@@ -220,6 +234,6 @@ await page.bringToFront();
 await wait(300);
 await clean();
 
-console.log("browser <=");
+console.log('browser <=');
 
-console.log("all passed");
+console.log('all passed');

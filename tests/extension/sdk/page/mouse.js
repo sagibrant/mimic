@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file mouse.js
  * @description 6. mouse test
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,38 +52,38 @@ const clean = async () => {
       await page.close();
     }
   }
-}
+};
 
 await clean();
 
-console.log("mouse =>");
-console.log("current page", page);
-const url_mouse = "file:///Users/sagi/Workspace/src/github/sagibrant/gogogo/tests/aut/mouse.html";
+console.log('mouse =>');
+console.log('current page', page);
+const url_mouse = 'file:///Users/sagi/Workspace/src/sagibrant/gogogo/tests/aut/mouse.html';
 
 await page.navigate(url_mouse);
-console.log("await page.navigate(url_mouse)", url_mouse);
+console.log('await page.navigate(url_mouse)', url_mouse);
 await page.sync();
-console.log("await page.sync()");
+console.log('await page.sync()');
 let page_status = await page.status();
-console.log("await page.status()", page_status);
+console.log('await page.status()', page_status);
 expect(page_status).toBe('complete');
 let page_url = await page.url();
-console.log("await page.url()", page_url);
+console.log('await page.url()', page_url);
 expect(page_url).toEqual(url_mouse);
 
 const keyboard = page.keyboard();
-console.log("page.keyboard()", keyboard);
+console.log('page.keyboard()', keyboard);
 expect(keyboard).not.toBeNullOrUndefined();
 
 const mouse = page.mouse();
-console.log("page.mouse()", mouse);
+console.log('page.mouse()', mouse);
 expect(mouse).not.toBeNullOrUndefined();
 
 try {
   await browser.attachDebugger();
-  console.log("await browser.attachDebugger()");
+  console.log('await browser.attachDebugger()');
   await wait(1000);
-  console.log("await wait(1000)");
+  console.log('await wait(1000)');
 
   // start monitor
   {
@@ -93,10 +93,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -113,10 +113,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -124,7 +124,7 @@ try {
     await mouse.move(x, y);
     console.log(` await mouse.move(${x}, ${y}); `);
 
-    const output = await page.element("#output_mousemoved").innerText();
+    const output = await page.element('#output_mousemoved').innerText();
     console.log(`await page.element("#output_mousemoved").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -143,10 +143,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -156,7 +156,7 @@ try {
     await mouse.down();
     console.log(` await mouse.down(); `);
 
-    const output = await page.element("#output_mousedown").innerText();
+    const output = await page.element('#output_mousedown').innerText();
     console.log(`await page.element("#output_mousedown").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -173,10 +173,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -186,7 +186,7 @@ try {
     await mouse.up();
     console.log(` await mouse.up(); `);
 
-    const output = await page.element("#output_mouseup").innerText();
+    const output = await page.element('#output_mouseup').innerText();
     console.log(`await page.element("#output_mouseup").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -203,10 +203,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -216,7 +216,7 @@ try {
     await mouse.wheel(0, 100);
     console.log(` await mouse.wheel(0, 100); `);
 
-    const output = await page.element("#output_wheel").innerText();
+    const output = await page.element('#output_wheel').innerText();
     console.log(`await page.element("#output_wheel").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -233,10 +233,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -244,7 +244,7 @@ try {
     await mouse.click(x, y, { button: 'left' });
     console.log(` await mouse.click(${x}, ${y}, { button: 'left'}); `);
 
-    const output = await page.element("#output_click").innerText();
+    const output = await page.element('#output_click').innerText();
     console.log(`await page.element("#output_click").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -255,7 +255,7 @@ try {
     expect(events).toContain('click');
   }
 
-  // mouse dblclick 
+  // mouse dblclick
   {
     const btn_id = 'btn_dblclick';
     const btn = await page.element().filter({ name: 'id', value: btn_id }).first().get();
@@ -263,10 +263,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -276,7 +276,7 @@ try {
       await mouse.click(${x}, ${y}, { button: 'left', clickCount: 2, position: { x: 3, y: 3 }, delayBetweenClick: 50 });
     `);
 
-    const output = await page.element("#output_dblclick").innerText();
+    const output = await page.element('#output_dblclick').innerText();
     console.log(`await page.element("#output_dblclick").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -288,7 +288,7 @@ try {
     expect(events).toContain('dblclick');
   }
 
-  // mouse middleclick 
+  // mouse middleclick
   {
     const btn_id = 'btn_middleclick';
     const btn = await page.element().filter({ name: 'id', value: btn_id }).first().get();
@@ -296,10 +296,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -309,13 +309,13 @@ try {
       await mouse.click(${x}, ${y}, { button: 'middle', delayBetweenDownUp: 50 });
     `);
     await wait(500);
-    console.log("await wait(500)");
+    console.log('await wait(500)');
     await mouse.click(x, y, { button: 'middle', delayBetweenDownUp: 50 });
     console.log(` 
       await mouse.click(${x}, ${y}, { button: 'middle', delayBetweenDownUp: 50 });
     `);
 
-    const output = await page.element("#output_middleclick").innerText();
+    const output = await page.element('#output_middleclick').innerText();
     console.log(`await page.element("#output_middleclick").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -326,7 +326,7 @@ try {
     // expect(events).toContain('auxclick');
   }
 
-  // mouse rightclick 
+  // mouse rightclick
   {
     const btn_id = 'btn_rightclick';
     const btn = await page.element().filter({ name: 'id', value: btn_id }).first().get();
@@ -334,10 +334,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -347,7 +347,7 @@ try {
       await mouse.click(${x}, ${y}, { button: 'right', delayBetweenDownUp: 50 });
     `);
 
-    const output = await page.element("#output_rightclick").innerText();
+    const output = await page.element('#output_rightclick').innerText();
     console.log(`await page.element("#output_rightclick").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -359,7 +359,7 @@ try {
     expect(events).toContain('contextmenu');
   }
 
-  // mouse move (btn_hover) 
+  // mouse move (btn_hover)
   {
     const btn_id = 'btn_hover';
     const btn = await page.element().filter({ name: 'id', value: btn_id }).first().get();
@@ -367,10 +367,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -380,7 +380,7 @@ try {
       await mouse.click(${x}, ${y});
     `);
 
-    const output = await page.element("#output_hover").innerText();
+    const output = await page.element('#output_hover').innerText();
     console.log(`await page.element("#output_hover").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -398,7 +398,7 @@ try {
     expect(btn_drag).not.toBeNullOrUndefined();
 
     await btn_drag.scrollIntoViewIfNeeded();
-    console.log("await btn_drag.scrollIntoViewIfNeeded()");
+    console.log('await btn_drag.scrollIntoViewIfNeeded()');
 
     const btn_id_drop = 'btn_drop';
     const btn_drop = await page.element().filter({ name: 'id', value: btn_id_drop }).first().get();
@@ -406,16 +406,16 @@ try {
     expect(btn_drop).not.toBeNullOrUndefined();
 
     await btn_drop.scrollIntoViewIfNeeded();
-    console.log("await btn_drop.scrollIntoViewIfNeeded()");
+    console.log('await btn_drop.scrollIntoViewIfNeeded()');
 
     const boundingBox_drag = await btn_drag.boundingBox();
-    console.log("await btn_drag.boundingBox()", boundingBox_drag);
+    console.log('await btn_drag.boundingBox()', boundingBox_drag);
 
     const x_drag = boundingBox_drag.x + boundingBox_drag.width / 2;
     const y_drag = boundingBox_drag.y + boundingBox_drag.height / 2;
 
     const boundingBox_drop = await btn_drop.boundingBox();
-    console.log("await btn_drop.boundingBox()", boundingBox_drop);
+    console.log('await btn_drop.boundingBox()', boundingBox_drop);
 
     const x_drop = boundingBox_drop.x + boundingBox_drop.width / 2;
     const y_drop = boundingBox_drop.y + boundingBox_drop.height / 2;
@@ -438,7 +438,7 @@ try {
       await mouse.up();
     `);
 
-    const output = await page.element("#output_drag_drop").innerText();
+    const output = await page.element('#output_drag_drop').innerText();
     console.log(`await page.element("#output_drag_drop").innerText()`, output.slice(0, 10));
     expect(output.length > 0).toBeTruthy();
 
@@ -462,10 +462,10 @@ try {
     expect(btn).not.toBeNullOrUndefined();
 
     await btn.scrollIntoViewIfNeeded();
-    console.log("await btn.scrollIntoViewIfNeeded()");
+    console.log('await btn.scrollIntoViewIfNeeded()');
 
     const boundingBox = await btn.boundingBox();
-    console.log("await btn.boundingBox()", boundingBox);
+    console.log('await btn.boundingBox()', boundingBox);
 
     const x = boundingBox.x + boundingBox.width / 2;
     const y = boundingBox.y + boundingBox.height / 2;
@@ -473,16 +473,14 @@ try {
     await mouse.click(x, y);
     console.log(` await mouse.click(${x}, ${y}); `);
   }
-}
-catch (error) {
+} catch (error) {
   throw error;
-}
-finally {
+} finally {
   await browser.detachDebugger();
-  console.log("await browser.detachDebugger()");
+  console.log('await browser.detachDebugger()');
   await page.bringToFront();
 }
 
-console.log("mouse <=");
+console.log('mouse <=');
 
-console.warn("all passed");
+console.warn('all passed');

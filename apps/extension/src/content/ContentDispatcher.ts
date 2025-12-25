@@ -1,0 +1,99 @@
+/**
+ * @copyright 2025 Sagi All Rights Reserved.
+ * @author: Sagi <sagibrant@hotmail.com>
+ * @license Apache-2.0
+ * @file ContentDispatcher.ts
+ * @description 
+ * Dispatching the message to the handlers or forward via channels using routing map
+ * 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { MsgUtils, RtidUtils, Utils, IChannel, Dispatcher, Message, Rtid} from "@gogogo/shared";
+import { ExtensionRuntimeChannel } from "../channels/ExtensionRuntimeChannel";
+import { ContentUtils } from "./ContentUtils";
+
+class ContentToBackgroundChannel extends ExtensionRuntimeChannel { }
+
+export class ContentDispatcher extends Dispatcher {
+  private readonly _contentToBackgroundChannel: ContentToBackgroundChannel;
+  private _frameSenderInfo: unknown;
+
+  constructor() {
+    super('content');
+
+    // id : "ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // origin: "chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj"
+    // bg url: 'chrome-extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/background.js'
+    const extensionId = chrome.runtime.id;
+    const extensionOrigin = `chrome-extension://${extensionId}`;
+    const backgroundUrl = `chrome-extension://${extensionId}/background.js`
+    this._contentToBackgroundChannel = new ContentToBackgroundChannel();
+    this._contentToBackgroundChannel.on('message', ({ msg, sender, responseCallback }) => {
+      if (!MsgUtils.isMessage(msg)) {
+        this.logger.error('Invalid message format: msg:', msg, ' sender:', sender);
+        return;
+      }
+      const { id, origin, url } = sender as any;
+      if (id !== extensionId || (origin !== extensionOrigin && url !== backgroundUrl)) {
+        this.logger.error('Invalid message sender: msg:', msg, ' sender:', sender);
+        return;
+      }
+      const frameRtid = Utils.deepClone(msg.data.dest);
+      frameRtid.object = -1;
+      if ((msg.type === 'event' || msg.type === 'request') && !RtidUtils.isRtidEqual(frameRtid, ContentUtils.frame.rtid)) {
+        this.logger.error('Invalid message dest: msg:', msg, ' sender:', sender, ' frameRtid:', ContentUtils.frame.rtid);
+        return;
+      }
+
+      this.onMessage(msg, sender, responseCallback);
+    });
+  }
+
+  async init() {
+    this._frameSenderInfo = await this.getConfig(RtidUtils.getAgentRtid(), 'sender');
+    const frameId = (this._frameSenderInfo as any).frameId as number;
+    const tabId = ((this._frameSenderInfo as any).tab as any).id as number;
+    await ContentUtils.frame.init(tabId, frameId);
+    this.logger.debug("init: ==== frame sender:", this._frameSenderInfo);
+    const isRecording = await this.getConfig(RtidUtils.getBrowserRtid(), 'isRecording');
+    if (isRecording) {
+      await ContentUtils.frame.startRecording();
+    }
+    this._contentToBackgroundChannel.startListening(true, false);
+  }
+
+  async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<any> {
+    const reqMsgData = MsgUtils.createMessageData('config', rtid, { name: 'get', params: { name: propName } });
+    const resMsgData = await this.sendRequest(reqMsgData, timeout);
+    if (resMsgData.status === 'OK') {
+      const propValue = Utils.getItem(propName, resMsgData.result as any);
+      return propValue;
+    }
+    else {
+      throw new Error(resMsgData.error || `get config value of ${propName} failed`);
+    }
+  }
+
+  protected override getChannel(msg: Message): IChannel {
+    const dest = msg.data.dest;
+    let contextType = RtidUtils.getRtidContextType(dest);
+    if (contextType !== 'MAIN') {
+      return this._contentToBackgroundChannel;
+    }
+    else {
+      throw new Error(`Unsupported context type ${contextType}`);
+    }
+  }
+}

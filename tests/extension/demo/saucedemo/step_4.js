@@ -4,8 +4,8 @@
  * @license Apache-2.0
  * @file step_4.js
  * @description 4. Buy Bike Light & Fleece Jacket
- * 
- * 
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ const items = await page.element('div .inventory_item_description').all();
 const names = [/Bike Light/, /Fleece Jacket/];
 for (const item of items) {
   for (const name of names) {
-    if (await item.text(name).count() === 1 && await item.text('Add to cart').count() === 1) {
+    if ((await item.text(name).count()) === 1 && (await item.text('Add to cart').count()) === 1) {
       await item.text(name).highlight();
       await item.text('Add to cart').highlight();
       await item.text('Add to cart').click();

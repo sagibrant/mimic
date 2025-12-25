@@ -45,7 +45,6 @@
     "jsx": "preserve",                                  // Preserve JSX for Vue compiler
     "jsxImportSource": "vue",                           // Specify Vue as JSX import source
     "allowJs": true,
-    "plugins": [ { "name": "@vitejs/plugin-vue" } ]                // Use Vue TypeScript plugin for better integration
   },
   "include": ["./**/*.ts", "../../packages/extension/src/execution/Task.ts", "./**/*.js"],           // Include all TypeScript and Vue files
   "exclude": ["node_modules", "dist"]                   // Exclude node_modules and output directory
