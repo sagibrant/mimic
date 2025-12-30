@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build:clean": "rimraf dist",
-    "build:assets": "tsc && node dist/tests/extension/build-assets.js",
+    "build:assets": "tsc && node dist/src/build-assets.js",
     "build": "run-s build:clean build:assets --"
   },
   "author": "Sagi",
