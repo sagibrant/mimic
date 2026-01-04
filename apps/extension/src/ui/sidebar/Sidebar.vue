@@ -302,7 +302,7 @@ const initialValues = ref({
   nodeName: ''
 });
 const AddTaskNodeSchema = z.object({
-  nodeType: z.literal(['task', 'group'], { message: t('sidebar_btn_action_tree_add_node_dialog_input_type_invalid') }),
+  nodeType: z.enum(['task', 'group'], { message: t('sidebar_btn_action_tree_add_node_dialog_input_type_invalid') }),
   nodeName: z.string().min(1, { message: t('sidebar_btn_action_tree_add_node_dialog_input_name_invalid') })
 });
 const resolver = ref(zodResolver(AddTaskNodeSchema));

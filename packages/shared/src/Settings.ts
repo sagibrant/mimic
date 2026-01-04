@@ -31,6 +31,11 @@ export interface Settings {
     baseURL: string;
     models: string;
   };
+  aiVisionSettings: {
+    apiKey: string;
+    baseURL: string;
+    models: string;
+  };
   replaySettings: {
     attachDebugger: boolean;
     autoSync: boolean;
@@ -77,6 +82,14 @@ export class SettingUtils {
     if (check_aiSettings.some(c => !c)) {
       return false;
     }
+    const check_aiVisionSettings = [
+      typeof settings.aiVisionSettings.apiKey === 'string',
+      typeof settings.aiVisionSettings.baseURL === 'string',
+      typeof settings.aiVisionSettings.models === 'string',
+    ];
+    if (check_aiVisionSettings.some(c => !c)) {
+      return false;
+    }
 
     const check_replaySettings = [
       typeof settings.replaySettings.attachDebugger === 'boolean',
@@ -120,6 +133,11 @@ export class SettingUtils {
       storeURL: '',
       logLevel: 'WARN',
       aiSettings: {
+        baseURL: '',
+        apiKey: '',
+        models: ''
+      },
+      aiVisionSettings: {
         baseURL: '',
         apiKey: '',
         models: ''

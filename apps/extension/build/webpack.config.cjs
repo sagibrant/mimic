@@ -193,7 +193,11 @@ module.exports = (env) => {
           test: /\.ts$/,
           loader: 'ts-loader',
           options: {
-            appendTsSuffixTo: [/\.vue$/]
+            appendTsSuffixTo: [/\.vue$/],
+            transpileOnly: true,
+            compilerOptions: {
+              module: 'esnext'
+            }
           },
           exclude: /node_modules/, // Exclude node_modules to improve build performance
         },

@@ -38,16 +38,15 @@
         <div class="flex flex-row items-center justify-between gap-2">
           <!-- Left Controls -->
           <div class="flex items-center gap-2">
-            <!-- Agent Mode Toggle -->
+            <!-- Chat Model Selection -->
             <FloatLabel class="flex items-center" variant="on">
-              <Select v-model="agentMode" inputId="agent-mode" :options="agentModes" optionLabel="label" size="small"
-                optionValue="value" class="w-22" :labelStyle="{ fontSize: '0.7rem' }" />
-              <label for="agent-mode">Mode</label>
+              <Select v-model="chatModel" inputId="model-select" :options="chatModelOptions" optionLabel="name"
+                size="small" optionValue="value" class="w-22" :labelStyle="{ fontSize: '0.7rem' }" />
+              <label for="model-select">Model</label>
             </FloatLabel>
-
-            <!-- Model Selection -->
+            <!-- Vision Model Selection -->
             <FloatLabel class="flex items-center" variant="on">
-              <Select v-model="selectedModel" inputId="model-select" :options="modelOptions" optionLabel="name"
+              <Select v-model="visionModel" inputId="model-select" :options="visionModelOptions" optionLabel="name"
                 size="small" optionValue="value" class="w-22" :labelStyle="{ fontSize: '0.7rem' }" />
               <label for="model-select">Model</label>
             </FloatLabel>
@@ -75,6 +74,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue';
+import { Jimp } from "jimp";
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import FloatLabel from 'primevue/floatlabel';
@@ -96,15 +96,14 @@ import { SidebarUtils } from './SidebarUtils';
 
 // State
 const userInput = ref('');
-const agentMode = ref('agent'); // Default to chat mode
-const selectedModel = ref('auto'); // Default to auto model
+const chatModel = ref('auto'); // Default to auto model
+const visionModel = ref('auto'); // Default to auto model
 
 // Options
-const agentModes = ref([
-  { label: 'Agent', value: 'agent' },
-  { label: 'Chat', value: 'chat' },
+const chatModelOptions = ref<{ name: string; value: string }[]>([
+  { name: 'Auto', value: 'auto' }
 ]);
-const modelOptions = ref<{ name: string; value: string }[]>([
+const visionModelOptions = ref<{ name: string; value: string }[]>([
   { name: 'Auto', value: 'auto' }
 ]);
 
@@ -144,6 +143,9 @@ const handleInspect = async () => {
     const result = await SidebarUtils.engine.runScript("let a = 1; console.log('debug log', a); return 100;");
     console.log('runScript', result);
   }
+  {
+    await identifyElementsWithVisionModel();
+  }
 };
 
 // const handleVoiceInput = () => {
@@ -171,6 +173,167 @@ const loadAPIDefinition = async () => {
   }
   const doc = await response.text();
   return doc;
+}
+
+const identifyElementsWithVisionModel = async (userPrompt?: string) => {
+  try {
+    // Use the helper function to get an appropriate vision model
+    const visionModel = await getModelForTask('vision');
+    const base64Image = await SidebarUtils.engine.capturePage();// startWith data:image/jpeg;base64,
+    const base64Prefix = 'data:image/jpeg;base64,';
+    // use Jimp to load the base64Image and get the image size
+    const base64str = base64Image.startsWith(base64Prefix) ? base64Image.slice(base64Prefix.length) : base64Image;
+    // Browser-compatible base64 decoding (Buffer is Node.js only)
+    const binaryString = atob(base64str);
+    const imageBuffer = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      imageBuffer[i] = binaryString.charCodeAt(i);
+    }
+    const jimpImage = await Jimp.fromBuffer(imageBuffer.buffer);
+    if (!jimpImage) return;
+
+    const systemPrompt = `
+## Role:
+You are an AI assistant that helps identify UI elements.
+
+## Objective:
+- Identify elements in screenshots that match the user's description.
+- Provide the coordinates of the element that matches the user's description.
+
+## Coordinate System:
+- ALL coordinates (x, y, width, height) MUST be relative to the provided screenshot image
+- The screenshot dimensions are: width=${jimpImage.width}, height=${jimpImage.height}
+- x must be between 0 and ${jimpImage.width - 1}
+- y must be between 0 and ${jimpImage.height - 1}
+- width must be positive and x + width must not exceed ${jimpImage.width}
+- height must be positive and y + height must not exceed ${jimpImage.height}
+- NEVER return coordinates outside these bounds
+
+## Output Requirements:
+- Return a maximum of 30 elements. If more elements exist, prioritize the most significant and relevant ones
+- Ensure bounding boxes accurately encompass the entire element
+
+## Output Format:
+\`\`\`json
+{
+  "elements": {
+    "type": string,
+    "description": string,
+    "x": number,
+    "y": number,
+    "width": number,
+    "height": number
+  }[], 
+  "errors"?: string[]
+}
+\`\`\`
+
+
+Fields:
+* \`elements\`: Array of UI elements found in the screenshot that match the user's description (maximum 30 items)
+* \`type\`: The type of the element (e.g., button, input, link, checkbox, dropdown, image, etc.)
+* \`description\`: A concise description of the element's purpose or content
+* \`x\`: The left coordinate of the element's bounding box.
+* \`y\`: The top coordinate of the element's bounding box.
+* \`width\`: The width of the element's bounding box.
+* \`height\`: The height of the element's bounding box.
+* \`errors\` is an optional array of error messages (if any)
+
+For example, when an element is found:
+\`\`\`json
+{
+  "elements": [{
+    "type": "button"
+    "description": "Login button"
+    "x": 50,
+    "y": 100,
+    "width": 100,
+    "height": 30
+  },{
+      "type": "input",
+      "description": "Email input field",
+      "x": 50,
+      "y": 140,
+      "width": 200,
+      "height": 35
+  }],
+  "errors": []
+}
+\`\`\`
+
+When no element is found:
+\`\`\`json
+{
+  "elements": [],
+  "errors": ["I can see ..., but {some element} is not found"]
+}
+\`\`\`
+`;
+    const UIElement = z.object({
+      type: z.string().describe("The type of the element (button, editor, link, image, movie, etc)."),
+      description: z.string().describe("The description of the element."),
+      x: z.number().describe("The left of the element bounding box"),
+      y: z.number().describe("The top of the element bounding box"),
+      width: z.number().describe("The width of the element bounding box"),
+      height: z.number().describe("The width of the element bounding box"),
+    });
+
+    const UIElementDetails = z.object({
+      elements: z.array(UIElement).describe("array of the elements"),
+      errors: z.array(z.string()).describe("array of error messages")
+    });
+
+    const messages = [{
+      role: "system",
+      content: systemPrompt
+    }, {
+      role: "user",
+      content: [
+        {
+          type: "text", text: userPrompt
+            || `This is the screenshot (dimensions: ${jimpImage.width}x${jimpImage.height}).
+Please identify all clickable and editable UI elements. 
+Return the results in the specified JSON schema format, limiting to the 30 most significant elements.` },
+        {
+          type: "image_url",
+          image_url: {
+            url: base64Image
+          }
+        }
+      ]
+    }];
+
+    console.log("visionModel.invoke ==>", messages);
+    const response = await visionModel.withStructuredOutput(UIElementDetails).invoke(messages);
+    console.log("visionModel.invoke <==", response);
+
+    if (response && response.elements) {
+      response.elements = response.elements.map(elem => {
+        let { x, y, width, height } = elem;
+
+        if (x >= jimpImage.width || y >= jimpImage.height) {
+          console.warn(`Element coordinates out of bounds: x=${x}, y=${y}, image size=${jimpImage.width}x${jimpImage.height}`);
+          x = Math.min(x, jimpImage.width - 1);
+          y = Math.min(y, jimpImage.height - 1);
+        }
+
+        if (x + width > jimpImage.width) {
+          width = jimpImage.width - x;
+        }
+
+        if (y + height > jimpImage.height) {
+          height = jimpImage.height - y;
+        }
+
+        return { ...elem, x, y, width, height };
+      });
+    }
+
+    return response;
+  } catch (error: any) {
+    console.error('Error in identifyElementsWithVision:', error);
+    return null;
+  }
 }
 
 /** ==================================================================================================================== */
@@ -231,53 +394,12 @@ const capturePage = tool(
 );
 
 const identifyElementsWithVision = tool(
-  async ({ base64Image, prompt }) => {
-    // Use the helper function to get an appropriate vision model
-    const visionModel = await getModelForTask('vision');
-
-    const message = {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: prompt || "Analyze this image and identify all interactive elements (buttons, links, input fields, dropdowns, etc.). For each element, provide the type, the coordinates (x, y) and dimensions (width, height) in the format: {type, x, y, width, height}. Return the information as a JSON array of elements with their properties."
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: `data:image/jpeg;base64,${base64Image}`
-          }
-        }
-      ]
-    };
-
+  async ({ prompt }) => {
     try {
-      const response = await visionModel.invoke([message]);
-      // Handle the response content properly
-      const content = typeof response.content === 'string' ? response.content :
-        Array.isArray(response.content) ? response.content.map(c =>
-          typeof c === 'string' ? c : c.text || '').join(' ') :
-          String(response.content);
-
-      console.log('identifyElementsWithVision response:', content);
-
-      // Try to extract JSON from the response
-      let elements = [];
-      const jsonMatch = content.match(/\[.*\]/s); // Look for JSON array in response
-      if (jsonMatch) {
-        try {
-          elements = JSON.parse(jsonMatch[0]);
-        } catch (e) {
-          console.error('Error parsing JSON from vision model response:', e);
-          // If JSON parsing fails, return the raw content
-          return [content, { rawResponse: content }];
-        }
-      } else {
-        // If no JSON found, return the raw content
-        return [content, { rawResponse: content }];
-      }
-
-      return [`Identified elements: ${JSON.stringify(elements)}`, { elements }];
+      if (!prompt) return;
+      const elements = await identifyElementsWithVisionModel(prompt);
+      const content = `The identified elements: ${JSON.stringify(elements)}`;
+      return [content, elements];
     } catch (error: any) {
       console.error('Error in identifyElementsWithVision:', error);
       return [`Error analyzing image: ${error.message}`, { error: error.message }];
@@ -288,7 +410,6 @@ const identifyElementsWithVision = tool(
     description: "Analyze a page screenshot using computer vision to identify interactive elements and their positions",
     responseFormat: 'content_and_artifact',
     schema: z.object({
-      base64Image: z.string().describe("The base64 encoded image of the page screenshot"),
       prompt: z.string().optional().describe("Custom prompt for the vision model")
     })
   }
@@ -300,7 +421,8 @@ const getElementFromPoint = tool(
     const content = `The element in the given position is: 
 \`\`\`json
 ${JSON.stringify(elem)}
-\`\`\``;
+\`\`\`
+`;
     console.log('getElementFromPoint', elem);
     return [content, elem];
   },
@@ -353,8 +475,8 @@ const handleToolErrors = createMiddleware({
 });
 
 const createSummarizationMiddleware = () => {
-  let modelName = selectedModel.value;
-  const models = modelOptions.value.filter(m => m.value !== 'auto');
+  let modelName = chatModel.value;
+  const models = chatModelOptions.value.filter(m => m.value !== 'auto');
   if (modelName === 'auto') {
     modelName = models[0].value;
   }
@@ -367,20 +489,21 @@ const createSummarizationMiddleware = () => {
 
 // Helper function to get an appropriate model for a specific task
 const getModelForTask = async (task: 'general' | 'vision' = 'general') => {
-  const settings = await AIUtils.getAISettings();
-  let modelName = selectedModel.value;
+  if (task === 'general' && chatModel.value.length <= 1) {
+    throw new Error('No valid model');
+  }
+  if (task === 'vision' && visionModelOptions.value.length <= 1) {
+    throw new Error('No valid model');
+  }
 
-  const models = modelOptions.value.filter(m => m.value !== 'auto');
-
+  const settings = task === 'vision' ? await AIUtils.getAIVisionSettings() : await AIUtils.getAISettings();
+  let modelName = task === 'vision' ? visionModel.value : chatModel.value;
   if (modelName === 'auto') {
-    modelName = models[0].value;
+    const options = (task === 'vision' ? visionModelOptions.value : chatModelOptions.value).filter(m => m.value !== 'auto');
+    if (options.length > 0) {
+      modelName = options[0].value;
+    }
   }
-
-  // If we need a vision model specifically and the user hasn't selected one
-  if (task === 'vision') {
-    modelName = 'gpt-4-vision';
-  }
-
   return new ChatOpenAI({
     model: modelName,
     configuration: {
@@ -445,15 +568,24 @@ const handleKeyDown = (event: KeyboardEvent) => {
 };
 
 onMounted(async () => {
-  const settings = await AIUtils.getAISettings();
-  const models = settings.models.split(';').filter(m => m.trim().length > 0);
-  if (models.length > 0) {
-    for (const model of models) {
-      modelOptions.value.push({ name: model, value: model });
+  const chatAISettings = await AIUtils.getAISettings();
+  const chatModels = chatAISettings.models.split(';').filter(m => m.trim().length > 0);
+  if (chatModels.length > 0) {
+    for (const model of chatModels) {
+      chatModelOptions.value.push({ name: model, value: model });
     }
-    selectedModel.value = modelOptions.value[0].value;
+    chatModel.value = chatModelOptions.value[0].value;
   }
   chatMessages.value.push(new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?'));
+
+  const visionAISettings = await AIUtils.getAIVisionSettings();
+  const visionModels = visionAISettings.models.split(';').filter(m => m.trim().length > 0);
+  if (visionModels.length > 0) {
+    for (const model of visionModels) {
+      visionModelOptions.value.push({ name: model, value: model });
+    }
+    visionModel.value = visionModelOptions.value[0].value;
+  }
 });
 </script>
 

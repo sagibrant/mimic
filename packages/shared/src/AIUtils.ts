@@ -619,19 +619,28 @@ ${inspectedNode}
   static async getAISettings() {
     const settings = { ...SettingUtils.getSettings().aiSettings };
     if (AIUtils.IsUsingDemoAI()) {
-      settings.baseURL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
-      settings.apiKey = 'sk-62ddda06266c45f18ae7aa3c69ee8e24';
+      settings.baseURL = 'https://ark.cn-beijing.volces.com/api/v3';
+      settings.apiKey = '9832d4b6-b0fd-441a-9e38-f90d7ccce4a7';
       const models = [
-        'qwen3-coder-30b-a3b-instruct',
-        'qwen3-coder-480b-a35b-instruct',
-        'qwen-coder-plus',
-        //'qwen-coder-plus-latest',
-        'qwen-coder-turbo',
-        //'qwen-coder-turbo-latest',
-        //'qwen3-coder-flash',
-        //'qwen3-coder-plus',
-        //'qwen3-max',
-        //'qwen-flash'
+        'doubao-1.5-vision-lite-250315',
+        'doubao-seed-1-6-flash-250828'
+      ];
+      settings.models = models.join(';');
+    }
+    else if (settings.apiKey) {
+      settings.apiKey = await CryptoUtil.decrypt(settings.apiKey);
+    }
+    return settings;
+  }
+
+  static async getAIVisionSettings() {
+    const settings = { ...SettingUtils.getSettings().aiVisionSettings };
+    if (AIUtils.IsUsingDemoAI()) {
+      settings.baseURL = 'https://ark.cn-beijing.volces.com/api/v3';
+      settings.apiKey = '9832d4b6-b0fd-441a-9e38-f90d7ccce4a7';
+      const models = [
+        'doubao-1.5-vision-lite-250315',
+        'doubao-seed-1-6-flash-250828'
       ];
       settings.models = models.join(';');
     }

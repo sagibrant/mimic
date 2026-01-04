@@ -94,6 +94,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "autoprefixer": "^10.4.23",
     "codemirror": "^6.0.2",
+    "jimp": "^1.6.0",
     "jshint": "^2.13.6",
     "langchain": "^1.2.3",
     "openai": "^6.4.0",
