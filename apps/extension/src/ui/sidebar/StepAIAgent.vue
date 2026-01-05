@@ -210,7 +210,7 @@ You are an AI assistant that helps identify UI elements.
 - NEVER return coordinates outside these bounds
 
 ## Output Requirements:
-- Return a maximum of 30 elements. If more elements exist, prioritize the most significant and relevant ones
+- Return a maximum of 20 elements. If more elements exist, prioritize the most significant and relevant ones
 - Ensure bounding boxes accurately encompass the entire element
 
 ## Output Format:
@@ -293,7 +293,7 @@ When no element is found:
           type: "text", text: userPrompt
             || `This is the screenshot (dimensions: ${jimpImage.width}x${jimpImage.height}).
 Please identify all clickable and editable UI elements. 
-Return the results in the specified JSON schema format, limiting to the 30 most significant elements.` },
+Return the results in the specified JSON schema format, limiting to the 20 most significant elements.` },
         {
           type: "image_url",
           image_url: {
@@ -511,9 +511,9 @@ const getModelForTask = async (task: 'general' | 'vision' = 'general') => {
       apiKey: settings.apiKey,
       dangerouslyAllowBrowser: true,
     },
-    temperature: task === 'vision' ? 0.2 : 0.5, // Lower temperature for vision tasks for more consistent results
+    temperature: task === 'vision' ? 0 : 0.5, // Lower temperature for vision tasks for more consistent results
     topP: 0.8,
-    maxTokens: task === 'vision' ? 1024 : 4096, // Smaller for vision tasks
+    maxTokens: 4096,
     streaming: false,
   });
 };

@@ -55,6 +55,6 @@
     "allowJs": true,
   },
   // "compileOnSave": true,
-  "include": ["packages", "apps"],           // Include all TypeScript and Vue files
-  "exclude": ["node_modules", "dist"]                   // Exclude node_modules and output directory
+  // "include": ["packages", "apps"],           // Include all TypeScript and Vue files
+  "exclude": ["**/node_modules", "**/dist"]                   // Exclude node_modules and output directory
 }

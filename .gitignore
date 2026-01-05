@@ -10,6 +10,11 @@ pnpm-lock.yaml
 .DS_Store
 .log
 .rollup.cache
+.temp
+.output
+
+## ts build
+tsconfig.tsbuildinfo
 
 # IDE
 .vscode

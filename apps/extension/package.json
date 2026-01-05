@@ -105,7 +105,7 @@
     "thememirror": "^2.0.1",
     "vue": "^3.5.18",
     "vue-codemirror": "^6.1.1",
-    "zod": "^4.2.1",
+    "zod": "^4.3.5",
     "zone.js": "^0.16.0"
   },
   "packageManager": "pnpm@10.26.2"

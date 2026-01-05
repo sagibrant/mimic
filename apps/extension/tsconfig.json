@@ -11,5 +11,12 @@
     "types": ["chrome", "firefox-webext-browser"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
-  "exclude": ["node_modules", "dist"]
+  "references": [
+    {
+      "path": "../../packages/shared"
+    },
+    {
+      "path": "../../packages/web"
+    }
+  ]
 }
