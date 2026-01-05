@@ -164,8 +164,6 @@ const handleInspect = async () => {
 //   // Mock voice input functionality
 // };
 
-const checkpointer = new MemorySaver();
-
 const UIElement = z.object({
   type: z.string().describe("The type of the element (e.g., button, input, link, checkbox, dropdown, image, etc.)"),
   description: z.string().describe("A concise description of the element's purpose or content."),
@@ -349,14 +347,14 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
 /** ==================================================================================================================== */
 /** ================================================= Define the tools ================================================= */
 /** ==================================================================================================================== */
-const getAPIDocument = tool(
+const getGogogoAPIDocument = tool(
   async () => {
     const doc = await loadAPIDocument() || '';
-    console.log('getAPIDocument ===', doc);
+    console.log('getGogogoAPIDocument ===', doc);
     return doc;
   },
   {
-    name: "get_api_document",
+    name: "get_gogogo_api_document",
     description: "Get the API documentation for Gogogo extension"
   }
 );
@@ -370,6 +368,26 @@ const getGogogoAPI = tool(
   {
     name: "get_gogogo_api",
     description: "Get the TypeScript API definitions for Gogogo extension"
+  }
+);
+
+const runGogogoScript = tool(
+  async ({ script }) => {
+    const result = await SidebarUtils.engine.runScript(script);
+    console.log('runScript', result);
+    let content = 'The script run passed';
+    if (result !== undefined && result !== null) {
+      content = `The script run completed with result: ${typeof result === 'object' ? JSON.stringify(result) : result}`;
+    }
+    return [content, result];
+  },
+  {
+    name: "run_gogogo_script",
+    description: "Run the script in Gogogo extension",
+    responseFormat: 'content_and_artifact',
+    schema: z.object({
+      script: z.string().describe("The script to run")
+    })
   }
 );
 
@@ -420,8 +438,21 @@ const getElementFromPoint = tool(
     const y = (bbox[1] + bbox[3]) / 2;
     const elem = await SidebarUtils.engine.getElementFromPoint(x, y);
     const content = `The element in the given position is: 
-\`\`\`json
-${JSON.stringify(elem)}
+\`\`\`javascript
+${elem.pageScript}.${elem.elementScript}
+\`\`\`
+The example code for this element is:
+\`\`\`javascript
+// click with event
+await ${elem.pageScript}.${elem.elementScript}.click();
+// click with cdp
+await ${elem.pageScript}.${elem.elementScript}.click({mode: 'cdp'});
+// set value with event
+await ${elem.pageScript}.${elem.elementScript}.fill('abcde');
+// set value with cdp
+await ${elem.pageScript}.${elem.elementScript}.fill('abcde', {mode: 'cdp'});
+// highlight the element
+await ${elem.pageScript}.${elem.elementScript}.highlight();
 \`\`\`
 `;
     console.log('getElementFromPoint', elem, type, description, bbox);
@@ -432,26 +463,6 @@ ${JSON.stringify(elem)}
     description: "Get the element description from the give position {x, y, width, height}",
     responseFormat: 'content_and_artifact',
     schema: UIElement
-  }
-);
-
-const runScript = tool(
-  async ({ script }) => {
-    const result = await SidebarUtils.engine.runScript(script);
-    console.log('runScript', result);
-    let content = 'The script run passed';
-    if (result !== undefined && result !== null) {
-      content = `The script run completed with result: ${typeof result === 'object' ? JSON.stringify(result) : result}`;
-    }
-    return [content, result];
-  },
-  {
-    name: "run_script",
-    description: "Run the script in Gogogo",
-    responseFormat: 'content_and_artifact',
-    schema: z.object({
-      script: z.string().describe("The script to run")
-    })
   }
 );
 
@@ -470,17 +481,25 @@ const handleToolErrors = createMiddleware({
   },
 });
 
-const createSummarizationMiddleware = () => {
-  let modelName = chatModel.value;
-  const models = chatModelOptions.value.filter(m => m.value !== 'auto');
-  if (modelName === 'auto') {
-    modelName = models[0].value;
-  }
-  return summarizationMiddleware({
-    model: modelName,
-    maxTokensBeforeSummary: 4000,
-    messagesToKeep: 20,
-  });
+const getSystemPrompt = () => {
+  const systemPrompt = `## Role:
+You are a versatile professional in web testing and automation. Your outstanding contributions will impact the user experience of billions of users.
+
+## Objective:
+* You need to analyze the user's request and make plans
+* You need to analyze the current page's screenshot and decide what to do next
+* You need to write script and run script with Gogogo APIs to achieve user's task goal
+
+## Important
+* You are working with the Gogogo extension, and you can automate/test the browser pages by running Gogogo scripts in Gogogo extension
+* You can get the Gogogo api definitions using tool get_gogogo_api
+* You can get the Gogogo api document with examples using tool get_gogogo_api_document
+* You can run the Gogogo scripts using tool run_gogogo_script
+* You can identify the page elements using tool identify_elements_with_vision
+* You can get the element using the tool get_element_from_point based on the returned result from tool identify_elements_with_vision
+
+`;
+  return systemPrompt;
 };
 
 // Helper function to get an appropriate model for a specific task
@@ -514,24 +533,27 @@ const getModelForTask = async (task: 'general' | 'vision' = 'general') => {
   });
 };
 
+const checkpointer = new MemorySaver();
+
 const handleSend = async () => {
   if (!userInput.value.trim()) {
     return;
   }
-
-  const baseModel = await getModelForTask('general');
-
-  const agent = createAgent({
-    model: baseModel,
-    tools: [getPageInfo, identifyElementsWithVision, getElementFromPoint, getAPIDocument, getGogogoAPI, runScript],
-    middleware: [handleToolErrors, createSummarizationMiddleware()] as const,
-    checkpointer,
-    systemPrompt: ""
-  });
   const userMessage = new HumanMessage(userInput.value);
   chatMessages.value.push(userMessage);
   console.log('Sending message:', chatMessages.value);
-
+  const baseModel = await getModelForTask('general');
+  const agent = createAgent({
+    model: baseModel,
+    tools: [getPageInfo, identifyElementsWithVision, getElementFromPoint, getGogogoAPIDocument, getGogogoAPI, runGogogoScript],
+    middleware: [handleToolErrors, summarizationMiddleware({
+      model: baseModel,
+      maxTokensBeforeSummary: 4000,
+      messagesToKeep: 20,
+    })] as const,
+    checkpointer,
+    systemPrompt: getSystemPrompt()
+  });
   const result = await agent.invoke({
     messages: userInput.value
   }, {
