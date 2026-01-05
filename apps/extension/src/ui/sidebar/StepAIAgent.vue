@@ -140,11 +140,22 @@ const handleInspect = async () => {
     console.log("getElementFromPoint(415, 355.875, 64, 64)", elem);
   }
   {
+    const elem = await SidebarUtils.engine.getElementFromPoint(28, 34);
+    console.log("getElementFromPoint(28, 34)", elem);
+  }
+  {
     const result = await SidebarUtils.engine.runScript("let a = 1; console.log('debug log', a); return 100;");
     console.log('runScript', result);
   }
   {
-    await identifyElementsWithVisionModel();
+    const result = await identifyElementsWithVisionModel();
+    if (!result) return;
+    for (const element of result.elements) {
+      const elem = await SidebarUtils.engine.getElementFromPoint((element.bbox[0] + element.bbox[2]) / 2, (element.bbox[1] + element.bbox[3]) / 2);
+      console.log("element-", element, " in ", element.bbox, " is ", elem);
+      const script = `await ${elem.pageScript}.${elem.elementScript}.highlight();`;
+      await SidebarUtils.engine.runScript(script);
+    }
   }
 };
 
@@ -154,6 +165,22 @@ const handleInspect = async () => {
 // };
 
 const checkpointer = new MemorySaver();
+
+const UIElement = z.object({
+  type: z.string().describe("The type of the element (e.g., button, input, link, checkbox, dropdown, image, etc.)"),
+  description: z.string().describe("A concise description of the element's purpose or content."),
+  bbox: z.array(z.number()).describe("The bounding box of the element [xmin, ymin, xmax, ymax]")
+});
+
+const UIPageDetails = z.object({
+  summary: z.string().describe("The summary of the main topic of the screenshot (maximum 50 words)"),
+  width: z.number().describe("The width of the screenshot"),
+  height: z.number().describe("The height of the screenshot"),
+  elements: z.array(UIElement).describe("Array of UI elements found in the screenshot that match the user's description (maximum 20 items)"),
+  errors: z.array(z.string()).describe("Optional array of error messages (if any)")
+});
+
+// type UIElementType = z.infer<typeof UIElement>;
 
 const loadAPIDocument = async () => {
   const docURL = chrome.runtime.getURL('assets/docs/README.md');
@@ -262,19 +289,7 @@ When no element is found:
 }
 \`\`\`
 `;
-    const UIElement = z.object({
-      type: z.string().describe("The type of the element (e.g., button, input, link, checkbox, dropdown, image, etc.)"),
-      description: z.string().describe("A concise description of the element's purpose or content."),
-      bbox: z.array(z.number()).describe("The bounding box of the element [xmin, ymin, xmax, ymax]")
-    });
 
-    const UIPageDetails = z.object({
-      summary: z.string().describe("The summary of the main topic of the screenshot (maximum 50 words)"),
-      width: z.number().describe("The width of the screenshot"),
-      height: z.number().describe("The height of the screenshot"),
-      elements: z.array(UIElement).describe("Array of UI elements found in the screenshot that match the user's description (maximum 20 items)"),
-      errors: z.array(z.string()).describe("Optional array of error messages (if any)")
-    });
 
     const messages = [{
       role: "system",
@@ -304,6 +319,8 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
     if (response && response.elements) {
       const width = jimpImage.width;
       const height = jimpImage.height;
+      response.width = Math.round((response.width * width) / 1000);
+      response.height = Math.round((response.height * height) / 1000);
       response.elements = response.elements.map(elem => {
         // x1, y1, x2, y2 -> 0-1000
         const bbox = [
@@ -372,27 +389,16 @@ const getPageInfo = tool(
   }
 );
 
-const capturePage = tool(
-  async () => {
-    const base64ImgString = await SidebarUtils.engine.capturePage();
-    const content = `The page screenshot in base64 format: ${base64ImgString}`;
-    console.log('capturePage', base64ImgString);
-    return [content, { base64ImgString }];
-  },
-  {
-    name: "capture_page",
-    description: "Capture the visible area of the current page",
-    responseFormat: 'content_and_artifact'
-  }
-);
-
 const identifyElementsWithVision = tool(
-  async ({ prompt }) => {
+  async ({ userPrompt }) => {
     try {
-      if (!prompt) return;
-      const elements = await identifyElementsWithVisionModel(prompt);
-      const content = `The identified elements: ${JSON.stringify(elements)}`;
-      return [content, elements];
+      const result = await identifyElementsWithVisionModel(userPrompt);
+      const content = `The identified result for this page: 
+\`\`\`json
+${JSON.stringify(result)}
+\`\`\`
+`;
+      return [content, result];
     } catch (error: any) {
       console.error('Error in identifyElementsWithVision:', error);
       return [`Error analyzing image: ${error.message}`, { error: error.message }];
@@ -403,32 +409,29 @@ const identifyElementsWithVision = tool(
     description: "Analyze a page screenshot using computer vision to identify interactive elements and their positions",
     responseFormat: 'content_and_artifact',
     schema: z.object({
-      prompt: z.string().optional().describe("Custom prompt for the vision model")
+      userPrompt: z.string().optional().describe("Custom prompt for the vision model")
     })
   }
 );
 
 const getElementFromPoint = tool(
-  async ({ x, y, width, height }) => {
-    const elem = await SidebarUtils.engine.getElementFromPoint(x, y, width, height);
+  async ({ type, description, bbox }) => {
+    const x = (bbox[0] + bbox[2]) / 2;
+    const y = (bbox[1] + bbox[3]) / 2;
+    const elem = await SidebarUtils.engine.getElementFromPoint(x, y);
     const content = `The element in the given position is: 
 \`\`\`json
 ${JSON.stringify(elem)}
 \`\`\`
 `;
-    console.log('getElementFromPoint', elem);
+    console.log('getElementFromPoint', elem, type, description, bbox);
     return [content, elem];
   },
   {
     name: "get_element_from_point",
     description: "Get the element description from the give position {x, y, width, height}",
     responseFormat: 'content_and_artifact',
-    schema: z.object({
-      x: z.number().describe("The x of the element position in viewport"),
-      y: z.number().describe("The x of the element position in viewport"),
-      width: z.number().describe("The width of the element in viewport"),
-      height: z.number().describe("The height of the element in viewport"),
-    })
+    schema: UIElement
   }
 );
 
@@ -520,9 +523,10 @@ const handleSend = async () => {
 
   const agent = createAgent({
     model: baseModel,
-    tools: [getPageInfo, capturePage, identifyElementsWithVision, getElementFromPoint, getAPIDocument, getGogogoAPI, runScript],
+    tools: [getPageInfo, identifyElementsWithVision, getElementFromPoint, getAPIDocument, getGogogoAPI, runScript],
     middleware: [handleToolErrors, createSummarizationMiddleware()] as const,
     checkpointer,
+    systemPrompt: ""
   });
   const userMessage = new HumanMessage(userInput.value);
   chatMessages.value.push(userMessage);

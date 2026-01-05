@@ -622,8 +622,7 @@ ${inspectedNode}
       settings.baseURL = 'https://ark.cn-beijing.volces.com/api/v3';
       settings.apiKey = '9832d4b6-b0fd-441a-9e38-f90d7ccce4a7';
       const models = [
-        'doubao-seed-1-6-vision-250815',
-        'doubao-seed-1-6-flash-250828'
+        'doubao-seed-1-6-251015'
       ];
       settings.models = models.join(';');
     }
@@ -639,7 +638,6 @@ ${inspectedNode}
       settings.baseURL = 'https://ark.cn-beijing.volces.com/api/v3';
       settings.apiKey = '9832d4b6-b0fd-441a-9e38-f90d7ccce4a7';
       const models = [
-        'doubao-seed-1-6-vision-250815',
         'doubao-seed-1-6-flash-250828'
       ];
       settings.models = models.join(';');
