@@ -42,13 +42,13 @@
             <FloatLabel class="flex items-center" variant="on">
               <Select v-model="chatModel" inputId="model-select" :options="chatModelOptions" optionLabel="name"
                 size="small" optionValue="value" class="w-22" :labelStyle="{ fontSize: '0.7rem' }" />
-              <label for="model-select">Model</label>
+              <label for="model-select">Chat</label>
             </FloatLabel>
             <!-- Vision Model Selection -->
             <FloatLabel class="flex items-center" variant="on">
               <Select v-model="visionModel" inputId="model-select" :options="visionModelOptions" optionLabel="name"
                 size="small" optionValue="value" class="w-22" :labelStyle="{ fontSize: '0.7rem' }" />
-              <label for="model-select">Model</label>
+              <label for="model-select">Vision</label>
             </FloatLabel>
           </div>
 
@@ -107,9 +107,7 @@ const visionModelOptions = ref<{ name: string; value: string }[]>([
   { name: 'Auto', value: 'auto' }
 ]);
 
-
 const chatMessages = ref<BaseMessage[]>([]);
-// Refs
 const inputTextArea = ref<HTMLTextAreaElement | null>(null);
 
 // // tool functions
@@ -148,7 +146,7 @@ const handleInspect = async () => {
     console.log('runScript', result);
   }
   {
-    const result = await identifyElementsWithVisionModel();
+    const result = await analyzePageWithVisionModel();
     if (!result) return;
     for (const element of result.elements) {
       const elem = await SidebarUtils.engine.getElementFromPoint((element.bbox[0] + element.bbox[2]) / 2, (element.bbox[1] + element.bbox[3]) / 2);
@@ -200,9 +198,8 @@ const loadAPIDefinition = async () => {
   return doc;
 }
 
-const identifyElementsWithVisionModel = async (userPrompt?: string) => {
+const analyzePageWithVisionModel = async (userPrompt?: string) => {
   try {
-    // Use the helper function to get an appropriate vision model
     const visionModel = await getModelForTask('vision');
     const base64Image = await SidebarUtils.engine.capturePage();// startWith data:image/jpeg;base64,
     const base64Prefix = 'data:image/jpeg;base64,';
@@ -215,26 +212,29 @@ const identifyElementsWithVisionModel = async (userPrompt?: string) => {
       imageBuffer[i] = binaryString.charCodeAt(i);
     }
     const jimpImage = await Jimp.fromBuffer(imageBuffer.buffer);
-    if (!jimpImage) return;
+    if (!jimpImage) {
+      throw new Error('Failed to load image from buffer');
+    }
 
     const systemPrompt = `
 ## Role:
-You are an AI assistant that helps identify UI elements.
+You are an AI assistant that helps identify UI elements on a webpage screenshot based on the user's description.
 
 ## Objective:
-- Analyzes and summary the main topic of the screenshot
+- Analyzes and summary the content of the screenshot.
+- Analyzes and answers the user's question according to the content of the screenshot if any.
 - Identify elements in screenshot that match the user's description.
 - Provide the coordinates of the element that matches the user's description.
 
 ## Output Requirements:
 - Return a maximum of 20 elements. If more elements exist, prioritize the most significant and relevant ones
 - Ensure bounding boxes accurately encompass the entire element
-- Do not change the scale of the screenshot and make sure the coordinates of the elements are accurate.
 
 ## Output Format:
 \`\`\`json
 {
   "summary": string,
+  "answer": string,
   "width": number,
   "height": number,
   "elements": {
@@ -242,13 +242,13 @@ You are an AI assistant that helps identify UI elements.
     "description": string,
     "bbox": [number, number, number, number] // 2d bounding box for the element, should be [xmin, ymin, xmax, ymax]
   }[], 
-  "errors"?: string[]
+  "errors": string[]
 }
 \`\`\`
 
-
 Fields:
 * \`summary\`: The summary of the main topic of the screenshot (maximum 50 words)
+* \`answer\`: The answer to the user's question based on the content of the screenshot (if any, optional)
 * \`width\`: The width of the screenshot
 * \`height\`: The height of the screenshot
 * \`elements\`: Array of UI elements found in the screenshot that match the user's description (maximum 20 items)
@@ -257,37 +257,68 @@ Fields:
 * \`element.description\`: A concise description of the element's purpose or content
 * \`element.bbox\`: The bounding box of the element that matches the user's description
 
-For example, when an element is found:
-\`\`\`json
-{
-  "summary": "The login page",
-  "width": 1024,
-  "height": 1080,
-  "elements": [{
-    "type": "button"
-    "description": "Login button"
-    "bbox": [50, 100, 100, 120]
-  },{
-      "type": "input",
-      "description": "Email input field",
-      "bbox": [50, 140, 100, 160]
-  }],
-  "errors": []
-}
-\`\`\`
+## Examples:
+* Scenario 1: User login scenario
+  * When the user message is 
+  "I want to login the page. Check if the user is already logged in or not. If not, find the elements required for login action."
+  * Then the response could be:
+  \`\`\`json
+  {
+    "summary": "The login page",
+    "answer": "The user is not logged in.",
+    "width": 1024,
+    "height": 1080,
+    "elements": [{
+        "type": "input",
+        "description": "Email input field",
+        "bbox": [50, 140, 100, 160]
+    },{
+        "type": "input",
+        "description": "Password input field",
+        "bbox": [50, 160, 100, 180]
+    },{
+      "type": "button"
+      "description": "Login button"
+      "bbox": [80, 200, 100, 210]
+    }],
+    "errors": []
+  }
+  \`\`\`
 
-When no element is found:
-\`\`\`json
-{
-  "summary": "The login page",
-  "width": 1024,
-  "height": 1080,
-  "elements": [],
-  "errors": ["I can see ..., but {some element} is not found"]
-}
-\`\`\`
+* Scenario 2: Weather forecast scenario
+  * When the user message is 
+  "I want know what is the weather today according to this page."
+  * Then the response could be:
+  \`\`\`json
+  {
+    "summary": "The weather forecast page",
+    "answer": "The weather today is sunny with a high of 75°F and a low of 55°F.",
+    "width": 1024,
+    "height": 1080,
+    "elements": [],
+    "errors": []
+  }
+  \`\`\`
+
+* Scenario 3: Page does not contain the required elements
+  * When the user message is 
+  "I want to buy a flight ticket from New York to San Francisco. Find the elements required for this action."
+  * Then the response could be:
+  When no element is found:
+  \`\`\`json
+  {
+    "summary": "The login page",
+    "answer": "This page does not contain the elements required for booking a flight ticket. It is a login page. You may need to login first.",
+    "width": 1024,
+    "height": 1080,
+    "elements": [],
+    "errors": ["I can see login buttons, but the elements for the flight booking action are not found"]
+  }
+  \`\`\`
 `;
-
+    const userMessage = `This is the screenshot.
+${userPrompt ? userPrompt : "Please summary the page screenshot's content and identify the UI elements."}
+Return the results in the specified JSON schema format, limiting to the 20 most significant elements.`
 
     const messages = [{
       role: "system",
@@ -296,9 +327,7 @@ When no element is found:
       role: "user",
       content: [
         {
-          type: "text", text: `This is the screenshot.
-Please summary the page screenshot's purpose and identify the UI elements. 
-Return the results in the specified JSON schema format, limiting to the 20 most significant elements.`
+          type: "text", text: userMessage
         },
         {
           type: "image_url",
@@ -373,13 +402,26 @@ const getGogogoAPI = tool(
 
 const runGogogoScript = tool(
   async ({ script }) => {
-    const result = await SidebarUtils.engine.runScript(script);
-    console.log('runScript', result);
-    let content = 'The script run passed';
-    if (result !== undefined && result !== null) {
-      content = `The script run completed with result: ${typeof result === 'object' ? JSON.stringify(result) : result}`;
+    try {
+      console.log('runScript ==>', script);
+      const result = await SidebarUtils.engine.runScript(script);
+      console.log('runScript <==', result);
+      let content = 'The script run completed';
+      if (result !== undefined && result !== null) {
+        let resultStr = typeof result === 'object' ? `
+\`\`\`json
+${JSON.stringify(result)}
+\`\`\`
+`: String(result);
+        content = `The script run completed with result: ${resultStr}`;
+      }
+      return [content, result];
     }
-    return [content, result];
+    catch (err) {
+      console.error('runScript error', err);
+      const content = `The script run completed with error: ${err instanceof Error ? err.message : String(err)}`;
+      return [content, err];
+    }
   },
   {
     name: "run_gogogo_script",
@@ -407,11 +449,11 @@ const getPageInfo = tool(
   }
 );
 
-const identifyElementsWithVision = tool(
+const analyzePageWithVision = tool(
   async ({ userPrompt }) => {
     try {
-      const result = await identifyElementsWithVisionModel(userPrompt);
-      const content = `The identified result for this page: 
+      const result = await analyzePageWithVisionModel(userPrompt);
+      const content = `The analyze result for this page: 
 \`\`\`json
 ${JSON.stringify(result)}
 \`\`\`
@@ -423,11 +465,11 @@ ${JSON.stringify(result)}
     }
   },
   {
-    name: "identify_elements_with_vision",
-    description: "Analyze a page screenshot using computer vision to identify interactive elements and their positions",
+    name: "analyze_page_with_vision",
+    description: "Analyze a page screenshot using computer vision and return the identified UI elements based on the user's description",
     responseFormat: 'content_and_artifact',
     schema: z.object({
-      userPrompt: z.string().optional().describe("Custom prompt for the vision model")
+      userPrompt: z.string().optional().describe("User's question or description for analyzing the page. e.g., 'Find the login button and input fields'")
     })
   }
 );
@@ -441,18 +483,27 @@ const getElementFromPoint = tool(
 \`\`\`javascript
 ${elem.pageScript}.${elem.elementScript}
 \`\`\`
+
 The example code for this element is:
+
 \`\`\`javascript
-// click with event
-await ${elem.pageScript}.${elem.elementScript}.click();
-// click with cdp
-await ${elem.pageScript}.${elem.elementScript}.click({mode: 'cdp'});
-// set value with event
-await ${elem.pageScript}.${elem.elementScript}.fill('abcde');
-// set value with cdp
-await ${elem.pageScript}.${elem.elementScript}.fill('abcde', {mode: 'cdp'});
 // highlight the element
 await ${elem.pageScript}.${elem.elementScript}.highlight();
+
+// click with event
+await ${elem.pageScript}.${elem.elementScript}.click();
+// set value with event
+await ${elem.pageScript}.${elem.elementScript}.fill('abcde');
+
+// enable cdp
+await browser.attachDebugger();
+// click with cdp (must enable cdp before using cdp mode)
+await ${elem.pageScript}.${elem.elementScript}.click({mode: 'cdp'});
+// set value with cdp (must enable cdp before using cdp mode)
+await ${elem.pageScript}.${elem.elementScript}.fill('abcde', {mode: 'cdp'});
+// disable cdp
+await browser.detachDebugger();
+
 \`\`\`
 `;
     console.log('getElementFromPoint', elem, type, description, bbox);
@@ -481,22 +532,48 @@ const handleToolErrors = createMiddleware({
   },
 });
 
-const getSystemPrompt = () => {
+const getSystemPrompt = async () => {
+  const api_doc = await loadAPIDefinition();
   const systemPrompt = `## Role:
 You are a versatile professional in web testing and automation. Your outstanding contributions will impact the user experience of billions of users.
 
 ## Objective:
-* You need to analyze the user's request and make plans
-* You need to analyze the current page's screenshot and decide what to do next
-* You need to write script and run script with Gogogo APIs to achieve user's task goal
+* You need to analyze the user's request and make plans.
+* You need to analyze the current page's screenshot and decide what to do next.
+* You need to write script and run script with Gogogo APIs to achieve user's task goal.
 
 ## Important
-* You are working with the Gogogo extension, and you can automate/test the browser pages by running Gogogo scripts in Gogogo extension
-* You can get the Gogogo api definitions using tool get_gogogo_api
-* You can get the Gogogo api document with examples using tool get_gogogo_api_document
-* You can run the Gogogo scripts using tool run_gogogo_script
-* You can identify the page elements using tool identify_elements_with_vision
-* You can get the element using the tool get_element_from_point based on the returned result from tool identify_elements_with_vision
+* You are working with the Gogogo extension, and you can automate/test the browser pages by running Gogogo scripts in Gogogo extension.
+* You can get the Gogogo api definitions using tool get_gogogo_api.
+* You can get the Gogogo api document with examples using tool get_gogogo_api_document.
+* You can run the Gogogo scripts using tool run_gogogo_script.
+* You can identify the page elements using tool analyze_page_with_vision.
+* You can get the element using the tool get_element_from_point based on the returned result from tool analyze_page_with_vision.
+
+## Script Guidelines:
+* Use Gogogo API to interact with the page and browser, make sure write safe and correct javascript code
+* Use PURE JavaScript script. Although TypeScript definitions of Gogogo API are provided (defined in types.d.ts), DO NOT use TypeScript-specific syntax (type annotations, interfaces, type aliases, enums)
+* Use async/await for all asynchronous operations
+* Test scripts in your mind before running them
+* If scripts have errors, try to review the Gogogo api definitions using tool get_gogogo_api and the Gogogo api document with examples using tool get_gogogo_api_document and fix the errors
+* Global variables:
+  (1) ai: Corresponds to the AIClient interface in types.d.ts, representing the AIClient object (use methods defined in types.d.ts), e.g., const response = await ai.init().setMode('gpt-4o').chat('hello');
+  (2) browser: Corresponds to the Browser interface in types.d.ts, representing the current browser (use methods defined in types.d.ts), e.g., await browser.page().first().bringToFront();
+  (3) page: Corresponds to the Page interface in types.d.ts, representing the current page (use methods defined in types.d.ts), e.g., await page.element("#id").nth(0).click();
+  (4) console: For logging only (browser native API)
+* Global functions (use with JavaScript syntax):
+  (1) expect(actual: unknown): Returns an Expect instance (defined in types.d.ts), e.g., await expect(1 === 1).toBeTruthy()
+  (2) wait(timeout: number): Returns a Promise for waiting, e.g., await wait(2000)
+* Prohibited Operations:
+  (1) DO NOT use third-party libraries (Selenium, Playwright, Puppeteer—NONE are supported)
+  (2) DO NOT use browser native APIs except console (e.g., document, window, document.querySelector, fetch are forbidden)
+  (3) DO NOT use TypeScript-specific syntax (type annotations like "let x: string", interfaces, type aliases, enums)
+  (4) DO NOT add un-requested logic (auto-navigation, extra wait time, redundant console.log—only implement user-specified features)
+
+## Gogogo API Reference (types.d.ts):
+\`\`\`typescript
+${api_doc}
+\`\`\`
 
 `;
   return systemPrompt;
@@ -539,32 +616,31 @@ const handleSend = async () => {
   if (!userInput.value.trim()) {
     return;
   }
-  const userMessage = new HumanMessage(userInput.value);
+  const userInputValue = userInput.value.trim();
+  const userMessage = new HumanMessage(userInputValue);
   chatMessages.value.push(userMessage);
   console.log('Sending message:', chatMessages.value);
-  const baseModel = await getModelForTask('general');
+  const baseModel = await getModelForTask();
+  const systemPrompt = await getSystemPrompt();
   const agent = createAgent({
     model: baseModel,
-    tools: [getPageInfo, identifyElementsWithVision, getElementFromPoint, getGogogoAPIDocument, getGogogoAPI, runGogogoScript],
+    tools: [getPageInfo, analyzePageWithVision, getElementFromPoint, getGogogoAPIDocument, getGogogoAPI, runGogogoScript],
     middleware: [handleToolErrors, summarizationMiddleware({
       model: baseModel,
       maxTokensBeforeSummary: 4000,
       messagesToKeep: 20,
     })] as const,
     checkpointer,
-    systemPrompt: getSystemPrompt()
+    systemPrompt: systemPrompt
   });
+  userInput.value = '';
   const result = await agent.invoke({
-    messages: userInput.value
+    messages: userInputValue
   }, {
     configurable: { thread_id: "1" }
   });
-  // Clear input after sending
-  userInput.value = '';
-
   chatMessages.value = result.messages;
   console.log("result", result);
-
   nextTick(() => {
     const chatContainer = document.querySelector('.chat-messages');
     if (chatContainer) {
