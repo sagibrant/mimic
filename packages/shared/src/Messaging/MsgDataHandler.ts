@@ -78,10 +78,18 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
     }).catch((error) => {
       this.logger.error('handle: ==x error on the message data:', data, error);
       if (resultCallback) {
+        let errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+        const runScriptErrorIndicator = 'at async eval (eval at runScript';
+        if (errorMessage.includes('at async eval (eval at runScript')) {
+          // simplify the error message from runScript
+          errorMessage = errorMessage.split(runScriptErrorIndicator)[0].trim();
+        }
+        errorMessage = Utils.replaceAll(errorMessage, 'chrome-extension://kpohfimcpcmbcihhpgnjcomihmcnfpna/ui/sidebar/sandbox.js', 'sandbox.js');
+        errorMessage = Utils.replaceAll(errorMessage, 'extension://ilcdijkgbkkllhojpgbiajmnbdiadppj/ui/sidebar/sandbox.js', 'sandbox.js');
         const resData: MessageData = {
           ...Utils.deepClone(data),
           status: 'ERROR',
-          error: error instanceof Error ? error.message : error as string
+          error: errorMessage
         };
         this.logger.debug('handle: <== resultCallback ERROR result:\r\n', data);
         resultCallback(resData);

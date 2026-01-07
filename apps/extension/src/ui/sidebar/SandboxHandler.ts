@@ -103,9 +103,6 @@ export class SandboxHandler extends MsgDataHandlerBase {
       else {
         return result;
       }
-    } catch (error) {
-      this.logger.error('runScript:', error);
-      throw error;
     }
     finally {
       this.logger.debug('runScript: <==');

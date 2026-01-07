@@ -141,6 +141,20 @@ export class Utils {
   }
 
   /**
+   * Replaces all occurrences of a pattern in a string with a replacement string.
+   * @param str original string
+   * @param pattern pattern to search
+   * @param replacement replacement string
+   * @returns updated string
+   */
+  static replaceAll(str: string, pattern: string, replacement: string): string {
+    if (Utils.isFunction((str as any).replaceAll)) {
+      return (str as any).replaceAll(pattern, replacement);
+    }
+    return str.split(pattern).join(replacement);
+  }
+
+  /**
    * Checks if the provided value is `RegExpSpec`
    * @param value The value to check
    * @returns 
