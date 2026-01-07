@@ -103,7 +103,7 @@ const getKeyPath = (keyType, browser, tempDir) => {
 
 // Generate default version: year.month.day.0
 const now = new Date();
-const defaultVersion = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.${now.getHours()}`;
+const defaultVersion = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${String(now.getHours()).padStart(2, '0')}`;
 
 module.exports = (env) => {
   console.log(`${timestamp()} webpack.config.cjs:: ==>`);

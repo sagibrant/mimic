@@ -13,7 +13,24 @@ on:
         default: '2026.1.1.0'
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      build_version: ${{ steps.set-version.outputs.build_version }}
+    steps:
+      - name: Set build version
+        id: set-version
+        run: |
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            BUILD_VERSION="${{ github.event.inputs.version }}"
+          else
+            # Generate dynamic version: year.month.day.hour
+            BUILD_VERSION=$(date +'%Y.%m.%d.%H')
+          fi
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_OUTPUT
+
   build:
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -34,7 +51,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '23'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -42,15 +59,9 @@ jobs:
           npm install -g pnpm
           pnpm install
 
-      - name: Set build version
-        id: set-version
+      - name: Set build version from setup
         run: |
-          if [ "${{ github.event.inputs.version }}" != "" ]; then
-            echo "BUILD_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          else
-            # Generate dynamic version: year.month.day.hour
-            echo "BUILD_VERSION=$(date +'%Y.%m.%d.%H')" >> $GITHUB_ENV
-          fi
+          echo "BUILD_VERSION=${{ needs.setup.outputs.build_version }}" >> $GITHUB_ENV
 
       - name: Build extension
         env:
@@ -69,7 +80,7 @@ jobs:
           if [ "${{ matrix.browser }}" = "firefox" ] && [ "${{ matrix.target }}" = "packed" ]; then
             echo "Skipping Firefox packed build (not supported)"
           else
-            npm run build:${{ matrix.browser }}:${{ matrix.manifestVersion }}:${{ matrix.target }} -- --env version=${{ env.BUILD_VERSION }}
+            pnpm build:${{ matrix.browser }}:${{ matrix.manifestVersion }}:${{ matrix.target }} --env version=${{ env.BUILD_VERSION }}
           fi
 
       - name: Upload build artifacts
@@ -81,7 +92,7 @@ jobs:
           retention-days: 14
 
   build-summary:
-    needs: build
+    needs: [setup, build]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -91,7 +102,7 @@ jobs:
       - name: Build summary
         run: |
           echo "# Build Summary"
-          echo "- Build version: ${{ env.BUILD_VERSION || 'dynamic' }}"
+          echo "- Build version: ${{ needs.setup.outputs.build_version }}"
           echo "- Build status: ${{ needs.build.result }}"
           echo "- Artifacts available for 14 days"
 
