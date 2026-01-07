@@ -72,29 +72,13 @@ const { v4: uuidv4 } = require('uuid');
 const rootDir = path.resolve(__dirname, '..'); // Project root = extension folder
 const timestamp = () => new Date().toISOString().replace(/T/, '-').replace(/:/g, '-').split('.')[0] + '-' + Date.now() % 1000;
 
-// Function to get key content, only using environment variables for security
-const getKeyContent = (keyType, browser) => {
-  // Environment variable format: EXTENSION_{BROWSER}_{KEYTYPE}
-  // Example: EXTENSION_CHROME_PRIVATEKEY
-  const envKey = `EXTENSION_${browser.toUpperCase()}_${keyType.toUpperCase()}`;
-  const envContent = process.env[envKey];
-  
-  if (envContent) {
-    console.log(`${timestamp()} webpack.config.cjs:: using environment variable for ${keyType}: ${envKey}`);
-    return envContent;
-  }
-  
-  console.warn(`${timestamp()} webpack.config.cjs:: key not found: ${keyType} for ${browser}`);
-  return null;
-};
-
 // Function to get key path (for plugins that require file paths)
-const getKeyPath = (keyType, browser) => {
+const getKeyPath = (keyType, browser, tempDir) => {
   // Check if we have environment variable for this key
   const envKey = `EXTENSION_${browser.toUpperCase()}_${keyType.toUpperCase()}`;
   if (process.env[envKey]) {
     // Create temporary key file if using environment variable
-    const tempKeyDir = path.resolve(rootDir, `build/temp/keys`);
+    const tempKeyDir = path.resolve(tempDir, 'secret');
     if (!fs.existsSync(tempKeyDir)) {
       fs.mkdirSync(tempKeyDir, { recursive: true });
     }
@@ -141,8 +125,8 @@ module.exports = (env) => {
 
   console.log(`${timestamp()} webpack.config.cjs:: configuring - browser: ${browser}, manifestVersion: ${manifestVersion}, target: ${target}, version: ${version}, outputPath: ${outputPath}, tempDir: ${tempDir}`);
 
-  const publicKeyPath = browser !== 'firefox' ? getKeyPath('publicKey', browser) : null;
-  const privateKeyPath = browser !== 'firefox' ? getKeyPath('privateKey', browser) : null;
+  const publicKeyPath = browser !== 'firefox' ? getKeyPath('publicKey', browser, tempDir) : null;
+  const privateKeyPath = browser !== 'firefox' ? getKeyPath('privateKey', browser, tempDir) : null;
   console.log(`${timestamp()} webpack.config.cjs:: key paths - publicKeyPath: ${publicKeyPath || 'none'}, privateKeyPath: ${privateKeyPath || 'none'}`);
 
   const config = {
@@ -416,8 +400,8 @@ module.exports = (env) => {
             console.log(`${timestamp()} webpack.config.cjs:: adding XpiPackPlugin`),
             new XpiPackPlugin({
               outputPath,
-              apiKeyPath: getKeyPath('apiKey', 'firefox'),
-              apiSecretPath: getKeyPath('apiSecret', 'firefox'),
+              apiKeyPath: getKeyPath('apiKey', 'firefox', tempDir),
+              apiSecretPath: getKeyPath('apiSecret', 'firefox', tempDir),
               tempDir,
             }),
           ]

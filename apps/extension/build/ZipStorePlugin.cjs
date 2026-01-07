@@ -12,8 +12,8 @@ class ZipStorePlugin {
 
   apply(compiler) {
     compiler.hooks.afterEmit.tapPromise('ZipStorePlugin', async () => {
-      const { browser, manifestVersion, keyVersion, outputPath, privateKeyPath, tempDir } = this.options;
-      console.log(`${timestamp()} ZipStorePlugin:: start - browser: ${browser}, manifestVersion: ${manifestVersion}, keyVersion: ${keyVersion}, outputPath: ${outputPath}, privateKeyPath: ${privateKeyPath || 'none'}, tempDir: ${tempDir}`);
+      const { browser, manifestVersion, outputPath, privateKeyPath, tempDir } = this.options;
+      console.log(`${timestamp()} ZipStorePlugin:: start - browser: ${browser}, manifestVersion: ${manifestVersion}, outputPath: ${outputPath}, privateKeyPath: ${privateKeyPath || 'none'}, tempDir: ${tempDir}`);
       
       const storeDir = path.join(outputPath, 'store');
       const tempTaskDir = path.join(tempDir, 'Extension');

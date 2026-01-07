@@ -12,8 +12,8 @@ class CrxPackPlugin {
 
   apply(compiler) {
     compiler.hooks.afterEmit.tap('CrxPackPlugin', () => {
-      const { browser, manifestVersion, keyVersion, outputPath, keyPath, tempDir } = this.options;
-      console.log(`${timestamp()} CrxPackPlugin:: start - browser: ${browser}, manifestVersion: ${manifestVersion}, keyVersion: ${keyVersion}, outputPath: ${outputPath}, keyPath: ${keyPath}, tempDir: ${tempDir}`);
+      const { browser, manifestVersion, outputPath, keyPath, tempDir } = this.options;
+      console.log(`${timestamp()} CrxPackPlugin:: start - browser: ${browser}, manifestVersion: ${manifestVersion}, outputPath: ${outputPath}, keyPath: ${keyPath}, tempDir: ${tempDir}`);
       
       const packedDir = path.join(outputPath, 'packed');
       const tempTaskDir = path.join(tempDir, 'Extension');
