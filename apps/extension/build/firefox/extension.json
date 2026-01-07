@@ -1,9 +1,0 @@
-{
-    "browser": "Firefox",
-    "extensions": [{
-            "id": "sagibrant@163.com",
-            "packed": "Extension.xpi",
-            "minVersion": 58
-        }
-    ]
-}
