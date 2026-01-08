@@ -250,8 +250,23 @@ ${codeContent}
 
   // Handle install extension button click
   const handleInstallExtension = () => {
-    // Open extension installation interface
-    window.open('https://chrome.google.com/webstore/category/extensions', '_blank');
+    // Detect browser type
+    const userAgent = navigator.userAgent;
+    const isChrome = /Chrome\//.test(userAgent) && !/Edg\//.test(userAgent);
+    const isEdge = /Edg\//.test(userAgent);
+    
+    // Open extension installation interface based on browser
+    let extensionUrl = '';
+    if (isChrome) {
+      extensionUrl = 'https://chromewebstore.google.com/detail/gogogo/kpohfimcpcmbcihhpgnjcomihmcnfpna';
+    } else if (isEdge) {
+      extensionUrl = 'https://microsoftedge.microsoft.com/addons/detail/gogogo/ilcdijkgbkkllhojpgbiajmnbdiadppj';
+    } else {
+      // Default to Chrome extension store for other browsers
+      extensionUrl = 'https://chromewebstore.google.com/detail/gogogo/kpohfimcpcmbcihhpgnjcomihmcnfpna';
+    }
+    
+    window.open(extensionUrl, '_blank');
   };
 
   // Handle run script button click
