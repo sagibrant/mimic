@@ -291,7 +291,7 @@ ${codeContent}
       <div className="workflow-step">
         <div className="step-header">
           <div className="step-number">1</div>
-          <h2 className="step-title">准备</h2>
+          <h2 className="step-title">Prepare</h2>
         </div>
         <div className="step-content">
           <button className="install-btn" onClick={handleInstallExtension}>
@@ -305,7 +305,7 @@ ${codeContent}
       <div className="workflow-step">
         <div className="step-header">
           <div className="step-number">2</div>
-          <h2 className="step-title">URL</h2>
+          <h2 className="step-title">Your URL</h2>
         </div>
         <div className="step-content">
           <div className="url-input-container">
@@ -326,7 +326,7 @@ ${codeContent}
       <div className="workflow-step">
         <div className="step-header">
           <div className="step-number">3</div>
-          <h2 className="step-title">代码</h2>
+          <h2 className="step-title">Script</h2>
         </div>
         <div className="step-content">
           <div className="editor-container" ref={editorRef}></div>
@@ -338,7 +338,7 @@ ${codeContent}
       <div className="workflow-step">
         <div className="step-header">
           <div className="step-number">4</div>
-          <h2 className="step-title">执行</h2>
+          <h2 className="step-title">Execute</h2>
         </div>
         <div className="step-content">
           <button className="run-btn" onClick={handleRunScript}>
