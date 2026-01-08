@@ -64,7 +64,6 @@ export class PostMessageChannel extends ChannelBase {
     this._listener = undefined;
   }
 
-
   postMessage(msg: Message): void {
     if (this._status != ChannelStatus.CONNECTED) {
       throw new Error('Unexpected Error: failed to post message because the status is not connected');

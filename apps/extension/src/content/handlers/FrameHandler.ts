@@ -74,6 +74,7 @@ export class FrameHandler extends MsgDataHandlerBase {
     try {
       let ready = this._main.isReady();
       if (!ready) {
+        this._main.init();
         const codeUrl = chrome.runtime.getURL('frame-in-main-loader.js');
         const response = await fetch(codeUrl);
         if (!response.ok) {

@@ -22,6 +22,7 @@
 
 import { Utils, Dispatcher } from "@gogogo/shared";
 import { ObjectRepository } from "./ObjectRepository";
+import { MainToContentDispatcher } from "./Dispatcher";
 
 export class RuntimeUtils {
   private static _dispatcher?: Dispatcher;
@@ -32,8 +33,9 @@ export class RuntimeUtils {
   }
 
   static get dispatcher() {
+    // init with build-in MainToContentDispatcher for web package
     if (Utils.isNullOrUndefined(RuntimeUtils._dispatcher)) {
-      throw new Error('The dispatcher is not ready');
+      RuntimeUtils._dispatcher = new MainToContentDispatcher();
     }
     return RuntimeUtils._dispatcher;
   }
@@ -44,7 +46,7 @@ export class RuntimeUtils {
 
   static get repo() {
     if (Utils.isNullOrUndefined(RuntimeUtils._repo)) {
-      throw new Error('The object repository is not ready');
+      RuntimeUtils._repo = new ObjectRepository();
     }
     return RuntimeUtils._repo;
   }

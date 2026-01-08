@@ -27,6 +27,7 @@ export class FrameInMAIN {
 
   private readonly _callbacks: Record<string, (result: any) => void> = {};
   private readonly _source: 'content' | 'MAIN';
+  private readonly _onEventHandler = this.onEvent.bind(this);
   constructor() {
     if (typeof chrome !== 'undefined' && typeof chrome.runtime?.id === 'string') {
       this._source = 'content';
@@ -37,11 +38,13 @@ export class FrameInMAIN {
   }
 
   init() {
+    window.removeEventListener("_MAIN_To_Content_EVENT_", this._onEventHandler, true);
+    window.removeEventListener("_Content_To_MAIN_EVENT_", this._onEventHandler, true);
     if (this._source === 'content') {
-      window.addEventListener("_MAIN_To_Content_EVENT_", this.onEvent.bind(this), true);
+      window.addEventListener("_MAIN_To_Content_EVENT_", this._onEventHandler, true);
     }
     else {
-      window.addEventListener("_Content_To_MAIN_EVENT_", this.onEvent.bind(this), true);
+      window.addEventListener("_Content_To_MAIN_EVENT_", this._onEventHandler, true);
     }
   }
 

@@ -21,15 +21,13 @@
  */
 
 import { SettingUtils } from "@gogogo/shared";
-import { ObjectRepository, RuntimeUtils } from "@gogogo/web";
+import { RuntimeUtils } from "@gogogo/web";
 import { SandboxHandler } from "./SandboxHandler";
 import { SandboxDispatcher } from "./SandboxDispatcher";
 
 SettingUtils.getSettings().logLevel = 'WARN';
-const repo = new ObjectRepository();
 const dispatcher = new SandboxDispatcher();
 const handler = new SandboxHandler();
 dispatcher.addHandler(handler);
 RuntimeUtils.dispatcher = dispatcher;
-RuntimeUtils.repo = repo;
 await dispatcher.init();
