@@ -1,0 +1,452 @@
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  display: block;
+  /* Ensure proper centering with auto margins on container */
+}
+
+/* Workflow container */
+.workflow-container {
+  width: 100%;
+  max-width: 900px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 3rem;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  /* Ensure proper centering */
+  display: block;
+  position: relative;
+}
+
+/* Workflow title */
+.workflow-title {
+  text-align: center;
+  color: #1e293b;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* Workflow step */
+.workflow-step {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.workflow-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.workflow-step:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
+}
+
+.workflow-step:hover::before {
+  transform: scaleY(1);
+}
+
+/* Step header */
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+/* Step number */
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+  flex-shrink: 0;
+}
+
+/* Step title */
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Step content */
+.step-content {
+  margin-left: 52px;
+  width: calc(100% - 52px);
+  text-align: left;
+}
+
+/* URL input container */
+.url-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin: 0;
+  max-width: 100%;
+  min-width: auto;
+}
+
+/* URL input */
+.url-input {
+  padding: 1rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  width: 100%;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  max-width: 100%;
+  min-width: auto;
+}
+
+/* Buttons container */
+.install-btn,
+.run-btn {
+  margin: 0;
+  display: inline-flex;
+}
+
+/* Editor container */
+.editor-container {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+  min-height: 500px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* Step description */
+.step-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-top: 0.75rem;
+  line-height: 1.6;
+}
+
+/* Install button */
+.install-btn {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.install-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+}
+
+.install-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+}
+
+/* URL input container */
+.url-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* URL label */
+.url-label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* URL input */
+.url-input {
+  padding: 1rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  width: 100%;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #ffffff;
+}
+
+.url-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Editor container */
+.editor-container {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+  min-height: 500px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.editor-container:hover {
+  border-color: #cbd5e1;
+}
+
+/* Run button */
+.run-btn {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.run-btn:hover {
+  background: linear-gradient(135deg, #059669, #10b981);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+}
+
+.run-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+}
+
+/* Dark mode adaptations */
+@media (prefers-color-scheme: dark) {
+  html, body, #root {
+    background-color: #0f172a;
+    color: #e2e8f0;
+  }
+
+  .workflow-container {
+    background-color: #1e293b;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .workflow-title {
+    color: #f1f5f9;
+  }
+
+  .workflow-step {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+
+  .workflow-step:hover {
+    border-color: #475569;
+  }
+
+  .step-title {
+    color: #f1f5f9;
+  }
+
+  .step-description {
+    color: #94a3b8;
+  }
+
+  .url-label {
+    color: #cbd5e1;
+  }
+
+  .url-input {
+    background-color: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .url-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background-color: #1e293b;
+  }
+
+  .url-input::placeholder {
+    color: #64748b;
+  }
+
+  .editor-container {
+    background-color: #0f172a;
+    border-color: #334155;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .editor-container:hover {
+    border-color: #475569;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .workflow-container {
+    max-width: 900px;
+    padding: 2rem;
+  }
+
+  .workflow-title {
+    font-size: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .workflow-step {
+    padding: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .workflow-container {
+    padding: 1.5rem;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .workflow-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .workflow-step {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .step-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .step-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .step-title {
+    font-size: 1.25rem;
+  }
+
+  .editor-container {
+    min-height: 400px;
+  }
+
+  .install-btn,
+  .run-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .workflow-container {
+    padding: 1rem;
+  }
+
+  .workflow-title {
+    font-size: 1.5rem;
+  }
+
+  .workflow-step {
+    padding: 1.25rem;
+  }
+
+  .editor-container {
+    min-height: 300px;
+  }
+
+  .url-input {
+    font-size: 1rem;
+    padding: 0.875rem 1rem;
+  }
+}
