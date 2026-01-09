@@ -1,0 +1,97 @@
+[hidden] {
+  display: none !important;
+}
+
+/* Menu/list inspired design for Chrome extension popup */
+.action-container {
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  background-color: var(--chrome-bg-color, #ffffff);
+  color: var(--chrome-text-color, #333333);
+}
+
+/* Menu item styling inspired by Vuetify lists */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* Hover state - subtle highlight */
+.menu-item:hover {
+  background-color: var(--chrome-hover-color, #f0f0f0);
+}
+
+/* Active/click state animation */
+.menu-item:active {
+  background-color: var(--chrome-active-color, #e0e0e0);
+  transform: scale(0.99);
+  transition: all 0.05s ease;
+}
+
+/* Recording state styling */
+.menu-item.recording {
+  color: #d32f2f;
+}
+
+.menu-item.recording:hover {
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+.menu-item.recording:active {
+  background-color: rgba(211, 47, 47, 0.2);
+}
+
+.menu-item:disabled {
+  cursor: not-allowed;
+}
+
+
+/* Icon styling */
+.icon {
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+  font-style: normal;
+}
+
+.store-icon::before {
+  content: '⚖';
+}
+
+.options-icon::before {
+  content: '☑';
+}
+
+.sidebar-icon::before {
+  content: '◨';
+}
+
+.record-icon::before {
+  content: '◉';
+}
+
+.stop-icon::before {
+  content: '■';
+}
+
+/* Theme adaptation for Chrome */
+@media (prefers-color-scheme: dark) {
+  .action-container {
+    --chrome-bg-color: #2d2d2d;
+    --chrome-text-color: #f0f0f0;
+    --chrome-hover-color: #3d3d3d;
+    --chrome-active-color: #4a4a4a;
+  }
+}

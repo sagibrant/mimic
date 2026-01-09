@@ -158,7 +158,7 @@ module.exports = (env) => {
       background: path.resolve(rootDir, 'src/background.ts'),
       content: path.resolve(rootDir, 'src/content.ts'),
       'frame-in-main-loader': path.resolve(rootDir, 'src/content/FrameInMAINLoader.ts'),
-      'ui/action/main': path.resolve(rootDir, 'src/ui/action/main.ts'),
+      'ui/action/main': path.resolve(rootDir, 'src/ui/action/index.tsx'),
       'ui/options/main': path.resolve(rootDir, 'src/ui/options/main.ts'),
       'ui/sidebar/main': path.resolve(rootDir, 'src/ui/sidebar/main.ts'),
       'ui/sidebar/sandbox': path.resolve(rootDir, 'src/ui/sidebar/sandbox.ts')
@@ -183,7 +183,7 @@ module.exports = (env) => {
      */
     resolve: {
       // File extensions to resolve automatically
-      extensions: ['.ts', '.js', '.html', '.css', '.vue', '.json'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.html', '.css', '.vue', '.json'],
       alias: {
         /**
          * Path alias configuration
@@ -216,15 +216,16 @@ module.exports = (env) => {
      */
     module: {
       rules: [
-        // 1. Process TypeScript files
+        // 1. Process TypeScript files (including React JSX)
         {
-          test: /\.ts$/,
+          test: /\.(ts|tsx)$/,
           loader: 'ts-loader',
           options: {
             appendTsSuffixTo: [/\.vue$/],
             transpileOnly: true,
             compilerOptions: {
-              module: 'esnext'
+              module: 'esnext',
+              jsx: 'react-jsx'
             }
           },
           exclude: /node_modules/, // Exclude node_modules to improve build performance
