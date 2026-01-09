@@ -29,7 +29,7 @@ export class StorageUtils {
   static async get(key: string): Promise<string | null> {
     if (typeof chrome !== 'undefined' && chrome?.storage?.local) {
       const result = await chrome.storage.local.get([key]);
-      if (key in Object.keys(result) && typeof result[key] === 'string') {
+      if (key in result && typeof result[key] === 'string') {
         return result[key] as string
       }
     }

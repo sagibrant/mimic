@@ -11,12 +11,13 @@ interface Notification {
 export default function App() {
   // Settings state
   const [settings, setSettings] = useState<Settings>(SettingUtils.getSettings());
+
   const [originalSettings, setOriginalSettings] = useState<Settings>(Utils.deepClone(SettingUtils.getSettings()));
-  
+
   // sub settings text
   const [replaySettings, setReplaySettings] = useState<string>('');
   const [recordSettings, setRecordSettings] = useState<string>('');
-  
+
   // Notification state
   const [notification, setNotification] = useState<Notification>({
     visible: false,
@@ -33,15 +34,15 @@ export default function App() {
   useEffect(() => {
     // Initialize theme based on system preferences
     updateTheme();
-    
+
     // Setup theme change listener
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleThemeChange = () => updateTheme();
     mediaQuery.addEventListener('change', handleThemeChange);
-    
+
     // Load settings
     loadSettings();
-    
+
     // Cleanup event listener
     return () => {
       mediaQuery.removeEventListener('change', handleThemeChange);
@@ -61,6 +62,7 @@ export default function App() {
    */
   const loadSettings = async (): Promise<void> => {
     try {
+      await SettingUtils.init();
       const result = SettingUtils.getSettings();
       if (!result) {
         throw new Error('fail to load settings by calling SettingUtils.getSettings');
@@ -80,37 +82,37 @@ export default function App() {
    */
   const saveSettings = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    
+
     try {
       const newSettings = Utils.deepClone(settings);
-      
+
       newSettings.replaySettings = parseReplaySettings(replaySettings);
       if (!newSettings.replaySettings) {
         showNotification(t('options_notification_invalidJsonReplay'), 'error');
         return;
       }
-      
+
       newSettings.recordSettings = parseRecordSettings(recordSettings);
       if (!newSettings.recordSettings) {
         showNotification(t('options_notification_invalidJsonRecord'), 'error');
         return;
       }
-      
+
       const newSettingsVal = JSON.stringify(newSettings, null, 2);
       if (SettingUtils.parse2Settings(newSettingsVal) === null) {
         throw new Error('The input settings are invalid.');
       }
-      
+
       // encrypt the sensitive values before storage
       if (newSettings.aiSettings.apiKey) {
         newSettings.aiSettings.apiKey = await CryptoUtil.encrypt(newSettings.aiSettings.apiKey);
       }
-      
+
       const result = await SettingUtils.save(newSettings);
       if (!result) {
         throw new Error('fail to save settings by calling SettingUtils.save');
       }
-      
+
       setSettings(result);
       setOriginalSettings(Utils.deepClone(result));
       setRecordSettings(JSON.stringify(result.recordSettings, null, 2));
@@ -183,7 +185,7 @@ export default function App() {
       message,
       type
     });
-    
+
     // Hide after 3 seconds
     setTimeout(() => {
       setNotification(prev => ({ ...prev, visible: false }));
@@ -193,7 +195,7 @@ export default function App() {
   return (
     <div className="settings-container">
       <h1>{t('options_label_settings')}</h1>
-      
+
       <form onSubmit={saveSettings}>
         {/* Store URL Field */}
         <div className="settings-group">
@@ -201,87 +203,87 @@ export default function App() {
             {t('options_label_storeURL')}
           </label>
           <div className="input-container">
-            <input 
-              id="storeURL" 
-              value={settings.storeURL} 
-              onChange={(e) => setSettings(prev => ({ ...prev, storeURL: e.target.value }))} 
-              type="url" 
+            <input
+              id="storeURL"
+              value={settings.storeURL}
+              onChange={(e) => setSettings(prev => ({ ...prev, storeURL: e.target.value }))}
+              type="url"
               className="setting-input"
               placeholder={t('options_placeholder_storeURL')}
             />
           </div>
         </div>
-        
+
         {/* AI BaseURL Field */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="ai_baseURL">
             {t('options_label_ai_baseURL')}
           </label>
           <div className="input-container">
-            <input 
-              id="ai_baseURL" 
-              value={settings.aiSettings.baseURL} 
-              onChange={(e) => setSettings(prev => ({ 
-                ...prev, 
-                aiSettings: { ...prev.aiSettings, baseURL: e.target.value } 
-              }))} 
-              type="url" 
+            <input
+              id="ai_baseURL"
+              value={settings.aiSettings.baseURL}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                aiSettings: { ...prev.aiSettings, baseURL: e.target.value }
+              }))}
+              type="url"
               className="setting-input"
               placeholder={t('options_placeholder_ai_baseURL')}
             />
           </div>
         </div>
-        
+
         {/* AI Models Field */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="ai_models">
             {t('options_label_ai_models')}
           </label>
           <div className="input-container">
-            <input 
-              id="ai_models" 
-              value={settings.aiSettings.models} 
-              onChange={(e) => setSettings(prev => ({ 
-                ...prev, 
-                aiSettings: { ...prev.aiSettings, models: e.target.value } 
-              }))} 
-              type="text" 
+            <input
+              id="ai_models"
+              value={settings.aiSettings.models}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                aiSettings: { ...prev.aiSettings, models: e.target.value }
+              }))}
+              type="text"
               className="setting-input"
               placeholder={t('options_placeholder_ai_models')}
             />
           </div>
         </div>
-        
+
         {/* AI API Key Field */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="ai_apiKey">
             {t('options_label_ai_apiKey')}
           </label>
           <div className="input-container">
-            <input 
-              id="ai_apiKey" 
-              value={settings.aiSettings.apiKey} 
-              onChange={(e) => setSettings(prev => ({ 
-                ...prev, 
-                aiSettings: { ...prev.aiSettings, apiKey: e.target.value } 
-              }))} 
-              type="password" 
+            <input
+              id="ai_apiKey"
+              value={settings.aiSettings.apiKey}
+              onChange={(e) => setSettings(prev => ({
+                ...prev,
+                aiSettings: { ...prev.aiSettings, apiKey: e.target.value }
+              }))}
+              type="password"
               className="setting-input"
               placeholder={t('options_placeholder_ai_apiKey')}
             />
           </div>
         </div>
-        
+
         {/* Log Level Select */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="logLevel">
             {t('options_label_logLevel')}
           </label>
           <div className="select-container">
-            <select 
-              id="logLevel" 
-              value={settings.logLevel} 
-              onChange={(e) => setSettings(prev => ({ ...prev, logLevel: e.target.value as any }))} 
+            <select
+              id="logLevel"
+              value={settings.logLevel}
+              onChange={(e) => setSettings(prev => ({ ...prev, logLevel: e.target.value as any }))}
               className="setting-select"
             >
               <option value="TRACE">TRACE</option>
@@ -294,41 +296,41 @@ export default function App() {
             <div className="select-arrow"></div>
           </div>
         </div>
-        
+
         {/* Replay Settings */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="replaySettings">
             {t('options_label_replaySettings')}
           </label>
           <div className="textarea-container">
-            <textarea 
-              id="replaySettings" 
-              value={replaySettings} 
-              onChange={(e) => setReplaySettings(e.target.value)} 
-              className="setting-textarea" 
+            <textarea
+              id="replaySettings"
+              value={replaySettings}
+              onChange={(e) => setReplaySettings(e.target.value)}
+              className="setting-textarea"
               rows={5}
               placeholder={t('options_placeholder_json')}
             ></textarea>
           </div>
         </div>
-        
+
         {/* Record Settings */}
         <div className="settings-group">
           <label className="setting-label" htmlFor="recordSettings">
             {t('options_label_recordSettings')}
           </label>
           <div className="textarea-container">
-            <textarea 
-              id="recordSettings" 
-              value={recordSettings} 
-              onChange={(e) => setRecordSettings(e.target.value)} 
-              className="setting-textarea" 
+            <textarea
+              id="recordSettings"
+              value={recordSettings}
+              onChange={(e) => setRecordSettings(e.target.value)}
+              className="setting-textarea"
               rows={5}
               placeholder={t('options_placeholder_json')}
             ></textarea>
           </div>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="settings-actions">
           <button type="submit" className="btn btn-primary">
@@ -339,9 +341,9 @@ export default function App() {
           </button>
         </div>
       </form>
-      
+
       {/* Notification Snackbar */}
-      <div 
+      <div
         className={`snackbar ${notification.visible ? 'snackbar-visible' : ''} ${notification.type === 'success' ? 'snackbar-success' : ''} ${notification.type === 'error' ? 'snackbar-error' : ''} ${notification.type === 'info' ? 'snackbar-info' : ''}`}
       >
         {notification.message}
