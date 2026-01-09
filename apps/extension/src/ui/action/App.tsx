@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserUtils, Utils, SettingUtils } from "@gogogo/shared";
 
 // 定义组件props类型
