@@ -173,73 +173,148 @@ const handleInspect = async () => {
   }
 };
 
-const formatChatMessage = (step: string, messages: BaseMessage[]): ChatMessage | null => {
+const formatChatMessage = (step: string, messages: BaseMessage[]): ChatMessage[] => {
   try {
     if (!messages || messages.length === 0) {
       throw new Error('No messages provided');
     }
+    const getMsgContent = (msg: BaseMessage): string => {
+      if (!msg.content) return '';
+      const content = typeof msg.content === 'string' ? msg.content
+        : msg.content.map((block) => block.type === 'text' ? block.text : JSON.stringify(block, null, 2)).join('\n');
+
+      return content.length > 100 ? content.substring(0, 100) + '...' : content;
+    };
+
     const lastMessage = messages[messages.length - 1];
 
     if (lastMessage.type === 'ai') {
       // call tool
       const aiMessage = lastMessage as AIMessage;
       if (aiMessage.tool_calls && aiMessage.tool_calls.length > 0) {
+        const chatMsgs = [];
         const toolCalls = aiMessage.tool_calls;
-        const toolDict: Record<string, string> = {
-          'get_gogogo_api_document': 'Get Gogogo API Document',
-          'get_gogogo_api': 'Get Gogogo API Definition',
-          'run_gogogo_script': 'Run Script',
-          'get_page_info': 'Get Page Info',
-          'analyze_page_with_vision': 'Analyze Page with Vision',
-          'get_element_from_point': 'Get Element from Point'
-        };
-        const toolNames = toolCalls.map((tc) => tc.name in toolDict ? toolDict[tc.name] as string : tc.name).join(', ');
-        const chatMessage = new AIMessage(`🔧 Calling tools: ${toolNames}`) as ChatMessage;
-        chatMessage.messageType = 'think';
-        return chatMessage;
+        for (const toolCall of toolCalls) {
+          let toolCallMsg = '';
+          switch (toolCall.name) {
+            case 'get_gogogo_api_document': {
+              toolCallMsg = 'Trying to load the Gogogo API Document';
+              break;
+            }
+            case 'get_gogogo_api': {
+              toolCallMsg = 'Trying to load the Gogogo API Definition';
+              break;
+            }
+            case 'run_gogogo_script': {
+              toolCallMsg = `Trying to run script\n${toolCall.args?.script?.length > 100 ? toolCall.args?.script.substring(0, 100) + '...' : toolCall.args?.script}`;
+              break;
+            }
+            case 'get_page_info': {
+              toolCallMsg = 'Trying to load the page information';
+              break;
+            }
+            case 'analyze_page_with_vision': {
+              toolCallMsg = 'Trying to analyze the page with vision model';
+              break;
+            }
+            case 'get_element_from_point': {
+              toolCallMsg = 'Trying to get element from point';
+              break;
+            }
+            default:
+              toolCallMsg = `Warning: Unrecognized tool call: ${toolCall.name}`;
+          }
+          const chatMessage = new AIMessage(`🔧 ${toolCallMsg}`) as ChatMessage;
+          chatMessage.messageType = 'tool';
+          chatMsgs.push(chatMessage);
+        }
+        return chatMsgs;
       }
       else if (aiMessage.content) {
-        const content = typeof aiMessage.content === 'string' ? aiMessage.content
-          : aiMessage.content.map((block) => block.type === 'text' ? block.text : JSON.stringify(block, null, 2)).join('\n');
+        const content = getMsgContent(aiMessage);
         if (aiMessage.response_metadata && aiMessage.response_metadata.finish_reason === 'stop') {
           const chatMessage = new AIMessage(content) as ChatMessage;
           chatMessage.messageType = 'final';
-          return chatMessage;
+          return [chatMessage];
         }
         else {
           const chatMessage = new AIMessage(`💭 Thinking: ${content}`) as ChatMessage;
           chatMessage.messageType = 'think';
-          return chatMessage;
+          return [chatMessage];
         }
       }
     }
     else if (lastMessage.type === 'tool') {
       const toolMessage = lastMessage as ToolMessage;
-      if (toolMessage.content) {
-        const toolName = toolMessage.name || 'tool';
-        const content = typeof toolMessage.content === 'string' ? toolMessage.content
-          : toolMessage.content.map((block) => block.type === 'text' ? block.text : JSON.stringify(block, null, 2)).join('\n');
-        const chatMessage = new AIMessage(`🔧 Tool Result (${toolName}):\n${content.substring(0, 500)}${content.length > 500 ? '...' : ''}`) as ChatMessage;
-        chatMessage.messageType = 'tool';
-        return chatMessage;
+      let toolCallResultMsg = '';
+      switch (toolMessage.name) {
+        case 'get_gogogo_api_document': {
+          toolCallResultMsg = 'The Gogogo API Document is loaded.';
+          break;
+        }
+        case 'get_gogogo_api': {
+          toolCallResultMsg = 'The Gogogo API Definition is loaded.';
+          break;
+        }
+        case 'run_gogogo_script': {
+          if (toolMessage.artifact) {
+            const jsonArtifact = JSON.stringify(toolMessage.artifact);
+            toolCallResultMsg = `The script run completed with result: ${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+          }
+          else {
+            toolCallResultMsg = `The script run completed.`;
+          }
+          break;
+        }
+        case 'get_page_info': {
+          if (toolMessage.artifact) {
+            const jsonArtifact = JSON.stringify(toolMessage.artifact);
+            toolCallResultMsg = `The page information: ${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+          }
+          else {
+            toolCallResultMsg = `The page information is loaded.`;
+          }
+          break;
+        }
+        case 'analyze_page_with_vision': {
+          if (toolMessage.artifact) {
+            const jsonArtifact = JSON.stringify(toolMessage.artifact);
+            toolCallResultMsg = `The page analyze result: ${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+          }
+          else {
+            toolCallResultMsg = `The page analyze is completed.`;
+          }
+          break;
+        }
+        case 'get_element_from_point': {
+          if (toolMessage.artifact) {
+            const jsonArtifact = JSON.stringify(toolMessage.artifact);
+            toolCallResultMsg = `The element from point is: ${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+          }
+          else {
+            toolCallResultMsg = `The element is retrieved from the point.`;
+          }
+          break;
+        }
+        default: {
+          const content = getMsgContent(toolMessage) || `Tool executed completely.`;
+          toolCallResultMsg = content;
+        }
       }
-      else {
-        const chatMessage = new AIMessage(`🔧 Tool executed successfully`) as ChatMessage;
-        chatMessage.messageType = 'tool';
-        return chatMessage;
-      }
+      const chatMessage = new AIMessage(`🔧 ${toolCallResultMsg}`) as ChatMessage;
+      chatMessage.messageType = 'tool';
+      return [chatMessage];
     }
     else if (lastMessage.content) {
-      const content = typeof lastMessage.content === 'string' ? lastMessage.content
-        : lastMessage.content.map((block) => block.type === 'text' ? block.text : JSON.stringify(block, null, 2)).join('\n');
-      const chatMessage = new AIMessage(`${step}: :\n${content.substring(0, 500)}${content.length > 500 ? '...' : ''}`) as ChatMessage;
+      const content = getMsgContent(lastMessage);
+      const chatMessage = new AIMessage(`${step}: :\n${content}`) as ChatMessage;
       chatMessage.messageType = 'final';
-      return chatMessage;
+      return [chatMessage];
     }
-    return null;
+    return [];
   } catch (error) {
     console.error('Error formatting chat message:', error);
-    return null;
+    return [];
   }
 };
 
@@ -692,7 +767,7 @@ const getModelForTask = async (task: 'general' | 'vision' = 'general') => {
       },
       temperature: task === 'vision' ? 0 : 0.5, // Lower temperature for vision tasks for more consistent results
       topP: 0.8,
-      maxTokens: 40960,
+      maxTokens: 20480,
       streaming: task === 'general', // Enable streaming only for general chat model, keep vision model with full response
     });
   } catch (error) {
@@ -779,13 +854,13 @@ const handleSend = async () => {
             continue;
           }
           // Create formatted message based on step type
-          const chatMessage = formatChatMessage(step, content.messages);
+          const msgs = formatChatMessage(step, content.messages);
 
           // Set message type based on step
-          if (!chatMessage) {
+          if (!msgs || msgs.length === 0) {
             continue;
           }
-          chatMessages.value.push(chatMessage);
+          chatMessages.value.push(...msgs);
         }
       } catch (streamError) {
         console.warn('Stream error, falling back to regular invoke:', streamError);
