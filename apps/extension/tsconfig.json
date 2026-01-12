@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/**/*.tsx"],

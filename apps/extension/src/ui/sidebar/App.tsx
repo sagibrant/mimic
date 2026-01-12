@@ -8,6 +8,7 @@ import { TaskUtils } from '../../execution/TaskUtils';
 import { SettingUtils, Utils } from "@gogogo/shared";
 import { SidebarUtils } from './SidebarUtils';
 import { toast, Toaster } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';
 
 export default function App() {
   console.log('sidebar ==> App');
@@ -176,6 +177,12 @@ export default function App() {
   const [isAddTaskNodeDialogVisible, setIsAddTaskNodeDialogVisible] = useState(false);
   const [isAIDialogVisible, setIsAIDialogVisible] = useState(false);
 
+  // AlertDialog state
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+  const [alertDialogTitle, setAlertDialogTitle] = useState('');
+  const [alertDialogDescription, setAlertDialogDescription] = useState('');
+  const confirmCallbackRef = useRef<(() => void) | null>(null);
+
   const [replayAbortController, setReplayAbortController] = useState<AbortController | null>(null);
 
   // require async get, to be set in useEffect
@@ -279,7 +286,7 @@ export default function App() {
         setSelectedStepUid('');
       }
     }
-  }, [taskAsset]);
+  }, [taskAsset, taskTree]);
 
   /** ==================================================================================================================== */
   /** ==================================================== menu btns ===================================================== */
@@ -301,9 +308,11 @@ export default function App() {
     };
 
     if (task) {
-      if (window.confirm(t('sidebar_btn_action_load_demo_confirm_text'))) {
-        loadDemoTask();
-      }
+      showConfirmDialog(
+        t('sidebar_btn_action_load_demo_confirm_text'),
+        t('sidebar_btn_action_load_demo_confirm_text'),
+        loadDemoTask
+      );
     } else {
       loadDemoTask();
     }
@@ -494,21 +503,25 @@ export default function App() {
 
     // todo: change to use shadcn/ui 
     // Confirm deletion 
-    if (window.confirm(t('sidebar_btn_action_tree_delete_node_confirm_message'))) {
-      // Remove node from tree
-      const node = findTaskNode((node) => node.id === activeTaskNodeId, taskTree);
-      if (!node) {
-        console.warn(`Task node not found for task node delete - ${activeTaskNodeId}`);
-        showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'), 3000, 'error');
-        return;
+    showConfirmDialog(
+      t('sidebar_btn_action_tree_delete_node_confirm_message'),
+      t('sidebar_btn_action_tree_delete_node_confirm_message'),
+      () => {
+        // Remove node from tree
+        const node = findTaskNode((node) => node.id === activeTaskNodeId, taskTree);
+        if (!node) {
+          console.warn(`Task node not found for task node delete - ${activeTaskNodeId}`);
+          showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'), 3000, 'error');
+          return;
+        }
+        if (node === taskTree) {
+          showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'), 3000, 'error');
+          return;
+        }
+        const root = deepRemoveNode((node) => node.id === activeTaskNodeId, taskTree);
+        updateTaskData(root);
       }
-      if (node === taskTree) {
-        showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'), 3000, 'error');
-        return;
-      }
-      const root = deepRemoveNode((node) => node.id === activeTaskNodeId, taskTree);
-      updateTaskData(root);
-    }
+    );
   }, [isIdle, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage]);
 
   // Handle add task node submit
@@ -620,19 +633,23 @@ export default function App() {
     }
 
     // Confirm deletion
-    if (window.confirm(t('sidebar_btn_action_steps_delete_step_confirm_message'))) {
-      const steps = [...task.steps];
-      // Remove the selected step
-      steps.splice(index, 1);
-      task.steps = steps;
-      // Update selection
-      if (steps.length > 0) {
-        const newIndex = index > task.steps.length - 1 ? task.steps.length - 1 : index;
-        setSelectedStepUid(task.steps[newIndex].uid);
-      } else {
-        setSelectedStepUid('');
+    showConfirmDialog(
+      t('sidebar_btn_action_steps_delete_step_confirm_message'),
+      t('sidebar_btn_action_steps_delete_step_confirm_message'),
+      () => {
+        const steps = [...task.steps];
+        // Remove the selected step
+        steps.splice(index, 1);
+        task.steps = steps;
+        // Update selection
+        if (steps.length > 0) {
+          const newIndex = index > steps.length - 1 ? steps.length - 1 : index;
+          setSelectedStepUid(steps[newIndex].uid);
+        } else {
+          setSelectedStepUid('');
+        }
       }
-    }
+    );
   }, [isIdle, activeTaskId, selectedStepUid, findTaskNode]);
 
   // Handle record
@@ -1099,6 +1116,37 @@ export default function App() {
   }, [isIdle, activeTaskId, selectedStepUid, selectedStep, taskTree]);
 
   /** ==================================================================================================================== */
+  /** =================================================== alert dialog =================================================== */
+  /** ==================================================================================================================== */
+  /**
+   * Custom confirm dialog using AlertDialog
+   */
+  const showConfirmDialog = useCallback((title: string, description: string, onConfirm: () => void) => {
+    setAlertDialogTitle(title);
+    setAlertDialogDescription(description);
+    confirmCallbackRef.current = onConfirm;
+    setIsAlertDialogOpen(true);
+  }, []);
+
+  /**
+   * Handle confirm dialog confirm button click
+   */
+  const handleConfirmDialogConfirm = useCallback(() => {
+    if (confirmCallbackRef.current) {
+      confirmCallbackRef.current();
+      confirmCallbackRef.current = null;
+    }
+    setIsAlertDialogOpen(false);
+  }, []);
+
+  /**
+   * Handle confirm dialog cancel button click
+   */
+  const handleConfirmDialogCancel = useCallback(() => {
+    confirmCallbackRef.current = null;
+    setIsAlertDialogOpen(false);
+  }, []);
+  /** ==================================================================================================================== */
   /** ===================================================== AI Dialog ==================================================== */
   /** ==================================================================================================================== */
   // Run script with new step
@@ -1196,6 +1244,26 @@ export default function App() {
     <div className="sidebar-container">
       {/* Toaster for notifications */}
       <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
+
+      {/* AlertDialog for confirmations */}
+      <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+        <AlertDialogContent className="max-w-[20rem]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {alertDialogDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleConfirmDialogCancel}>
+              {t('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDialogConfirm}>
+              {t('confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Add Task Node Dialog */}
       {isAddTaskNodeDialogVisible && (
