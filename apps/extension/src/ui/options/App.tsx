@@ -15,8 +15,8 @@ export default function App() {
   const [originalSettings, setOriginalSettings] = useState<Settings>(Utils.deepClone(SettingUtils.getSettings()));
 
   // sub settings text
-  const [replaySettings, setReplaySettings] = useState<string>('');
-  const [recordSettings, setRecordSettings] = useState<string>('');
+  const [replaySettings, setReplaySettings] = useState<string>(JSON.stringify(settings.replaySettings, null, 2));
+  const [recordSettings, setRecordSettings] = useState<string>(JSON.stringify(settings.recordSettings, null, 2));
 
   // Notification state
   const [notification, setNotification] = useState<Notification>({
@@ -40,9 +40,6 @@ export default function App() {
     const handleThemeChange = () => updateTheme();
     mediaQuery.addEventListener('change', handleThemeChange);
 
-    // Load settings
-    loadSettings();
-
     // Cleanup event listener
     return () => {
       mediaQuery.removeEventListener('change', handleThemeChange);
@@ -55,26 +52,6 @@ export default function App() {
   const updateTheme = () => {
     document.documentElement.classList.toggle('dark-theme',
       window.matchMedia('(prefers-color-scheme: dark)').matches);
-  };
-
-  /**
-   * Load settings directly from chrome.storage.local
-   */
-  const loadSettings = async (): Promise<void> => {
-    try {
-      await SettingUtils.init();
-      const result = SettingUtils.getSettings();
-      if (!result) {
-        throw new Error('fail to load settings by calling SettingUtils.getSettings');
-      }
-      setSettings(result);
-      setOriginalSettings(Utils.deepClone(result));
-      setReplaySettings(JSON.stringify(result.replaySettings, null, 2));
-      setRecordSettings(JSON.stringify(result.recordSettings, null, 2));
-    } catch (error) {
-      console.error('Error loading settings:', error);
-      showNotification(t('options_notification_failedToLoadSettings'), 'error');
-    }
   };
 
   /**

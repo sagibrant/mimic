@@ -1,0 +1,409 @@
+.readonly {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+/* Main container Styles */
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  color: #333;
+  background-color: #fff;
+  font-family: Roboto, Arial, sans-serif;
+  overflow: hidden;
+  border-left: 1px solid #e0e0e0;
+}
+
+/* Header Styles */
+.sidebar-header {
+  flex-shrink: 0;
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.menu-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  user-select: none;
+}
+
+.menu-bar:last-child {
+  margin-bottom: 0;
+}
+
+.menu-btn {
+  padding: 6px 12px;
+  border: none;
+  background-color: transparent;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+
+.menu-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.menu-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.menu-divider {
+  width: 1px;
+  height: 16px;
+  background-color: #ddd;
+  margin: 0 4px;
+}
+
+
+/* Middle Section Styles */
+.sidebar-middle {
+  display: flex;
+  flex: 1 1 auto;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+/** Task tree panel Styles */
+.task-tree-panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  min-width: 160px;
+  max-width: 160px;
+}
+
+.task-tree-panel.collapsed {
+  min-width: 24px;
+}
+
+.task-tree-panel.collapsed .tree-controls {
+  border-bottom: none;
+  padding: 0, 4px;
+}
+
+.task-tree-panel.collapsed .tree-container {
+  display: none;
+}
+
+.tree-controls {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-bottom: 1px solid #e0e0e0;
+  user-select: none;
+}
+
+.command-btn {
+  padding: 6px;
+  border: none;
+  background-color: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 2px;
+  font-size: 16px;
+}
+
+.command-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.command-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.tree-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 2px;
+  overflow-x: auto;
+  min-width: 160px;
+}
+
+/* Steps panel controls */
+.steps-panel {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.steps-controls {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  user-select: none;
+}
+
+.steps-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-card {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.step-card:hover {
+  border-color: #bdbdbd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.step-card:hover .step-type-icon {
+  color: #555;
+}
+
+.step-card.selected {
+  background-color: #337ab7;
+  color: white;
+  border-color: #337ab7;
+}
+
+.step-card.selected .step-type {
+  border-right-color: rgba(255, 255, 255, 0.3);
+}
+
+.step-card.selected .step-type-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.step-type {
+  min-width: 40px;
+  height: 100%;
+  padding: 0 12px;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.step-type:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.step-type-icon {
+  font-size: 16px;
+  color: #888;
+  transition: color 0.2s;
+}
+
+.step-description {
+  flex: 1;
+  padding: 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-description-edit {
+  flex: 1;
+  padding: 0 12px;
+  min-width: 100px;
+}
+
+.step-status {
+  min-width: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.step-status.passed {
+  color: #4caf50;
+}
+
+.step-status.failed {
+  color: #f44336;
+}
+
+.step-status.pending {
+  color: #9e9e9e;
+}
+
+/* Bottom Section Styles */
+.sidebar-bottom {
+  border-top: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  max-height: 300px;
+}
+
+.sidebar-bottom.expanded {
+  flex: 1 0 auto;
+  max-height: none;
+}
+
+/** if bottom expanded, middle should be collapsed and display as readonly */
+.sidebar-container:has(.sidebar-bottom.expanded) .sidebar-middle {
+  flex: 0 0 auto;
+}
+
+.bottom-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+  background-color: #f5f5f5;
+  user-select: none;
+}
+
+.bottom-control-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+}
+
+.bottom-control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.bottom-control-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.sidebar-bottom-content {
+  padding: 0 16px 16px 16px;
+  overflow-y: auto;
+  flex: 1 0 auto;
+}
+
+.content-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  .sidebar-container {
+    color: #e0e0e0;
+    background-color: #121212;
+  }
+
+  .sidebar-header {
+    border-bottom-color: #333;
+    background-color: #1e1e1e;
+  }
+
+  .menu-btn {
+    color: #ccc;
+    background-color: transparent;
+  }
+
+  .menu-btn:hover {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .menu-btn:disabled {
+    color: #555;
+  }
+
+  .task-tree-panel {
+    border-right-color: #333;
+    background-color: #1e1e1e;
+  }
+
+  .command-btn {
+    color: #ccc;
+  }
+
+  .command-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .command-btn:disabled {
+    color: #555;
+  }
+
+  .tree-controls,
+  .steps-controls {
+    background-color: #1e1e1e;
+    border-bottom-color: #333;
+  }
+
+  .step-card {
+    border-color: #333;
+    background-color: #1e1e1e;
+  }
+
+  .step-card:hover {
+    border-color: #555;
+  }
+
+  .step-card:hover .step-type-icon {
+    color: #ddd;
+  }
+
+  .step-type {
+    border-right-color: #333;
+  }
+
+  .step-type:active {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .step-type-icon {
+    color: #aaa;
+  }
+
+  .sidebar-bottom {
+    border-top-color: #333;
+    background-color: #1e1e1e;
+  }
+
+  .bottom-controls {
+    background-color: #1e1e1e;
+  }
+
+  .bottom-control-btn {
+    color: #ccc;
+  }
+
+  .bottom-control-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .bottom-control-btn:disabled {
+    color: #555;
+  }
+}

@@ -1,0 +1,1627 @@
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import './App.css';
+import TreeNode from './TreeNode';
+import StepScriptEditor from './StepScriptEditor';
+import StepAIAgent from './StepAIAgent';
+import { TaskAsset, TaskGroup, Task, Step, TaskResult, StepResult } from '../../execution/Task';
+import { TaskUtils } from '../../execution/TaskUtils';
+import { SettingUtils, Utils } from "@gogogo/shared";
+import { SidebarUtils } from './SidebarUtils';
+import { toast, Toaster } from "sonner";
+
+export default function App() {
+  // Stable Util methods
+  /**
+   * Localization helper
+   */
+  const t = useCallback((key: string) => {
+    return chrome.i18n.getMessage(key) || key;
+  }, []);
+  /**
+   * wait with abort support
+   */
+  const wait = useCallback((timeout: number, signal: AbortSignal) => {
+    return new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(resolve, timeout);
+
+      signal.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new Error('Operation aborted'));
+      });
+    });
+  }, []);
+  // Notification message handler
+  const showNotificationMessage = useCallback((message: string, timeout: number = 3000, severity: 'success' | 'info' | 'warning' | 'error' = 'info', summary: string = '') => {
+    if (summary) {
+      toast[severity](message, { description: summary, duration: timeout });
+    } else {
+      toast[severity](message, { duration: timeout });
+    }
+  }, []);
+  /**
+   * Find task node helper function
+   */
+  const findTaskNode = useCallback((match: (node: TaskNode) => boolean, root: TaskNode): TaskNode | null => {
+    let nodes: TaskNode[] = [root];
+    while (nodes.length > 0) {
+      const node = nodes.shift();
+      if (node && match(node)) {
+        return node;
+      }
+      if (node?.type === 'group' && (node as TaskGroup).children.length > 0) {
+        nodes = [...nodes, ...(node as TaskGroup).children];
+      }
+    }
+    return null;
+  }, []);
+  /**
+   * deep update node
+   */
+  const deepUpdateNode = useCallback((match: (node: TaskNode) => boolean, node: TaskNode, nodeData: Partial<TaskNode>): TaskNode => {
+    if (match(node)) {
+      return {
+        ...node,
+        ...nodeData
+      } as TaskNode;
+    }
+    if (node.type === 'group' && node.children && node.children.length > 0) {
+      return {
+        ...node,
+        children: node.children.map(child => deepUpdateNode(match, child, nodeData))
+      }
+    }
+    return node;
+  }, []);
+  /**
+   * deep remove node
+   */
+  const deepRemoveNode = useCallback((match: (node: TaskNode) => boolean, node: TaskNode): TaskNode => {
+    if (node.type === 'group' && node.children && node.children.length > 0) {
+      const children = [];
+      for (const child of node.children) {
+        if (child.type === 'group') {
+          const newChild = deepRemoveNode(match, child);
+          children.push(newChild);
+        }
+        else if (!match(child)) {
+          children.push(child);
+        }
+      }
+      return {
+        ...node,
+        children
+      };
+    }
+    return node;
+  }, []);
+  /**
+   * deep add node
+   */
+  const deepAddNode = useCallback((match: (node: TaskNode) => boolean, node: TaskNode, newNode: TaskNode): TaskNode => {
+    if (node.type === 'group' && match(node)) {
+      return {
+        ...node,
+        children: [...node.children, newNode]
+      }
+    }
+    if (node.type === 'group' && node.children && node.children.length > 0) {
+      const children = [...node.children];
+      const index = children.findIndex(child => match(child));
+      if (index >= 0) {
+        children.splice(index, 0, newNode);
+        return {
+          ...node,
+          children
+        }
+      }
+      else {
+        return {
+          ...node,
+          children: children.map((child) => deepAddNode(match, child, newNode))
+        }
+      }
+    }
+    return node;
+  }, []);
+
+  const deepUpdateStep = useCallback((match: (step: Step) => boolean, node: TaskNode, stepData: Partial<Step>): TaskNode => {
+    if (node.type === 'group') {
+      return {
+        ...node,
+        children: node.children.map(child => deepUpdateStep(match, child, stepData))
+      };
+    }
+    else {
+      const task = node as Task;
+      const steps = [...task.steps];
+      const index = steps.findIndex(s => match(s));
+      if (index < 0) {
+        return node;
+      }
+      else {
+        const step = steps[index];
+        steps[index] = { ...step, ...stepData };
+        return {
+          ...task,
+          steps
+        };
+      }
+    }
+  }, []);
+
+  // Type definitions
+  type TaskNode = TaskGroup | Task;
+
+  // Empty task asset for initialization
+  const emptyTaskAsset: TaskAsset = useMemo(() => {
+    return TaskUtils.createNewTaskAsset()
+  }, []);
+
+  // State management
+  const [uiMode, setUiMode] = useState<'idle' | 'record' | 'replay' | 'replayFromStep'>('idle');
+  const [isTreeCollapsed, setIsTreeCollapsed] = useState(true);
+  const [isBottomExpanded, setIsBottomExpanded] = useState(false);
+
+  const [taskAsset, setTaskAsset] = useState<TaskAsset>(emptyTaskAsset);
+  const [activeTaskNodeId, setActiveTaskNodeId] = useState('');
+  const [activeTaskId, setActiveTaskId] = useState('');
+  const [selectedStepUid, setSelectedStepUid] = useState('');
+  const [draggedStepUid, setDraggedStepUid] = useState('');
+  const [editingStepUid, setEditingStepUid] = useState('');
+  const [editedStepDescription, setEditedStepDescription] = useState('');
+
+  const [isAddTaskNodeDialogVisible, setIsAddTaskNodeDialogVisible] = useState(false);
+  const [isAIDialogVisible, setIsAIDialogVisible] = useState(false);
+
+  const [runningScript, setRunningScript] = useState('');
+  const [replayAbortController, setReplayAbortController] = useState<AbortController | null>(null);
+
+  // require async get, to be set in useEffect
+  const [isDebuggerAttached, setIsDebuggerAttached] = useState(false);
+  const [isInspectStarted, setIsInspectStarted] = useState(false);
+
+  // Refs
+  const stepScriptEditorRef = useRef<any>(null); // todo: remove this one, update script instead
+
+  // Computed values
+  const isReplaying = uiMode === 'replay';
+  const isRecording = uiMode === 'record';
+  const isIdle = uiMode === 'idle';
+  const taskTree = taskAsset.root;
+  const taskResults = taskAsset.results;
+  const activeTask: Task | null = activeTaskId ? (findTaskNode((node) => node.id === activeTaskId, taskTree) as Task) : null;
+  const activeSteps: Step[] = useMemo(() => {
+    if (!activeTask) {
+      return [];
+    }
+    if (isBottomExpanded && selectedStepUid) {
+      const selectedStep = activeTask.steps.find(s => s.uid === selectedStepUid);
+      return selectedStep ? [selectedStep] : [];
+    }
+    return activeTask.steps;
+  }, [activeTask, isBottomExpanded, selectedStepUid]);
+  const selectedStep: Step | undefined = activeSteps.find(s => s.uid === selectedStepUid);
+  const inspectedNodeDetails = selectedStep?.objects?.length ? selectedStep.objects[0] : undefined;
+
+  // Form schema and initialization
+  const taskNodeTypes = [
+    { name: t('sidebar_btn_action_tree_add_node_dialog_input_type_task'), code: 'task' },
+    { name: t('sidebar_btn_action_tree_add_node_dialog_input_type_group'), code: 'group' }
+  ];
+
+  // Add node dialog state
+  const [addNodeType, setAddNodeType] = useState<'task' | 'group'>('task');
+  const [addNodeName, setAddNodeName] = useState('');
+
+  // Update all task step results in memory
+  const updateAllTaskStepResults = useCallback((root: TaskNode, results: TaskResult[]) => {
+    let nodes: TaskNode[] = [root];
+    while (nodes.length > 0) {
+      const node = nodes.shift();
+      if (node && node.type === 'task') {
+        const task = node as Task;
+        const taskResult = results.find(t => t.task_id === task.id);
+        if (taskResult) {
+          for (const step of task.steps) {
+            const stepResult = taskResult.steps.find(r => r.step_uid === step.uid);
+            if (stepResult) {
+              step.last_error = stepResult.error;
+              step.last_status = stepResult.status;
+            }
+          }
+        }
+      }
+      if (node?.type === 'group' && (node as TaskGroup).children.length > 0) {
+        nodes = [...nodes, ...(node as TaskGroup).children];
+      }
+    }
+  }, []);
+
+  // Initialize task data
+  const updateTaskData = useCallback((root?: TaskNode, results?: TaskResult[]) => {
+    const newTaskAsset = { ...taskAsset };
+    if (root) {
+      newTaskAsset.root = root;
+    }
+    if (results) {
+      newTaskAsset.results = results;
+    }
+    setTaskAsset(newTaskAsset);
+
+    // Select first available task by default
+    const selectFirstAvailableTask = () => {
+      const task = findTaskNode((node) => node.type === 'task', newTaskAsset.root);
+      if (task) {
+        setActiveTaskNodeId(task.id);
+        setActiveTaskId(task.id);
+        setSelectedStepUid('');
+      }
+    };
+
+    // no previous selection, select first available task
+    if (!activeTaskNodeId || !activeTaskId) {
+      selectFirstAvailableTask();
+      return;
+    }
+
+    // select previously active task node if still exists
+    if (activeTaskNodeId) {
+      const node = findTaskNode((node) => node.id === activeTaskNodeId, newTaskAsset.root);
+      if (!node) {
+        selectFirstAvailableTask();
+        return;
+      }
+    }
+
+    // select previously active task if still exists
+    if (activeTaskId) {
+      const node = findTaskNode((node) => node.id === activeTaskId && node.type === 'task', newTaskAsset.root);
+      if (!node) {
+        selectFirstAvailableTask();
+        return;
+      } else if (!(node.type === 'task' && selectedStepUid && (node as Task).steps.findIndex(s => s.uid === selectedStepUid) >= 0)) {
+        setSelectedStepUid('');
+      }
+    }
+  }, [taskAsset]);
+
+  // Toggle tree collapse/expand
+  const handleToggleTreeClick = useCallback(() => {
+    if (!isIdle) {
+      return;
+    }
+    setIsTreeCollapsed(!isTreeCollapsed);
+  }, [isIdle, isTreeCollapsed]);
+
+  // Handle task node selection
+  const handleTaskNodeSelect = useCallback((nodeId: string) => {
+    if (!isIdle) {
+      console.warn(`Unexpected task node selection event - ${nodeId}, uiMode - ${uiMode}`);
+      return;
+    }
+
+    const node = findTaskNode((node) => node.id === nodeId, taskTree);
+    if (!node) {
+      console.warn(`Task node not found for task node selection - ${nodeId}`);
+      return;
+    }
+    setActiveTaskNodeId(nodeId);
+  }, [isIdle, uiMode, taskTree]);
+
+  // Handle task node rename
+  const handleTaskNodeRename = useCallback((nodeId: string, newName: string) => {
+    if (!isIdle) {
+      console.warn(`Unexpected task node name change event - ${nodeId}, ${newName}, uiMode - ${uiMode}`);
+      return;
+    }
+
+    const node = findTaskNode((node) => node.id === nodeId, taskTree);
+    if (!node) {
+      console.warn(`Task node not found for task node rename - ${nodeId}, ${newName}`);
+      return;
+    }
+
+    const root = deepUpdateNode((node) => node.id === nodeId, taskTree, { name: newName });
+    updateTaskData(root);
+  }, [isIdle, uiMode, taskTree]);
+
+  // Handle task selection
+  const handleTaskSelect = useCallback((taskId: string) => {
+    if (!taskId) {
+      console.warn('Invalid task id for task selection');
+      return;
+    }
+
+    const task = findTaskNode((node) => node.id === taskId && node.type === 'task', taskTree);
+    if (!task || task.type !== 'task') {
+      console.warn(`Task not found for task selection - ${taskId}`);
+      return;
+    }
+
+    setActiveTaskId(taskId);
+    if (task.steps.findIndex(s => s.uid === selectedStepUid) < 0) {
+      setSelectedStepUid('');
+    }
+  }, []);
+
+  // Handle the click to display the AddTaskNodeDialog 
+  const handleShowAddTaskNodeDialog = useCallback(() => {
+    if (!(isIdle && activeTaskNodeId)) {
+      return;
+    }
+    setIsAddTaskNodeDialogVisible(true);
+  }, [isIdle, activeTaskNodeId]);
+
+  // Handle delete the active task node
+  const handleDeleteTaskNode = useCallback(() => {
+    if (!(isIdle && activeTaskNodeId)) {
+      return;
+    }
+
+    // todo: change to use shadcn/ui 
+    // Confirm deletion 
+    if (window.confirm(t('sidebar_btn_action_tree_delete_node_confirm_message'))) {
+      // Remove node from tree
+      const node = findTaskNode((node) => node.id === activeTaskNodeId, taskTree);
+      if (!node) {
+        console.warn(`Task node not found for task node delete - ${activeTaskNodeId}`);
+        showNotificationMessage(t('sidebar_btn_action_tree_delete_node_failed'), 3000, 'error');
+        return;
+      }
+      const root = deepRemoveNode((node) => node.id === activeTaskNodeId, taskTree);
+      updateTaskData(root);
+    }
+  }, [isIdle, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage]);
+
+  // Handle add task node submit
+  const onAddTaskNodeSubmit = useCallback(() => {
+    const nodeType = addNodeType;
+    const nodeName = addNodeName;
+    if (!nodeType) {
+      showNotificationMessage(t('sidebar_btn_action_tree_add_node_dialog_input_type_invalid'), 3000, 'error');
+      return;
+    }
+    if (!nodeName) {
+      showNotificationMessage(t('sidebar_btn_action_tree_add_node_dialog_input_name_invalid'), 3000, 'error');
+      return;
+    }
+
+    setIsAddTaskNodeDialogVisible(false);
+    // Reset form
+    setAddNodeType('task');
+    setAddNodeName('');
+
+    const node = findTaskNode((node) => node.id === activeTaskNodeId, taskTree);
+    if (!node) {
+      console.warn(`Task node not found for task node add - ${activeTaskNodeId}`);
+      showNotificationMessage(t('sidebar_btn_action_tree_add_node_failed'), 3000, 'error');
+      return;
+    }
+
+    const newNode: TaskNode = {
+      id: Utils.generateUUID(),
+      name: nodeName.trim(),
+      type: nodeType,
+      ...(nodeType === 'group' ? { children: [] } : { steps: [] })
+    } as TaskNode;
+
+    const root = deepAddNode((node) => node.id === activeTaskNodeId, taskTree, newNode);
+    updateTaskData(root);
+
+  }, [addNodeType, addNodeName, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage]);
+
+  // Handle add task node canceled
+  const handleAddTaskNodeCanceled = useCallback(() => {
+    setIsAddTaskNodeDialogVisible(false);
+    // Reset form
+    setAddNodeType('task');
+    setAddNodeName('');
+  }, []);
+
+  // Handle step selection
+  const handleStepSelect = useCallback((stepUid: string) => {
+    // Allow to unselect steps in any case
+    if (!stepUid) {
+      setSelectedStepUid('');
+      return;
+    }
+
+    if (!activeTaskId) {
+      console.warn('Invalid active task id for step selection');
+      return;
+    }
+
+    if (selectedStepUid === stepUid) {
+      return;
+    }
+
+    const task = findTaskNode((node) => node.id === activeTaskId && node.type === 'task', taskTree);
+    if (!task || task.type === 'group') {
+      console.warn(`Task not found for step selection - ${activeTaskId}`);
+      return;
+    }
+
+    const step = task.steps.find(s => s.uid === stepUid);
+    if (!step) {
+      console.warn(`Step not found for step selection - ${stepUid}`);
+      return;
+    }
+
+    setSelectedStepUid(stepUid);
+  }, [activeTaskId, selectedStepUid, taskTree]);
+
+  // Get step description
+  const getStepDescription = useCallback((step: Step): string => {
+    return step.description || 'new step';// todo: mlu
+  }, []);
+
+  // Check if step is editing
+  const isStepEditing = useCallback((uid: string) => {
+    return editingStepUid === uid;
+  }, [editingStepUid]);
+
+  // Cancel step edit
+  const cancelStepEdit = useCallback(() => {
+    setEditingStepUid('');
+    setEditedStepDescription('');
+  }, []);
+
+  // Handle step description double click
+  const handleStepDescriptionDblClick = useCallback((stepUid: string) => {
+    const step = activeSteps.find(s => s.uid === stepUid);
+    if (!step) {
+      console.warn(`Step not found for description edit - ${stepUid}`);
+      return;
+    }
+    setEditingStepUid(stepUid);
+    setEditedStepDescription(step.description || '');
+  }, [activeSteps]);
+
+  // Save step description
+  const saveStepDescription = useCallback((stepUid: string) => {
+    const trimmedDesc = editedStepDescription.trim();
+    if (trimmedDesc) {
+      const step = activeSteps.find(s => s.uid === stepUid);
+      if (step) {
+        step.description = trimmedDesc;
+      }
+    }
+    setEditingStepUid('');
+    setEditedStepDescription('');
+  }, [activeSteps, editedStepDescription]);
+
+  // Handle step result click
+  const handleStepResultClick = useCallback((_uid: string) => {
+    // todo: display results in a better UI
+    // setSidebarBottomType('result');
+  }, []);
+
+  // Handle add step
+  const handleAddStep = useCallback((script: string = '', description: string = '', edit: boolean = true) => {
+    if (!(isIdle && activeTaskId)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const newStep: Step = {
+      uid: Utils.generateUUID(),
+      type: 'script_step',
+      description: description || t('sidebar_btn_action_steps_add_step_new_step_label'),
+      script: script
+    };
+
+    if (selectedStepUid) {
+      // Add after selected step
+      const steps = [...task.steps];
+      const index = steps.findIndex(step => step.uid === selectedStepUid);
+      if (index >= 0) {
+        steps.splice(index, 0, newStep);
+        task.steps = steps;
+      }
+      else {
+        const steps = [...task.steps, newStep];
+        task.steps = steps;
+      }
+    } else {
+      const steps = [...task.steps, newStep];
+      task.steps = steps;
+    }
+
+    setSelectedStepUid(newStep.uid);
+
+    if (!edit) return newStep;
+
+    setEditingStepUid(newStep.uid);
+    setEditedStepDescription(newStep.description || '');
+    return newStep;
+  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode]);
+
+  // Handle remove step
+  const handleRemoveStep = useCallback(() => {
+    if (!(isIdle && activeTaskId && selectedStepUid)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const index = task.steps.findIndex(step => step.uid === selectedStepUid);
+    if (index < 0) {
+      return;
+    }
+
+    // Confirm deletion
+    if (window.confirm(t('sidebar_btn_action_steps_delete_step_confirm_message'))) {
+      const steps = [...task.steps];
+      // Remove the selected step
+      steps.splice(index, 1);
+      task.steps = steps;
+      // Update selection
+      if (steps.length > 0) {
+        const newIndex = index > task.steps.length - 1 ? task.steps.length - 1 : index;
+        setSelectedStepUid(task.steps[newIndex].uid);
+      } else {
+        setSelectedStepUid('');
+      }
+    }
+  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode]);
+
+  // Handle run script, no impact on the step
+  const handleRunScript = useCallback(async (script: string) => {
+    if (script.length === 0) {
+      return;
+    }
+    if (runningScript.length > 0) {
+      showNotificationMessage('Another script is running', 3000, 'warning');
+      return;
+    }
+    showNotificationMessage('Script run started');
+    const settings = SettingUtils.getSettings();
+    const engine = SidebarUtils.engine;
+    // update the current settings into the sandbox
+    try {
+      const engine = SidebarUtils.engine;
+      await engine.updateSettings();
+    } catch (error) {
+      console.error('handleRunScript: updateSettings failed', error);
+    }
+    setRunningScript(script);
+    try {
+      const result = await engine.runScript(script, true, settings.replaySettings.stepTimeout);
+      if (result) {
+        const msg = typeof result === 'object' ? JSON.stringify(result) : String(result);
+        showNotificationMessage(`Script run result: ${msg}`);
+      }
+      else {
+        showNotificationMessage('Script run completed');
+      }
+    }
+    catch (error) {
+      showNotificationMessage(error instanceof Error ? error.message : String(error), 3000, 'error');
+    }
+    finally {
+      setRunningScript('');
+    }
+  }, [showNotificationMessage]);
+
+  // Handle record
+  const handleRecord = useCallback(async () => {
+    if (!(isIdle && activeTaskId)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    if (!selectedStepUid) {
+      handleAddStep('', '', false);
+    }
+
+    setUiMode('record');
+
+    await SidebarUtils.engine.startRecording();
+  }, []);
+
+  /** 
+   * run a step
+   */
+  const runStep = async (step: Step): Promise<StepResult> => {
+    const settings = SettingUtils.getSettings();
+    const stepResult: StepResult = {
+      step_uid: step.uid,
+      step_description: step.description,
+      step_start_time: Date.now(),
+      step_end_time: -1,
+      status: 'passed',
+      result: undefined,
+      error: undefined,
+      screenshot: undefined
+    };
+    try {
+      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: undefined });
+      setSelectedStepUid(step.uid);
+      const result = await SidebarUtils.engine.runScript(step.script, true, settings.replaySettings.stepTimeout);
+      stepResult.step_end_time = Date.now();
+      stepResult.status = 'passed';
+      stepResult.result = result;
+      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: 'passed' });
+      setSelectedStepUid(step.uid);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+      stepResult.step_end_time = Date.now();
+      stepResult.status = 'failed';
+      stepResult.error = errorMessage;
+      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: errorMessage, last_status: 'failed' });
+      setSelectedStepUid(step.uid);
+    }
+    return stepResult;
+  }
+
+  /**
+   * run the give steps on the given taskId, update the step results into the taskResults
+   * @param taskId id of the task
+   * @param stepIds ids of steps to run
+   * @param stopOnError whether to stop on first error
+   */
+  const runSteps = useCallback(async (taskId: string, stepIds: string[], stopOnError: boolean = true): Promise<StepResult[]> => {
+    const replayAbortController = new AbortController();
+    setReplayAbortController(replayAbortController);
+    const signal = replayAbortController.signal;
+    const settings = SettingUtils.getSettings();
+
+    // get task and steps
+    const task = findTaskNode(node => node.id === taskId, taskTree);
+    if (!task || task.type !== 'task') {
+      throw new Error(`runSteps: task not found - ${taskId}`);
+    }
+    const steps = task.steps.filter(s => stepIds.includes(s.uid));
+    // prepare task result
+    let taskResult: TaskResult = {
+      task_id: task.id,
+      task_start_time: Date.now(),
+      task_end_time: -1,
+      status: 'passed',
+      last_error: undefined,
+      steps: []
+    };
+    const taskResultIndex = taskResults.findIndex(r => r.task_id === taskId);
+    if (taskResultIndex >= 0) {
+      taskResult = taskResults[taskResultIndex];
+      taskResult.task_start_time = Date.now();
+      taskResult.task_end_time = -1;
+    }
+    else {
+      taskResults.push(taskResult);
+    }
+
+    const stepResults: StepResult[] = [];
+
+    // update the current settings into the sandbox
+    try {
+      await SidebarUtils.engine.updateSettings();
+    } catch (error) {
+      console.error('runSteps: updateSettings failed', error);
+    }
+    // enable cdp if needed
+    const wasDebuggerAttached = isDebuggerAttached;
+    try {
+      if (settings.replaySettings.attachDebugger && !wasDebuggerAttached) {
+        await SidebarUtils.engine.attachDebugger();
+      }
+    } catch (error) {
+      console.error('runSteps: attachDebugger failed', error);
+    }
+
+    try {
+      for (const step of steps) {
+        if (signal.aborted) {
+          break;
+        }
+        // select the step on ui
+        setSelectedStepUid(step.uid);
+
+        const stepResult = await runStep(step);
+
+        const stepResultIndex = taskResult.steps.findIndex(s => s.step_uid === step.uid);
+        if (stepResultIndex < 0) {
+          taskResult.steps.push(stepResult);
+        }
+        else {
+          taskResult.steps[stepResultIndex] = stepResult;
+        }
+        stepResults.push(stepResult);
+
+        if (stopOnError && stepResult.status === 'failed') {
+          break;
+        }
+
+        if (signal.aborted) {
+          break;
+        }
+
+        if (settings.replaySettings.stepInterval > 0) {
+          await wait(settings.replaySettings.stepInterval, signal);
+        }
+      }
+    } catch (error) {
+      console.error('runSteps: runSteps failed', error);
+    }
+
+    // finalize task result
+    taskResult.task_end_time = Date.now();
+    const lastErrorStep = [...taskResult.steps].reverse().find(r => r.status === 'failed');
+    if (lastErrorStep) {
+      taskResult.status = 'failed';
+      taskResult.last_error = lastErrorStep.error;
+    }
+    else {
+      taskResult.status = 'passed';
+    }
+
+    // disable cdp if needed
+    try {
+      if (settings.replaySettings.attachDebugger && !wasDebuggerAttached) {
+        await SidebarUtils.engine.detachDebugger();
+      }
+    } catch (error) {
+      console.error('runSteps: detachDebugger failed', error);
+    }
+
+    return stepResults;
+  }, [taskTree]);
+
+  // Handle replay
+  const handleReplay = useCallback(async () => {
+    if (!(isIdle && activeTaskId)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task' || task.steps.length <= 0) {
+      return;
+    }
+
+    setUiMode('replay');
+
+    const pre_selectedStepUid = selectedStepUid;
+    const stepIds = task.steps.map(s => s.uid);
+
+    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
+
+    const stepResults = await runSteps(task.id, stepIds);
+
+    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
+    if (lastErrorStep) {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
+    }
+    else {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
+    }
+
+    setSelectedStepUid(pre_selectedStepUid);
+
+    setUiMode('idle');
+  }, [isIdle, activeTaskId, selectedStepUid, taskTree]);
+
+  // Handle replay from step
+  const handleReplayFromStep = useCallback(async () => {
+    if (!(isIdle && activeTaskId && selectedStepUid)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const pre_selectedStepUid = selectedStepUid;
+    const selectedStepIndex = activeSteps.findIndex(s => s.uid === pre_selectedStepUid);
+    if (selectedStepIndex < 0) {
+      return;
+    }
+
+    const steps = activeSteps.slice(selectedStepIndex);
+    if (steps.length <= 0) {
+      return;
+    }
+
+    setUiMode('replayFromStep');
+
+    const stepIds = steps.map(s => s.uid);
+
+    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
+
+    const stepResults = await runSteps(task.id, stepIds);
+
+    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
+    if (lastErrorStep) {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
+    }
+    else {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
+    }
+
+    setSelectedStepUid(pre_selectedStepUid);
+
+    setUiMode('idle');
+  }, [isIdle, activeTaskId, selectedStepUid, taskTree, activeSteps]);
+
+  // Handle stop
+  const handleStop = useCallback(async () => {
+    if (!(isRecording || isReplaying)) {
+      return;
+    }
+
+    if (replayAbortController) {
+      replayAbortController.abort();
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_stopped'));
+    }
+
+    if (isRecording) {
+      await SidebarUtils.engine.stopRecording();
+      showNotificationMessage(t('sidebar_btn_action_steps_record_stopped'));
+    }
+
+    setUiMode('idle');
+  }, [isRecording, isReplaying, replayAbortController]);
+
+  // Toggle CDP attach
+  const toggleCDPAttach = useCallback(async () => {
+    try {
+      const engine = SidebarUtils.engine;
+      if (isDebuggerAttached) {
+        await engine.detachDebugger();
+      }
+      else {
+        await engine.attachDebugger();
+      }
+      setIsDebuggerAttached(!isDebuggerAttached);
+    }
+    catch (error) {
+      console.error('toggleCDPAttach failed', error);
+      const msg = isDebuggerAttached ? t('sidebar_btn_action_steps_debugger_detach_failed') : t('sidebar_btn_action_steps_debugger_attach_failed');
+      showNotificationMessage(msg, 3000, 'error');
+    }
+
+  }, [isDebuggerAttached]);
+
+  // Open AI dialog
+  const openAIDialog = useCallback(() => {
+    setIsAIDialogVisible(true);
+  }, []);
+
+  // Toggle bottom expanded
+  const toggleBottomExpanded = useCallback(() => {
+    setIsBottomExpanded(!isBottomExpanded);
+  }, [isBottomExpanded]);
+
+  // Toggle inspect mode
+  const handleToggleInspectMode = useCallback(async () => {
+    const engine = SidebarUtils.engine;
+    await engine.toggleInspectMode();
+    setIsInspectStarted(!isInspectStarted);
+  }, [isInspectStarted]);
+
+  // Run script with new step
+  const runScriptWithNewStep = useCallback(async (script: string, newStep: boolean) => {
+    if (!script || script.length === 0) {
+      throw new Error('Step script is empty');
+    }
+    if (!activeTaskId) {
+      throw new Error('No active task selected, please select a task first');
+    }
+    const taskId = activeTaskId;
+    const task = findTaskNode(node => node.id === taskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+    if (newStep) {
+      const step = handleAddStep(script, '', false);
+      if (!step) {
+        throw new Error('No step after adding new step');
+      }
+      const stepResults = await runSteps(taskId, [step.uid]);
+      setSelectedStepUid(step.uid);
+      const result = stepResults[0].status === 'passed' ? stepResults[0].result : stepResults[0].error;
+      return result;
+    }
+    else {
+      const settings = SettingUtils.getSettings();
+      const result = await SidebarUtils.engine.runScript(script, true, settings.replaySettings.stepTimeout);
+      return result;
+    }
+  }, [activeTaskId, taskTree]);
+
+  const createDemoTaskAsset = useCallback(() => {
+    const asset = TaskUtils.createNewTaskAsset();
+    const task = findTaskNode(n => n.type === 'task', asset.root);
+    if (task?.type !== 'task') {
+      throw new Error('Fail to create Demo Task asset');
+    }
+    const sauceDemoSteps = [
+      {
+        description: '1. Navigate to demo page',
+        script: `const url = 'https://www.saucedemo.com/';
+await page.navigate(url);
+await page.bringToFront();
+await page.sync();`
+      },
+      {
+        description: '2. Login',
+        script: `await page.element('#login_credentials').first().text().nth(1).highlight();
+const username = await page.element('#login_credentials').first().text().nth(1).textContent();
+
+const password = await page.element().filter({ name: 'data-test', value: 'login-password', type: 'attribute' }).first().text().nth(1).textContent();
+await page.element().filter({ name: 'data-test', value: 'login-password', type: 'attribute' }).first().text().nth(1).highlight();
+
+await page.element('#user-name').highlight();
+await page.element('#user-name').fill(username);
+
+await page.element('#password').highlight();
+await page.element('#password').fill(password);
+
+await page.element('#login-button').highlight();
+await page.element('#login-button').click();
+
+await page.sync();`
+      },
+      {
+        description: '3. Buy Backpack',
+        script: `await page.element('div .inventory_item_name ').filter({ name: 'textContent', value: /Backpack/ }).highlight();
+await page.element('div .inventory_item_name ').filter({ name: 'textContent', value: /Backpack/ }).click();
+await page.sync();
+const count = await page.element('button#add-to-cart').count();
+if (count === 1) {
+  await page.element('button#add-to-cart').highlight();
+  await page.element('button#add-to-cart').click();
+}
+await page.element('#back-to-products').highlight();
+await page.element('#back-to-products').click();
+await page.sync();`
+      },
+      {
+        description: '4. Buy Bike Light & Fleece Jacket',
+        script: `const items = await page.element('div .inventory_item_description').all();
+const names = [/Bike Light/, /Fleece Jacket/];
+for (const item of items) {
+  for (const name of names) {
+    if (await item.text(name).count() === 1 && await item.text('Add to cart').count() === 1) {
+      await item.text(name).highlight();
+      await item.text('Add to cart').highlight();
+      await item.text('Add to cart').click();
+    }
+  }
+}
+const itemCount = await page.element('#shopping_cart_container > a > span').textContent();
+expect(itemCount).toEqual('3');
+await page.element('#shopping_cart_container > a').highlight();
+await page.element('#shopping_cart_container > a').click();
+await page.sync();`
+      },
+      {
+        description: '5. Checkout',
+        script: `await page.element('#checkout').highlight();
+await page.element('#checkout').click();
+await page.sync();
+await page.element('input#first-name').highlight();
+await page.element('input#first-name').fill('first_name');
+await page.element('input#last-name').highlight();
+await page.element('input#last-name').fill('last_name');
+await page.element('input#postal-code').highlight();
+await page.element('input#postal-code').fill('111111');
+await page.element('#continue').highlight();
+await page.element('#continue').click();
+await page.sync();`
+      },
+      {
+        description: '6. Verify and Finish',
+        script: `const elems = await page.element('div.inventory_item_price').all();
+let total_price = 0;
+for (const elem of elems) {
+  await elem.highlight();
+  const textContent = await elem.textContent();
+  const index = textContent.indexOf('$');
+  const price = Number(textContent.slice(index + 1));
+  total_price += price;
+}
+await page.element('div.summary_subtotal_label').highlight();
+const summary_total_text = await page.element('div.summary_subtotal_label').textContent();
+const index = summary_total_text.indexOf('$');
+const summary_total_price = Number(summary_total_text.slice(index + 1));
+expect(total_price).toBe(summary_total_price);
+
+await page.element('#finish').highlight();
+await page.element('#finish').click();`
+      },
+      {
+        description: '7. Back Home',
+        script: `await page.element('#back-to-products').highlight();
+await page.element('#back-to-products').click();`
+      },
+      {
+        description: '8. Reset and Logout',
+        script: `await page.element('#react-burger-menu-btn').highlight();
+await page.element('#react-burger-menu-btn').click();
+let exists = await page.element('div.bm-menu').text('Reset App State').count() === 1;
+while (!exists) {
+  await wait(500);
+  exists = await page.element('div.bm-menu').text('Reset App State').count() === 1;
+}
+await page.element('div.bm-menu').text('Reset App State').highlight();
+await page.element('div.bm-menu').text('Reset App State').click();
+await page.element('div.bm-menu').text('Logout').highlight();
+await page.element('div.bm-menu').text('Logout').click();`
+      },
+    ];
+    const demoSteps = sauceDemoSteps;
+    for (const stepInfo of demoSteps) {
+      const step: Step = {
+        uid: Utils.generateUUID(),
+        type: 'script_step',
+        description: stepInfo.description,
+        script: stepInfo.script
+      };
+      task.steps.push(step);
+    }
+    return asset;
+  }, []);
+
+  // Handle demo task
+  const handleDemoTask = useCallback(() => {
+    if (!isIdle) {
+      return;
+    }
+
+    const task = findTaskNode(n => n.type === 'task', taskTree);
+
+    const loadDemoTask = () => {
+      const asset = createDemoTaskAsset();
+      updateTaskData(asset.root, asset.results);
+    };
+
+    if (task) {
+      if (window.confirm(t('sidebar_btn_action_load_demo_confirm_text'))) {
+        loadDemoTask();
+      }
+    } else {
+      loadDemoTask();
+    }
+  }, [isIdle, findTaskNode, updateTaskData]);
+
+  // Handle load task
+  const handleLoadTask = useCallback(() => {
+    if (!isIdle) {
+      return;
+    }
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.gogogo';
+    fileInput.addEventListener('change', async (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (!file) {
+        return;
+      }
+      try {
+        const content = await file.text();
+        const asset = JSON.parse(content);
+        if (TaskUtils.isTaskAsset(asset)) {
+          updateAllTaskStepResults(asset.root, asset.results);
+          updateTaskData(asset.root, asset.results);
+        } else {
+          showNotificationMessage(t('sidebar_btn_action_load_error_invalid_file'), 3000, 'error');
+        }
+      } catch (error) {
+        console.error(error);
+        showNotificationMessage(t('sidebar_btn_action_load_error'), 3000, 'error');
+      }
+    });
+
+    fileInput.click();
+  }, [isIdle, updateAllTaskStepResults, updateTaskData, showNotificationMessage]);
+
+  // Handle save task
+  const handleSaveTask = useCallback(async () => {
+    if (!isIdle) {
+      return;
+    }
+
+    if (!taskAsset) {
+      return;
+    }
+
+    const asset: TaskAsset = { ...taskAsset };
+    const jsonContent = JSON.stringify(asset, null, 2);
+
+    try {
+      await chrome.storage.local.set({
+        lastAsset: jsonContent
+      });
+      showNotificationMessage(t('sidebar_btn_action_save_notification'));
+    } catch (error) {
+      console.error(error);
+      showNotificationMessage(t('sidebar_btn_action_save_error'), 3000, 'error');
+    }
+  }, [isIdle, taskAsset, showNotificationMessage]);
+
+  // Handle download task
+  const handleDownloadTask = useCallback(() => {
+    if (!isIdle) {
+      return;
+    }
+
+    if (!taskAsset) {
+      return;
+    }
+
+    try {
+      const asset = { ...taskAsset };
+
+      const jsonContent = JSON.stringify(asset, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.download = 'tasks.gogogo';
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      showNotificationMessage(t('sidebar_btn_action_download_error'), 3000, 'error');
+    }
+  }, [isIdle, taskTree, showNotificationMessage]);
+
+  // Handle open help document
+  const handleOpenHelpDocument = useCallback(async () => {
+    if (!isIdle) {
+      return;
+    }
+    try {
+      const docURL = 'https://github.com/sagibrant/gogogo-docs';
+      await chrome.tabs.create({ url: docURL });
+    } catch (error) {
+      console.error(error);
+      showNotificationMessage(t('sidebar_btn_action_help_docs_error_failedToOpenHelpDocument'), 3000, 'error');
+    }
+  }, [isIdle, showNotificationMessage]);
+
+  // Handle drag start
+  const handleDragStart = useCallback((stepUid: string) => {
+    setDraggedStepUid(stepUid);
+  }, []);
+
+  // Handle drag over
+  const handleDragOver = useCallback((stepUid: string) => {
+    // Prevent default to allow drop
+  }, []);
+
+  // Handle drop
+  const handleDrop = useCallback((targetStepUid: string) => {
+    if (!draggedStepUid || draggedStepUid === targetStepUid) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId && node.type === 'task', taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const steps = [...task.steps];
+    const draggedIndex = steps.findIndex(step => step.uid === draggedStepUid);
+    const targetIndex = steps.findIndex(step => step.uid === targetStepUid);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    // Remove dragged step from its original position
+    const [draggedStep] = steps.splice(draggedIndex, 1);
+    // Insert it at the target position
+    steps.splice(targetIndex, 0, draggedStep);
+
+    // Update task steps
+    task.steps = steps;
+    setDraggedStepUid('');
+  }, [draggedStepUid, activeTaskId, taskTree, findTaskNode]);
+
+  // Handle steps panel click
+  const handleStepsPanelClick = useCallback(() => {
+    // Deselect any selected step when clicking on the panel background
+  }, []);
+
+  // Initialize component
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // Load last asset from storage
+        const result = await chrome.storage.local.get(['lastAsset']);
+        const content = result.lastAsset || '';
+        let asset: TaskAsset = emptyTaskAsset;
+        if (content && typeof content === 'string') {
+          try {
+            const parsed = JSON.parse(content);
+            if (TaskUtils.isTaskAsset(parsed)) {
+              asset = parsed;
+            }
+          } catch (error) {
+            console.warn('Failed to parse lastAsset:', error);
+          }
+        }
+
+        updateAllTaskStepResults(asset.root, asset.results);
+        updateTaskData(asset.root, asset.results);
+
+        // Check if debugger is attached
+        const engine = SidebarUtils.engine;
+        const attached = await engine.isDebuggerAttached();
+        setIsDebuggerAttached(attached);
+
+        // Check if recording is in progress
+        const isRecording = await engine.isRecording();
+        if (isRecording) {
+          await engine.stopRecording();
+        }
+
+        // Set up event listeners
+        SidebarUtils.handler.on('nodeInspected', async ({ details }: any) => {
+          if (selectedStep) {
+            selectedStep.objects = [details];
+          }
+          setIsInspectStarted(!isInspectStarted);
+        });
+
+        SidebarUtils.handler.on('stepRecorded', ({ step }: any) => {
+          if (selectedStep) {
+            const scripts: string[] = [];
+            if (step.browserScript) scripts.push(step.browserScript);
+            if (step.pageScript) scripts.push(step.pageScript);
+            if (step.frameScript) scripts.push(step.frameScript);
+            if (step.elementScript) scripts.push(step.elementScript);
+            if (step.actionScript) scripts.push(step.actionScript);
+            const stepScript = (step.await ? 'await ' : '') + scripts.join('.') + ';';
+            if (stepScriptEditorRef.current) {
+              stepScriptEditorRef.current.addStepScript(stepScript);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Initialization error:', error);
+      }
+    };
+
+    init();
+  }, [updateAllTaskStepResults, updateTaskData, selectedStep]);
+
+  return (
+    <div className="sidebar-container">
+      {/* Toaster for notifications */}
+      <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
+
+      {/* Add Task Node Dialog */}
+      {isAddTaskNodeDialogVisible && (
+        <div className="dialog-overlay">
+          <div className="dialog-content" style={{ width: '20rem' }}>
+            <div className="dialog-header">
+              <h2>{t('sidebar_btn_action_tree_add_node_dialog_header')}</h2>
+            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              onAddTaskNodeSubmit();
+            }} className="flex justify-center flex-col gap-4">
+              <div className="flex items-center gap-4 mb-4">
+                <label htmlFor="add_new_node_type" className="font-semibold w-24">
+                  {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
+                </label>
+                <select
+                  id="add_new_node_type"
+                  value={addNodeType}
+                  onChange={(e) => setAddNodeType(e.target.value as 'task' | 'group')}
+                  className="flex-auto"
+                >
+                  {taskNodeTypes.map(type => (
+                    <option key={type.code} value={type.code}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-4 mb-8">
+                <label htmlFor="add_new_node_name" className="font-semibold w-24">
+                  {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
+                </label>
+                <input
+                  type="text"
+                  id="add_new_node_name"
+                  value={addNodeName}
+                  onChange={(e) => setAddNodeName(e.target.value)}
+                  className="flex-auto"
+                  placeholder="Enter name"
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button type="submit" className="btn secondary">
+                  {t('sidebar_dialog_ok')}
+                </button>
+                <button type="button" className="btn" onClick={handleAddTaskNodeCanceled}>
+                  {t('sidebar_dialog_cancel')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* AI Dialog */}
+      {isAIDialogVisible && (
+        <div className="dialog-overlay">
+          <div className="dialog-content" style={{ width: '20rem' }}>
+            <div className="dialog-header">
+              <h2>{t('sidebar_btn_action_steps_ai_assistant_header')}</h2>
+            </div>
+            <StepAIAgent runScript={runScriptWithNewStep} />
+          </div>
+        </div>
+      )}
+
+      {/* Header with menus */}
+      <header className="sidebar-header">
+        {/* Task menus */}
+        <div className={`menu-bar ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
+          <button className="menu-btn" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
+            {t('sidebar_btn_label_demo')}
+          </button>
+          <span className="menu-divider"></span>
+          <button className="menu-btn" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
+            {t('sidebar_btn_label_load')}
+          </button>
+          <span className="menu-divider"></span>
+          <button className="menu-btn" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
+            {t('sidebar_btn_label_save')}
+          </button>
+          <span className="menu-divider"></span>
+          <button className="menu-btn" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
+            {t('sidebar_btn_title_download')}
+          </button>
+          <span className="menu-divider"></span>
+          <button className="menu-btn" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
+            {t('sidebar_btn_label_help')}
+          </button>
+        </div>
+      </header>
+
+      {/* Middle section with task tree and steps panel */}
+      <main className="sidebar-middle">
+        {/* Task tree panel with toggle */}
+        <div className={`task-tree-panel ${isTreeCollapsed ? 'collapsed' : ''} ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
+          {/* Task tree controls */}
+          <div className="tree-controls">
+            <button
+              className="command-btn"
+              disabled={!isIdle}
+              onClick={handleToggleTreeClick}
+              title={isTreeCollapsed ? t('sidebar_btn_title_tree_expand') : t('sidebar_btn_title_tree_collapse')}
+            >
+              {isTreeCollapsed ? '→' : '←'}
+            </button>
+            {!isTreeCollapsed && (
+              <>
+                <button
+                  className="command-btn"
+                  disabled={!(activeTaskNodeId && isIdle)}
+                  onClick={handleShowAddTaskNodeDialog}
+                  title={t('sidebar_btn_title_tree_add_node')}
+                >
+                  +
+                </button>
+                <button
+                  className="command-btn"
+                  disabled={!(activeTaskNodeId && isIdle)}
+                  onClick={handleDeleteTaskNode}
+                  title={t('sidebar_btn_title_tree_delete_node')}
+                >
+                  -
+                </button>
+              </>
+            )}
+          </div>
+          {/* Task tree container */}
+          {!isTreeCollapsed && (
+            <div className="tree-container">
+              <TreeNode
+                node={taskTree}
+                activeNodeId={activeTaskNodeId}
+                onNodeSelected={handleTaskNodeSelect}
+                onTaskSelected={handleTaskSelect}
+                onRenameNode={handleTaskNodeRename}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Steps panel */}
+        <div className="steps-panel" onClick={handleStepsPanelClick}>
+          {/* Steps controls */}
+          <div className="steps-controls">
+            <button
+              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              disabled={!(activeTaskId && isIdle)}
+              onClick={() => handleAddStep()}
+              title={t('sidebar_btn_title_steps_add_step')}
+            >
+              +
+            </button>
+            <button
+              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              disabled={!(activeTaskId && isIdle && selectedStepUid)}
+              onClick={handleRemoveStep}
+              title={t('sidebar_btn_title_steps_delete_step')}
+            >
+              -
+            </button>
+            <span className="menu-divider"></span>
+            <button
+              className="command-btn"
+              disabled={!(activeTaskId && isIdle)}
+              onClick={handleRecord}
+              title={t('sidebar_btn_title_steps_record')}
+            >
+              ◉
+            </button>
+            <span className="menu-divider"></span>
+            <button
+              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              disabled={!(activeTaskId && isIdle)}
+              onClick={handleReplay}
+              title={t('sidebar_btn_title_steps_replay')}
+            >
+              ▶
+            </button>
+            <button
+              className="command-btn"
+              disabled={!(activeTaskId && isIdle && selectedStepUid)}
+              onClick={handleReplayFromStep}
+              title={t('sidebar_btn_title_steps_replayFromStep')}
+            >
+              ▷
+            </button>
+            <span className="menu-divider"></span>
+            <button
+              className="command-btn"
+              disabled={!(activeTaskId && (isReplaying || isRecording))}
+              onClick={handleStop}
+              title={t('sidebar_btn_title_steps_stop')}
+            >
+              ■
+            </button>
+            <span className="menu-divider"></span>
+            <button
+              className="command-btn"
+              disabled={!(isIdle)}
+              onClick={toggleCDPAttach}
+              title={isDebuggerAttached ? t('sidebar_btn_title_steps_debugger_detach') : t('sidebar_btn_title_steps_debugger_attach')}
+            >
+              {isDebuggerAttached ? '☍' : '☌'}
+            </button>
+            <span className="menu-divider"></span>
+            <button
+              className="command-btn"
+              disabled={!(isIdle)}
+              onClick={openAIDialog}
+              title={t('sidebar_btn_title_steps_ai_assistant')}
+            >
+              AI
+            </button>
+          </div>
+          {/* Steps container */}
+          <div className={`steps-container ${isRecording || isReplaying ? 'readonly' : ''}`}>
+            {activeSteps.map(step => (
+              <div
+                key={step.uid}
+                draggable={!!(activeTaskId && isIdle)}
+                className={`step-card ${selectedStepUid === step.uid ? 'selected' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStepSelect(step.uid);
+                }}
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  handleDragStart(step.uid);
+                }}
+                onDragOver={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleDragOver(step.uid);
+                }}
+                onDrop={(e) => {
+                  e.stopPropagation();
+                  handleDrop(step.uid);
+                }}
+              >
+                <div className="step-type">
+                  <span className="step-type-icon">≡</span>
+                </div>
+                {!isStepEditing(step.uid) ? (
+                  <div
+                    className="step-description"
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      handleStepDescriptionDblClick(step.uid);
+                    }}
+                  >
+                    {getStepDescription(step)}
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    className="step-description-edit"
+                    value={editedStepDescription}
+                    onChange={(e) => setEditedStepDescription(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveStepDescription(step.uid);
+                      if (e.key === 'Escape') cancelStepEdit();
+                    }}
+                    onBlur={() => saveStepDescription(step.uid)}
+                    autoFocus
+                  />
+                )}
+                <div
+                  className={`step-status ${step.last_status || 'pending'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStepResultClick(step.uid);
+                  }}
+                  title={step.last_error || ''}
+                >
+                  {step.last_status === 'passed' ? '✓' : (step.last_status === 'failed' ? '✗' : '○')}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* Bottom section with tabs */}
+      <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
+        <div className="bottom-controls">
+          <button
+            className="bottom-control-btn"
+            disabled={!(activeTaskId && selectedStepUid && isIdle)}
+            onClick={toggleBottomExpanded}
+            title={isBottomExpanded ? t('sidebar_btn_title_bottom_collapse') : t('sidebar_btn_title_bottom_expand')}
+          >
+            ⇵
+          </button>
+        </div>
+
+        {selectedStep && (
+          <div className="sidebar-bottom-content content-panel">
+            <StepScriptEditor
+              step={selectedStep}
+              key={selectedStep.uid}
+              inspectedNodeDetails={inspectedNodeDetails}
+              onRunScript={handleRunScript}
+              onShowNotificationMessage={showNotificationMessage}
+              getPageHtml={() => Promise.resolve('')}
+              getPageUrl={() => Promise.resolve('')}
+              toggleInspectMode={handleToggleInspectMode}
+            />
+          </div>
+        )}
+      </footer>
+    </div>
+  );
+};

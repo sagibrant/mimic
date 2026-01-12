@@ -160,7 +160,7 @@ module.exports = (env) => {
       'frame-in-main-loader': path.resolve(rootDir, 'src/content/FrameInMAINLoader.ts'),
       'ui/action/main': path.resolve(rootDir, 'src/ui/action/index.tsx'),
       'ui/options/main': path.resolve(rootDir, 'src/ui/options/index.tsx'),
-      'ui/sidebar/main': path.resolve(rootDir, 'src/ui/sidebar/main.ts'),
+      'ui/sidebar/main': path.resolve(rootDir, 'src/ui/sidebar/index.tsx'),
       'ui/sidebar/sandbox': path.resolve(rootDir, 'src/ui/sidebar/sandbox.ts')
     },
 

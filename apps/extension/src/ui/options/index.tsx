@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './App.css';
+import { SettingUtils } from '@gogogo/shared';
+
+await SettingUtils.init();
 
 const root = ReactDOM.createRoot(
   document.getElementById('app') as HTMLElement
