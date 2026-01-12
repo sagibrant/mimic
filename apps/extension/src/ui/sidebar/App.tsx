@@ -50,8 +50,8 @@ export default function App() {
       if (node && match(node)) {
         return node;
       }
-      if (node?.type === 'group' && (node as TaskGroup).children.length > 0) {
-        nodes = [...nodes, ...(node as TaskGroup).children];
+      if (node?.type === 'group' && node.children.length > 0) {
+        nodes = [...nodes, ...node.children];
       }
     }
     return null;
@@ -81,12 +81,9 @@ export default function App() {
     if (node.type === 'group' && node.children && node.children.length > 0) {
       const children = [];
       for (const child of node.children) {
-        if (child.type === 'group') {
+        if (!match(child)) {
           const newChild = deepRemoveNode(match, child);
           children.push(newChild);
-        }
-        else if (!match(child)) {
-          children.push(child);
         }
       }
       return {
@@ -248,6 +245,8 @@ export default function App() {
   const updateTaskData = useCallback((root?: TaskNode) => {
     if (root) {
       setTaskTree(root);
+      taskAsset.root = root;
+      setTaskAsset(taskAsset);
     }
     root = root || taskTree;
 
@@ -286,7 +285,7 @@ export default function App() {
         setSelectedStepUid('');
       }
     }
-  }, [taskAsset, taskTree]);
+  }, [taskAsset, taskTree, activeTaskNodeId, activeTaskId, selectedStepUid]);
 
   /** ==================================================================================================================== */
   /** ==================================================== menu btns ===================================================== */
