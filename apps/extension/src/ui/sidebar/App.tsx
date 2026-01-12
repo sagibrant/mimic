@@ -1485,9 +1485,9 @@ export default function App() {
 
       {/* Bottom section with tabs */}
       <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
-        <div className="bottom-controls">
+        <div className="sidebar-bottom-controls">
           <button
-            className="bottom-control-btn"
+            className="sidebar-bottom-control-btn"
             disabled={!(activeTaskId && selectedStepUid && isIdle)}
             onClick={toggleBottomExpanded}
             title={isBottomExpanded ? t('sidebar_btn_title_bottom_collapse') : t('sidebar_btn_title_bottom_expand')}
@@ -1497,7 +1497,7 @@ export default function App() {
         </div>
 
         {selectedStep && (
-          <div className="sidebar-bottom-content content-panel">
+          <div className="sidebar-bottom-content">
             <StepScriptEditor
               key={selectedStep.uid}
               initialScriptContent={selectedStep.script}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useImperativeHandle, useCallback } from 'react';
 import './StepScriptEditor.css';
-import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor } from '@codemirror/view';
+import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, scrollPastEnd } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { javascript } from '@codemirror/lang-javascript';
 import { autocompletion, type Completion } from '@codemirror/autocomplete';
@@ -226,6 +226,7 @@ ${codeContent}
           maxRenderedOptions: 20
         }),
         EditorView.lineWrapping,
+        scrollPastEnd(),
         isDark ? coolGlow : ayuLight,
         EditorView.updateListener.of(update => {
           if (update.docChanged) {
