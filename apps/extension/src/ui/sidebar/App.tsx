@@ -109,7 +109,7 @@ export default function App() {
       const children = [...node.children];
       const index = children.findIndex(child => match(child));
       if (index >= 0) {
-        children.splice(index, 0, newNode);
+        children.splice(index + 1, 0, newNode);
         return {
           ...node,
           children
@@ -574,7 +574,7 @@ export default function App() {
       const steps = [...task.steps];
       const index = steps.findIndex(step => step.uid === selectedStepUid);
       if (index >= 0) {
-        steps.splice(index, 0, newStep);
+        steps.splice(index + 1, 0, newStep);
         task.steps = steps;
       }
       else {
