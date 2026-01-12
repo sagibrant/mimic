@@ -285,8 +285,39 @@ export default function App() {
         setSelectedStepUid('');
       }
     }
-  }, [taskAsset, taskTree, activeTaskNodeId, activeTaskId, selectedStepUid]);
+  }, [taskAsset, taskTree, activeTaskNodeId, activeTaskId, selectedStepUid, findTaskNode]);
 
+  /** ==================================================================================================================== */
+  /** =================================================== alert dialog =================================================== */
+  /** ==================================================================================================================== */
+  /**
+   * Custom confirm dialog using AlertDialog
+   */
+  const showConfirmDialog = useCallback((title: string, description: string, onConfirm: () => void) => {
+    setAlertDialogTitle(title);
+    setAlertDialogDescription(description);
+    confirmCallbackRef.current = onConfirm;
+    setIsAlertDialogOpen(true);
+  }, []);
+
+  /**
+   * Handle confirm dialog confirm button click
+   */
+  const handleConfirmDialogConfirm = useCallback(() => {
+    if (confirmCallbackRef.current) {
+      confirmCallbackRef.current();
+      confirmCallbackRef.current = null;
+    }
+    setIsAlertDialogOpen(false);
+  }, []);
+
+  /**
+   * Handle confirm dialog cancel button click
+   */
+  const handleConfirmDialogCancel = useCallback(() => {
+    confirmCallbackRef.current = null;
+    setIsAlertDialogOpen(false);
+  }, []);
   /** ==================================================================================================================== */
   /** ==================================================== menu btns ===================================================== */
   /** ==================================================================================================================== */
@@ -315,7 +346,7 @@ export default function App() {
     } else {
       loadDemoTask();
     }
-  }, [isIdle, taskTree, updateTaskData]);
+  }, [isIdle, taskTree, updateTaskData, showConfirmDialog, t, findTaskNode]);
 
   // Handle load task
   const handleLoadTask = useCallback(() => {
@@ -351,7 +382,7 @@ export default function App() {
     });
 
     fileInput.click();
-  }, [isIdle, updateAllTaskStepResults, updateTaskData, showNotificationMessage]);
+  }, [isIdle, updateAllTaskStepResults, updateTaskData, showNotificationMessage, t]);
 
   // Handle save task
   const handleSaveTask = useCallback(async () => {
@@ -377,7 +408,7 @@ export default function App() {
       console.error(error);
       showNotificationMessage(t('sidebar_btn_action_save_error'), 3000, 'error');
     }
-  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage]);
+  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage, t]);
 
   // Handle download task
   const handleDownloadTask = useCallback(() => {
@@ -408,7 +439,7 @@ export default function App() {
       console.error(error);
       showNotificationMessage(t('sidebar_btn_action_download_error'), 3000, 'error');
     }
-  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage]);
+  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage, t]);
 
   // Handle open help document
   const handleOpenHelpDocument = useCallback(async () => {
@@ -422,7 +453,7 @@ export default function App() {
       console.error(error);
       showNotificationMessage(t('sidebar_btn_action_help_docs_error_failedToOpenHelpDocument'), 3000, 'error');
     }
-  }, [isIdle, showNotificationMessage]);
+  }, [isIdle, showNotificationMessage, t]);
 
   /** ==================================================================================================================== */
   /** ==================================================== task tree ===================================================== */
@@ -448,7 +479,7 @@ export default function App() {
       return;
     }
     setActiveTaskNodeId(nodeId);
-  }, [isIdle, uiMode, taskTree]);
+  }, [isIdle, uiMode, taskTree, findTaskNode]);
 
   // Handle task node rename
   const handleTaskNodeRename = useCallback((nodeId: string, newName: string) => {
@@ -465,7 +496,7 @@ export default function App() {
 
     const root = deepUpdateNode((node) => node.id === nodeId, taskTree, { name: newName });
     updateTaskData(root);
-  }, [isIdle, uiMode, taskTree, updateTaskData]);
+  }, [isIdle, uiMode, taskTree, updateTaskData, findTaskNode, deepUpdateNode]);
 
   // Handle task selection
   const handleTaskSelect = useCallback((taskId: string) => {
@@ -484,7 +515,7 @@ export default function App() {
     if (task.steps.findIndex(s => s.uid === selectedStepUid) < 0) {
       setSelectedStepUid('');
     }
-  }, [isIdle, uiMode, taskTree]);
+  }, [isIdle, uiMode, taskTree, findTaskNode, selectedStepUid]);
 
   // Handle the click to display the AddTaskNodeDialog 
   const handleShowAddTaskNodeDialog = useCallback(() => {
@@ -521,7 +552,7 @@ export default function App() {
         updateTaskData(root);
       }
     );
-  }, [isIdle, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage]);
+  }, [isIdle, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage, showConfirmDialog, t, findTaskNode, deepRemoveNode]);
 
   // Handle add task node submit
   const onAddTaskNodeSubmit = useCallback(() => {
@@ -558,7 +589,7 @@ export default function App() {
     const root = deepAddNode((node) => node.id === activeTaskNodeId, taskTree, newNode);
     updateTaskData(root);
 
-  }, [addNodeType, addNodeName, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage]);
+  }, [addNodeType, addNodeName, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage, t, findTaskNode, deepAddNode]);
 
   // Handle add task node canceled
   const handleAddTaskNodeCanceled = useCallback(() => {
@@ -613,7 +644,7 @@ export default function App() {
     setEditingStepUid(newStep.uid);
     setEditedStepDescription(newStep.description || '');
     return newStep;
-  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode]);
+  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode, t, taskTree]);
 
   // Handle remove step
   const handleRemoveStep = useCallback(() => {
@@ -649,7 +680,7 @@ export default function App() {
         }
       }
     );
-  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode]);
+  }, [isIdle, activeTaskId, selectedStepUid, findTaskNode, showConfirmDialog, t, taskTree]);
 
   // Handle record
   const handleRecord = useCallback(async () => {
@@ -669,264 +700,12 @@ export default function App() {
     setUiMode('record');
 
     await SidebarUtils.engine.startRecording();
-  }, []);
-
-  // Handle replay
-  const handleReplay = useCallback(async () => {
-    if (!(isIdle && activeTaskId)) {
-      return;
-    }
-
-    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
-    if (!task || task.type !== 'task' || task.steps.length <= 0) {
-      return;
-    }
-
-    setUiMode('replay');
-
-    const pre_selectedStepUid = selectedStepUid;
-    const stepIds = task.steps.map(s => s.uid);
-
-    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
-
-    const stepResults = await runSteps(task.id, stepIds);
-
-    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
-    if (lastErrorStep) {
-      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
-    }
-    else {
-      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
-    }
-
-    setSelectedStepUid(pre_selectedStepUid);
-
-    setUiMode('idle');
-  }, [isIdle, activeTaskId, selectedStepUid, taskTree]);
-
-  // Handle replay from step
-  const handleReplayFromStep = useCallback(async () => {
-    if (!(isIdle && activeTaskId && selectedStepUid)) {
-      return;
-    }
-
-    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
-    if (!task || task.type !== 'task') {
-      return;
-    }
-
-    const pre_selectedStepUid = selectedStepUid;
-    const selectedStepIndex = activeSteps.findIndex(s => s.uid === pre_selectedStepUid);
-    if (selectedStepIndex < 0) {
-      return;
-    }
-
-    const steps = activeSteps.slice(selectedStepIndex);
-    if (steps.length <= 0) {
-      return;
-    }
-
-    setUiMode('replayFromStep');
-
-    const stepIds = steps.map(s => s.uid);
-
-    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
-
-    const stepResults = await runSteps(task.id, stepIds);
-
-    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
-    if (lastErrorStep) {
-      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
-    }
-    else {
-      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
-    }
-
-    setSelectedStepUid(pre_selectedStepUid);
-
-    setUiMode('idle');
-  }, [isIdle, activeTaskId, selectedStepUid, taskTree, activeSteps]);
-
-  // Handle stop
-  const handleStop = useCallback(async () => {
-    if (!(isRecording || isReplaying)) {
-      return;
-    }
-
-    if (replayAbortController) {
-      replayAbortController.abort();
-      showNotificationMessage(t('sidebar_btn_action_steps_replay_stopped'));
-    }
-
-    if (isRecording) {
-      await SidebarUtils.engine.stopRecording();
-      showNotificationMessage(t('sidebar_btn_action_steps_record_stopped'));
-    }
-
-    setUiMode('idle');
-  }, [isRecording, isReplaying, replayAbortController]);
-
-  // Toggle inspect mode
-  const handleToggleInspectMode = useCallback(async () => {
-    const engine = SidebarUtils.engine;
-    await engine.toggleInspectMode();
-    setIsInspectStarted(!isInspectStarted);
-  }, [isInspectStarted]);
-
-  // Toggle CDP attach
-  const toggleCDPAttach = useCallback(async () => {
-    try {
-      const engine = SidebarUtils.engine;
-      if (isDebuggerAttached) {
-        await engine.detachDebugger();
-      }
-      else {
-        await engine.attachDebugger();
-      }
-      setIsDebuggerAttached(!isDebuggerAttached);
-    }
-    catch (error) {
-      console.error('toggleCDPAttach failed', error);
-      const msg = isDebuggerAttached ? t('sidebar_btn_action_steps_debugger_detach_failed') : t('sidebar_btn_action_steps_debugger_attach_failed');
-      showNotificationMessage(msg, 3000, 'error');
-    }
-
-  }, [isDebuggerAttached]);
-
-  // Open AI dialog
-  const openAIDialog = useCallback(() => {
-    setIsAIDialogVisible(true);
-  }, []);
-
-  /** ==================================================================================================================== */
-  /** ==================================================== step panel ==================================================== */
-  /** ==================================================================================================================== */
-  // Handle step selection
-  const handleStepSelect = useCallback((stepUid: string) => {
-    // Allow to unselect steps in any case
-    if (!stepUid) {
-      setSelectedStepUid('');
-      return;
-    }
-
-    if (!activeTaskId) {
-      console.warn('Invalid active task id for step selection');
-      return;
-    }
-
-    if (selectedStepUid === stepUid) {
-      return;
-    }
-
-    const task = findTaskNode((node) => node.id === activeTaskId && node.type === 'task', taskTree);
-    if (!task || task.type === 'group') {
-      console.warn(`Task not found for step selection - ${activeTaskId}`);
-      return;
-    }
-
-    const step = task.steps.find(s => s.uid === stepUid);
-    if (!step) {
-      console.warn(`Step not found for step selection - ${stepUid}`);
-      return;
-    }
-
-    setSelectedStepUid(stepUid);
-  }, [activeTaskId, selectedStepUid, taskTree]);
-
-  // Get step description
-  const getStepDescription = useCallback((step: Step): string => {
-    return step.description || 'new step';// todo: mlu
-  }, []);
-
-  // Check if step is editing
-  const isStepEditing = useCallback((uid: string) => {
-    return editingStepUid === uid;
-  }, [editingStepUid]);
-
-  // Cancel step edit
-  const cancelStepEdit = useCallback(() => {
-    setEditingStepUid('');
-    setEditedStepDescription('');
-  }, []);
-
-  // Handle step description double click
-  const handleStepDescriptionDblClick = useCallback((stepUid: string) => {
-    const step = activeSteps.find(s => s.uid === stepUid);
-    if (!step) {
-      console.warn(`Step not found for description edit - ${stepUid}`);
-      return;
-    }
-    setEditingStepUid(stepUid);
-    setEditedStepDescription(step.description || '');
-  }, [activeSteps]);
-
-  // Save step description
-  const saveStepDescription = useCallback((stepUid: string) => {
-    const trimmedDesc = editedStepDescription.trim();
-    if (trimmedDesc) {
-      const step = activeSteps.find(s => s.uid === stepUid);
-      if (step) {
-        step.description = trimmedDesc;
-      }
-    }
-    setEditingStepUid('');
-    setEditedStepDescription('');
-  }, [activeSteps, editedStepDescription]);
-
-  // Handle step result click
-  const handleStepResultClick = useCallback((_uid: string) => {
-    // todo: display results in a better UI
-    // setSidebarBottomType('result');
-  }, []);
-
-  // Handle drag start
-  const handleDragStart = useCallback((stepUid: string) => {
-    setDraggedStepUid(stepUid);
-  }, []);
-
-  // Handle drag over
-  const handleDragOver = useCallback((stepUid: string) => {
-    // Prevent default to allow drop
-  }, []);
-
-  // Handle drop
-  const handleDrop = useCallback((targetStepUid: string) => {
-    if (!draggedStepUid || draggedStepUid === targetStepUid) {
-      return;
-    }
-
-    const task = findTaskNode(node => node.id === activeTaskId && node.type === 'task', taskTree);
-    if (!task || task.type !== 'task') {
-      return;
-    }
-
-    const steps = [...task.steps];
-    const draggedIndex = steps.findIndex(step => step.uid === draggedStepUid);
-    const targetIndex = steps.findIndex(step => step.uid === targetStepUid);
-
-    if (draggedIndex === -1 || targetIndex === -1) {
-      return;
-    }
-
-    // Remove dragged step from its original position
-    const [draggedStep] = steps.splice(draggedIndex, 1);
-    // Insert it at the target position
-    steps.splice(targetIndex, 0, draggedStep);
-
-    // Update task steps
-    task.steps = steps;
-    setDraggedStepUid('');
-  }, [draggedStepUid, activeTaskId, taskTree, findTaskNode]);
-
-  // Handle steps panel click
-  const handleStepsPanelClick = useCallback(() => {
-    // Deselect any selected step when clicking on the panel background
-  }, []);
+  }, [isIdle, activeTaskId, findTaskNode, taskTree, selectedStepUid, handleAddStep]);
 
   /** 
    * run a step
    */
-  const runStep = async (step: Step): Promise<StepResult> => {
+  const runStep = useCallback(async (step: Step): Promise<StepResult> => {
     const settings = SettingUtils.getSettings();
     const stepResult: StepResult = {
       step_uid: step.uid,
@@ -956,7 +735,7 @@ export default function App() {
       setSelectedStepUid(step.uid);
     }
     return stepResult;
-  }
+  }, [deepUpdateStep]);
 
   /**
    * run the give steps on the given taskId, update the step results into the taskResults
@@ -1069,7 +848,259 @@ export default function App() {
     }
 
     return stepResults;
-  }, [taskTree]);
+  }, [taskTree, findTaskNode, wait, isDebuggerAttached]);
+
+  // Handle replay
+  const handleReplay = useCallback(async () => {
+    if (!(isIdle && activeTaskId)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task' || task.steps.length <= 0) {
+      return;
+    }
+
+    setUiMode('replay');
+
+    const pre_selectedStepUid = selectedStepUid;
+    const stepIds = task.steps.map(s => s.uid);
+
+    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
+
+    const stepResults = await runSteps(task.id, stepIds);
+
+    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
+    if (lastErrorStep) {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
+    }
+    else {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
+    }
+
+    setSelectedStepUid(pre_selectedStepUid);
+
+    setUiMode('idle');
+  }, [isIdle, activeTaskId, selectedStepUid, taskTree, findTaskNode, runSteps, showNotificationMessage, t]);
+
+  // Handle replay from step
+  const handleReplayFromStep = useCallback(async () => {
+    if (!(isIdle && activeTaskId && selectedStepUid)) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId, taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const pre_selectedStepUid = selectedStepUid;
+    const selectedStepIndex = activeSteps.findIndex(s => s.uid === pre_selectedStepUid);
+    if (selectedStepIndex < 0) {
+      return;
+    }
+
+    const steps = activeSteps.slice(selectedStepIndex);
+    if (steps.length <= 0) {
+      return;
+    }
+
+    setUiMode('replayFromStep');
+
+    const stepIds = steps.map(s => s.uid);
+
+    showNotificationMessage(t('sidebar_btn_action_steps_replay_start'));
+
+    const stepResults = await runSteps(task.id, stepIds);
+
+    const lastErrorStep = [...stepResults].reverse().find(r => r.status === 'failed');
+    if (lastErrorStep) {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_failed'), 3000, 'error');
+    }
+    else {
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_passed'), 3000, 'success');
+    }
+
+    setSelectedStepUid(pre_selectedStepUid);
+
+    setUiMode('idle');
+  }, [isIdle, activeTaskId, selectedStepUid, taskTree, activeSteps, findTaskNode, runSteps, showNotificationMessage, t]);
+
+  // Handle stop
+  const handleStop = useCallback(async () => {
+    if (!(isRecording || isReplaying)) {
+      return;
+    }
+
+    if (replayAbortController) {
+      replayAbortController.abort();
+      showNotificationMessage(t('sidebar_btn_action_steps_replay_stopped'));
+    }
+
+    if (isRecording) {
+      await SidebarUtils.engine.stopRecording();
+      showNotificationMessage(t('sidebar_btn_action_steps_record_stopped'));
+    }
+
+    setUiMode('idle');
+  }, [isRecording, isReplaying, replayAbortController]);
+
+  // Toggle inspect mode
+  const handleToggleInspectMode = useCallback(async () => {
+    const engine = SidebarUtils.engine;
+    await engine.toggleInspectMode();
+    setIsInspectStarted(!isInspectStarted);
+  }, [isInspectStarted]);
+
+  // Toggle CDP attach
+  const toggleCDPAttach = useCallback(async () => {
+    try {
+      const engine = SidebarUtils.engine;
+      if (isDebuggerAttached) {
+        await engine.detachDebugger();
+      }
+      else {
+        await engine.attachDebugger();
+      }
+      setIsDebuggerAttached(!isDebuggerAttached);
+    }
+    catch (error) {
+      console.error('toggleCDPAttach failed', error);
+      const msg = isDebuggerAttached ? t('sidebar_btn_action_steps_debugger_detach_failed') : t('sidebar_btn_action_steps_debugger_attach_failed');
+      showNotificationMessage(msg, 3000, 'error');
+    }
+
+  }, [isDebuggerAttached, t, showNotificationMessage]);
+
+  // Open AI dialog
+  const openAIDialog = useCallback(() => {
+    setIsAIDialogVisible(true);
+  }, []);
+
+  /** ==================================================================================================================== */
+  /** ==================================================== step panel ==================================================== */
+  /** ==================================================================================================================== */
+  // Handle step selection
+  const handleStepSelect = useCallback((stepUid: string) => {
+    // Allow to unselect steps in any case
+    if (!stepUid) {
+      setSelectedStepUid('');
+      return;
+    }
+
+    if (!activeTaskId) {
+      console.warn('Invalid active task id for step selection');
+      return;
+    }
+
+    if (selectedStepUid === stepUid) {
+      return;
+    }
+
+    const task = findTaskNode((node) => node.id === activeTaskId && node.type === 'task', taskTree);
+    if (!task || task.type === 'group') {
+      console.warn(`Task not found for step selection - ${activeTaskId}`);
+      return;
+    }
+
+    const step = task.steps.find(s => s.uid === stepUid);
+    if (!step) {
+      console.warn(`Step not found for step selection - ${stepUid}`);
+      return;
+    }
+
+    setSelectedStepUid(stepUid);
+  }, [activeTaskId, selectedStepUid, taskTree, findTaskNode]);
+
+  // Get step description
+  const getStepDescription = useCallback((step: Step): string => {
+    return step.description || 'new step';// todo: mlu
+  }, []);
+
+  // Check if step is editing
+  const isStepEditing = useCallback((uid: string) => {
+    return editingStepUid === uid;
+  }, [editingStepUid]);
+
+  // Cancel step edit
+  const cancelStepEdit = useCallback(() => {
+    setEditingStepUid('');
+    setEditedStepDescription('');
+  }, []);
+
+  // Handle step description double click
+  const handleStepDescriptionDblClick = useCallback((stepUid: string) => {
+    const step = activeSteps.find(s => s.uid === stepUid);
+    if (!step) {
+      console.warn(`Step not found for description edit - ${stepUid}`);
+      return;
+    }
+    setEditingStepUid(stepUid);
+    setEditedStepDescription(step.description || '');
+  }, [activeSteps]);
+
+  // Save step description
+  const saveStepDescription = useCallback((stepUid: string) => {
+    const trimmedDesc = editedStepDescription.trim();
+    if (trimmedDesc) {
+      const step = activeSteps.find(s => s.uid === stepUid);
+      if (step) {
+        step.description = trimmedDesc;
+      }
+    }
+    setEditingStepUid('');
+    setEditedStepDescription('');
+  }, [activeSteps, editedStepDescription]);
+
+  // Handle step result click
+  const handleStepResultClick = useCallback((_uid: string) => {
+    // todo: display results in a better UI
+    // setSidebarBottomType('result');
+  }, []);
+
+  // Handle drag start
+  const handleDragStart = useCallback((stepUid: string) => {
+    setDraggedStepUid(stepUid);
+  }, []);
+
+  // Handle drag over
+  const handleDragOver = useCallback((stepUid: string) => {
+    // Prevent default to allow drop
+  }, []);
+
+  // Handle drop
+  const handleDrop = useCallback((targetStepUid: string) => {
+    if (!draggedStepUid || draggedStepUid === targetStepUid) {
+      return;
+    }
+
+    const task = findTaskNode(node => node.id === activeTaskId && node.type === 'task', taskTree);
+    if (!task || task.type !== 'task') {
+      return;
+    }
+
+    const steps = [...task.steps];
+    const draggedIndex = steps.findIndex(step => step.uid === draggedStepUid);
+    const targetIndex = steps.findIndex(step => step.uid === targetStepUid);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    // Remove dragged step from its original position
+    const [draggedStep] = steps.splice(draggedIndex, 1);
+    // Insert it at the target position
+    steps.splice(targetIndex, 0, draggedStep);
+
+    // Update task steps
+    task.steps = steps;
+    setDraggedStepUid('');
+  }, [draggedStepUid, activeTaskId, taskTree, findTaskNode]);
+
+  // Handle steps panel click
+  const handleStepsPanelClick = useCallback(() => {
+    // Deselect any selected step when clicking on the panel background
+  }, []);
 
   /** ==================================================================================================================== */
   /** =================================================== bottom panel =================================================== */
@@ -1112,39 +1143,8 @@ export default function App() {
     }
 
     setUiMode('idle');
-  }, [isIdle, activeTaskId, selectedStepUid, selectedStep, taskTree]);
+  }, [isIdle, activeTaskId, selectedStepUid, selectedStep, taskTree, findTaskNode, runSteps, showNotificationMessage, t]);
 
-  /** ==================================================================================================================== */
-  /** =================================================== alert dialog =================================================== */
-  /** ==================================================================================================================== */
-  /**
-   * Custom confirm dialog using AlertDialog
-   */
-  const showConfirmDialog = useCallback((title: string, description: string, onConfirm: () => void) => {
-    setAlertDialogTitle(title);
-    setAlertDialogDescription(description);
-    confirmCallbackRef.current = onConfirm;
-    setIsAlertDialogOpen(true);
-  }, []);
-
-  /**
-   * Handle confirm dialog confirm button click
-   */
-  const handleConfirmDialogConfirm = useCallback(() => {
-    if (confirmCallbackRef.current) {
-      confirmCallbackRef.current();
-      confirmCallbackRef.current = null;
-    }
-    setIsAlertDialogOpen(false);
-  }, []);
-
-  /**
-   * Handle confirm dialog cancel button click
-   */
-  const handleConfirmDialogCancel = useCallback(() => {
-    confirmCallbackRef.current = null;
-    setIsAlertDialogOpen(false);
-  }, []);
   /** ==================================================================================================================== */
   /** ===================================================== AI Dialog ==================================================== */
   /** ==================================================================================================================== */
@@ -1176,7 +1176,7 @@ export default function App() {
       const result = await SidebarUtils.engine.runScript(script, true, settings.replaySettings.stepTimeout);
       return result;
     }
-  }, [activeTaskId, taskTree]);
+  }, [activeTaskId, taskTree, findTaskNode, handleAddStep, runSteps, setSelectedStepUid]);
 
   // Initialize component
   useEffect(() => {
