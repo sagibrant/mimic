@@ -369,7 +369,7 @@ export default function App() {
       console.error(error);
       showNotificationMessage(t('sidebar_btn_action_save_error'), 3000, 'error');
     }
-  }, [isIdle, taskAsset, showNotificationMessage]);
+  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage]);
 
   // Handle download task
   const handleDownloadTask = useCallback(() => {
@@ -383,6 +383,8 @@ export default function App() {
 
     try {
       const asset = { ...taskAsset };
+      asset.root = taskTree;
+      asset.results = taskResults;
 
       const jsonContent = JSON.stringify(asset, null, 2);
       const blob = new Blob([jsonContent], { type: 'application/json' });
@@ -398,7 +400,7 @@ export default function App() {
       console.error(error);
       showNotificationMessage(t('sidebar_btn_action_download_error'), 3000, 'error');
     }
-  }, [isIdle, taskAsset, showNotificationMessage]);
+  }, [isIdle, taskAsset, taskTree, taskResults, showNotificationMessage]);
 
   // Handle open help document
   const handleOpenHelpDocument = useCallback(async () => {
