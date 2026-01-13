@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './App.css';
 import TreeNode from './TreeNode';
-import StepScriptEditor from './StepScriptEditor';
+import StepScriptEditor, { StepScriptEditorRef } from './StepScriptEditor';
 import StepAIAgent from './StepAIAgent';
 import { TaskAsset, TaskGroup, Task, Step, TaskResult, StepResult, ObjectDescription } from '../../execution/Task';
 import { TaskUtils } from '../../execution/TaskUtils';
@@ -186,6 +186,9 @@ export default function App() {
   const [isDebuggerAttached, setIsDebuggerAttached] = useState(false);
   const [isInspectStarted, setIsInspectStarted] = useState(false);
   const [inspectedObject, setInspectedObject] = useState<ObjectDescription | undefined>(undefined);
+
+  // Refs
+  const stepScriptEditorRef = useRef<StepScriptEditorRef | null>(null);
 
   // Computed values
   const isReplaying = uiMode === 'replay';
@@ -1207,17 +1210,18 @@ export default function App() {
         console.error('Initialization error:', error);
       }
     };
-
     init();
+  }, []);
 
-    // Set up event listeners
+  // Set up event listeners
+  useEffect(() => {
     const onNodeInspected = async ({ details }: any) => {
       setInspectedObject(details);
       setIsInspectStarted(!isInspectStarted);
     };
     SidebarUtils.handler.on('nodeInspected', onNodeInspected);
 
-    const onStepRecorded = ({ step }: any) => {
+    const onStepRecorded = async ({ step }: any) => {
       if (!selectedStep) return;
       const scripts: string[] = [];
       if (step.browserScript) scripts.push(step.browserScript);
@@ -1226,8 +1230,9 @@ export default function App() {
       if (step.elementScript) scripts.push(step.elementScript);
       if (step.actionScript) scripts.push(step.actionScript);
       const stepScript = (step.await ? 'await ' : '') + scripts.join('.') + ';';
-      selectedStep.script = selectedStep.script + '\n' + stepScript;
-      setSelectedStepUid(selectedStep.uid);
+      if (stepScriptEditorRef.current) {
+        stepScriptEditorRef.current.addStepScript(stepScript);
+      }
     };
     SidebarUtils.handler.on('stepRecorded', onStepRecorded);
     return () => {
@@ -1235,7 +1240,8 @@ export default function App() {
       SidebarUtils.handler.off('stepRecorded', onStepRecorded);
     };
 
-  }, [updateAllTaskStepResults, updateTaskData, isInspectStarted, selectedStep]);
+  }, [isInspectStarted, selectedStep]);
+
 
   return (
     <div className="sidebar-container">
@@ -1573,6 +1579,7 @@ export default function App() {
           <div className="sidebar-bottom-content">
             <StepScriptEditor
               key={selectedStep.uid}
+              ref={stepScriptEditorRef}
               initialScriptContent={selectedStep.script}
               onScriptChange={(script) => selectedStep.script = script}
               runScript={handleReplaySelectedStep}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useImperativeHandle, useCallback } from 'react';
 import './StepScriptEditor.css';
-import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, scrollPastEnd } from '@codemirror/view';
+import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { javascript } from '@codemirror/lang-javascript';
 import { autocompletion, type Completion } from '@codemirror/autocomplete';
@@ -10,13 +10,20 @@ import { JSHINT, LintError, LintOptions } from 'jshint';
 import { ayuLight, coolGlow } from 'thememirror';
 import { StepScriptEditorHelper } from './StepScriptEditorHelper';
 
+// Define the interface for the exposed methods
+export interface StepScriptEditorRef {
+  addStepScript(script: string): void;
+}
+
 interface StepScriptEditorProps {
+  ref: React.RefObject<StepScriptEditorRef | null>;
   initialScriptContent: string;
   onScriptChange: (content: string) => void;
   runScript: () => Promise<void>;
 }
 
 export default function StepScriptEditor({
+  ref,
   initialScriptContent,
   onScriptChange,
   runScript
@@ -226,7 +233,7 @@ ${codeContent}
           maxRenderedOptions: 20
         }),
         EditorView.lineWrapping,
-        scrollPastEnd(),
+        // scrollPastEnd(),
         isDark ? coolGlow : ayuLight,
         EditorView.updateListener.of(update => {
           if (update.docChanged) {
@@ -275,11 +282,23 @@ ${codeContent}
   }, []);
 
   // Expose addStepScript method for parent components
-  useImperativeHandle(undefined, () => ({
-    addStepScript(script: string) {
-      setScriptContent(pre => pre + '\n' + script);
+  useImperativeHandle(ref, () => {
+    return {
+      addStepScript(script: string) {
+        setScriptContent(pre => pre ? pre + '\n' + script : script);
+        const scrollContainer = editorViewRef.current?.scrollDOM;
+        if (!scrollContainer) return;
+        // let offset = 0;
+        // if (typeof scrollContainer.getBoundingClientRect === 'function') {
+        //   const rect = scrollContainer.getBoundingClientRect();
+        //   if (rect && rect.height) {
+        //     offset = rect.height + 50;
+        //   }
+        // }
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;// - offset > 0 ? scrollContainer.scrollHeight - offset : scrollContainer.scrollHeight;
+      }
     }
-  }));
+  }, []);
 
   return (
     <div className="step-script-container">
