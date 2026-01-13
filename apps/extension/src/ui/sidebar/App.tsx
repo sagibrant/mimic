@@ -77,7 +77,7 @@ export default function App() {
         children: node.children.map(child => deepUpdateNode(match, child, nodeData))
       }
     }
-    return node;
+    return { ...node };
   }, []);
   /**
    * deep remove node
@@ -96,7 +96,7 @@ export default function App() {
         children
       };
     }
-    return node;
+    return { ...node };
   }, []);
   /**
    * deep add node
@@ -125,7 +125,7 @@ export default function App() {
         }
       }
     }
-    return node;
+    return { ...node };
   }, []);
 
   const deepUpdateStep = useCallback((match: (step: Step) => boolean, node: TaskNode, stepData: Partial<Step>): TaskNode => {
@@ -140,13 +140,13 @@ export default function App() {
       const steps = [...task.steps];
       const index = steps.findIndex(s => match(s));
       if (index < 0) {
-        return node;
+        return { ...node };
       }
       else {
         const step = steps[index];
         steps[index] = { ...step, ...stepData };
         return {
-          ...task,
+          ...node,
           steps
         };
       }
@@ -246,21 +246,19 @@ export default function App() {
     }
   }, []);
 
-  // Initialize task data
-  const updateTaskData = useCallback((root?: TaskNode) => {
-    if (root) {
-      setTaskTree(root);
-      taskAsset.root = root;
-      setTaskAsset(taskAsset);
-    }
-    root = root || taskTree;
-
+  // refresh active task & selected step
+  const refreshActiveTaskStep = useCallback((root: TaskNode) => {
     // Select first available task by default
     const selectFirstAvailableTask = () => {
       const task = findTaskNode((node) => node.type === 'task', root);
       if (task) {
         setActiveTaskNodeId(task.id);
         setActiveTaskId(task.id);
+        setSelectedStepUid('');
+      }
+      else {
+        setActiveTaskNodeId(root.id);
+        setActiveTaskId('');
         setSelectedStepUid('');
       }
     };
@@ -290,7 +288,7 @@ export default function App() {
         setSelectedStepUid('');
       }
     }
-  }, [taskAsset, taskTree, activeTaskNodeId, activeTaskId, selectedStepUid, findTaskNode]);
+  }, [taskTree, activeTaskNodeId, activeTaskId, selectedStepUid, findTaskNode]);
 
   /** ==================================================================================================================== */
   /** =================================================== alert dialog =================================================== */
@@ -338,8 +336,8 @@ export default function App() {
       const asset = TaskUtils.createDemoTaskAsset();
       setTaskAsset(asset);
       setTaskTree(asset.root);
-      updateTaskData(asset.root);
       setTaskResults(asset.results);
+      refreshActiveTaskStep(asset.root);
     };
 
     if (task) {
@@ -351,7 +349,7 @@ export default function App() {
     } else {
       loadDemoTask();
     }
-  }, [isIdle, taskTree, updateTaskData, showConfirmDialog, t, findTaskNode]);
+  }, [isIdle, taskTree, refreshActiveTaskStep, showConfirmDialog, t, findTaskNode]);
 
   // Handle load task
   const handleLoadTask = useCallback(() => {
@@ -373,10 +371,10 @@ export default function App() {
         const asset = JSON.parse(content);
         if (TaskUtils.isTaskAsset(asset)) {
           updateAllTaskStepResults(asset.root, asset.results);
-          updateTaskData(asset.root);
           setTaskAsset(asset);
           setTaskTree(asset.root);
           setTaskResults(asset.results);
+          refreshActiveTaskStep(asset.root);
         } else {
           showNotificationMessage(t('sidebar_btn_action_load_error_invalid_file'), 3000, 'error');
         }
@@ -387,7 +385,7 @@ export default function App() {
     });
 
     fileInput.click();
-  }, [isIdle, updateAllTaskStepResults, updateTaskData, showNotificationMessage, t]);
+  }, [isIdle, updateAllTaskStepResults, refreshActiveTaskStep, showNotificationMessage, t]);
 
   // Handle save task
   const handleSaveTask = useCallback(async () => {
@@ -500,8 +498,8 @@ export default function App() {
     }
 
     const root = deepUpdateNode((node) => node.id === nodeId, taskTree, { name: newName });
-    updateTaskData(root);
-  }, [isIdle, uiMode, taskTree, updateTaskData, findTaskNode, deepUpdateNode]);
+    setTaskTree(root);
+  }, [isIdle, uiMode, taskTree, findTaskNode, deepUpdateNode]);
 
   // Handle task selection
   const handleTaskSelect = useCallback((taskId: string) => {
@@ -554,10 +552,11 @@ export default function App() {
           return;
         }
         const root = deepRemoveNode((node) => node.id === activeTaskNodeId, taskTree);
-        updateTaskData(root);
+        setTaskTree(root);
+        refreshActiveTaskStep(root);
       }
     );
-  }, [isIdle, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage, showConfirmDialog, t, findTaskNode, deepRemoveNode]);
+  }, [isIdle, activeTaskNodeId, taskTree, refreshActiveTaskStep, showNotificationMessage, showConfirmDialog, t, findTaskNode, deepRemoveNode]);
 
   // Handle add task node submit
   const onAddTaskNodeSubmit = useCallback(() => {
@@ -592,9 +591,8 @@ export default function App() {
     } as TaskNode;
 
     const root = deepAddNode((node) => node.id === activeTaskNodeId, taskTree, newNode);
-    updateTaskData(root);
-
-  }, [addNodeType, addNodeName, activeTaskNodeId, taskTree, updateTaskData, showNotificationMessage, t, findTaskNode, deepAddNode]);
+    setTaskTree(root);
+  }, [addNodeType, addNodeName, activeTaskNodeId, taskTree, showNotificationMessage, t, findTaskNode, deepAddNode]);
 
   // Handle add task node canceled
   const handleAddTaskNodeCanceled = useCallback(() => {
@@ -625,23 +623,23 @@ export default function App() {
       script: script
     };
 
+    const steps = [...task.steps];
     if (selectedStepUid) {
       // Add after selected step
-      const steps = [...task.steps];
       const index = steps.findIndex(step => step.uid === selectedStepUid);
       if (index >= 0) {
         steps.splice(index + 1, 0, newStep);
-        task.steps = steps;
       }
       else {
-        const steps = [...task.steps, newStep];
-        task.steps = steps;
+        steps.push(newStep);
       }
     } else {
-      const steps = [...task.steps, newStep];
-      task.steps = steps;
+      steps.push(newStep);
     }
 
+    const updatedTask = { ...task, steps };
+    const root = deepUpdateNode(node => node.id === task.id, task, updatedTask)
+    setTaskTree(root);
     setSelectedStepUid(newStep.uid);
 
     if (!edit) return newStep;
@@ -723,24 +721,33 @@ export default function App() {
       screenshot: undefined
     };
     try {
-      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: undefined });
-      setSelectedStepUid(step.uid);
+      // Update step status to undefined before running
+      let updatedTree = deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: undefined });
+      setTaskTree(updatedTree);
+      console.error('step ready to run', step, updatedTree);
+
       const result = await SidebarUtils.engine.runScript(step.script, true, settings.replaySettings.stepTimeout);
       stepResult.step_end_time = Date.now();
       stepResult.status = 'passed';
       stepResult.result = result;
-      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: 'passed' });
-      setSelectedStepUid(step.uid);
+
+      // Update step status to passed
+      updatedTree = deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: undefined, last_status: 'passed' });
+      setTaskTree(updatedTree);
+      console.error('step passed', step, updatedTree);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
       stepResult.step_end_time = Date.now();
       stepResult.status = 'failed';
       stepResult.error = errorMessage;
-      deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: errorMessage, last_status: 'failed' });
-      setSelectedStepUid(step.uid);
+
+      // Update step status to failed
+      let updatedTree = deepUpdateStep(s => s.uid === step.uid, taskTree, { last_error: errorMessage, last_status: 'failed' });
+      setTaskTree(updatedTree);
+      console.error('step failed', step, updatedTree);
     }
     return stepResult;
-  }, [deepUpdateStep]);
+  }, [deepUpdateStep, taskTree]);
 
   /**
    * run the give steps on the given taskId, update the step results into the taskResults
@@ -774,9 +781,6 @@ export default function App() {
       taskResult = taskResults[taskResultIndex];
       taskResult.task_start_time = Date.now();
       taskResult.task_end_time = -1;
-    }
-    else {
-      taskResults.push(taskResult);
     }
 
     const stepResults: StepResult[] = [];
@@ -843,6 +847,13 @@ export default function App() {
       taskResult.status = 'passed';
     }
 
+    if (taskResultIndex >= 0) {
+      setTaskResults([...taskResults])
+    }
+    else {
+      setTaskResults([...taskResults, taskResult]);
+    }
+
     // disable cdp if needed
     try {
       if (settings.replaySettings.attachDebugger && !wasDebuggerAttached) {
@@ -853,7 +864,7 @@ export default function App() {
     }
 
     return stepResults;
-  }, [taskTree, findTaskNode, wait, isDebuggerAttached]);
+  }, [taskTree, findTaskNode, isDebuggerAttached, runStep, taskResults, wait]);
 
   // Handle replay
   const handleReplay = useCallback(async () => {
@@ -1025,6 +1036,16 @@ export default function App() {
     return step.description || 'new step';// todo: mlu
   }, []);
 
+  // Get step last run status
+  const getStepLastStatus = useCallback((step: Step): string => {
+    return step.last_status === 'passed' ? '✓' : (step.last_status === 'failed' ? '✗' : '○');
+  }, []);
+
+  // Get step last run error
+  const getStepLastError = useCallback((step: Step): string => {
+    return step.last_error || '';
+  }, []);
+
   // Check if step is editing
   const isStepEditing = useCallback((uid: string) => {
     return editingStepUid === uid;
@@ -1100,10 +1121,12 @@ export default function App() {
     // Insert it at the target position
     steps.splice(targetIndex, 0, draggedStep);
 
-    // Update task steps
-    task.steps = steps;
+    // Update task steps and trigger re-render
+    const updatedTask = { ...task, steps };
+    const root = deepUpdateNode((node) => node.id === activeTaskId, taskTree, updatedTask);
+    setTaskTree(root);
     setDraggedStepUid('');
-  }, [draggedStepUid, activeTaskId, taskTree, findTaskNode]);
+  }, [draggedStepUid, activeTaskId, taskTree, findTaskNode, deepUpdateNode]);
 
   // Handle steps panel click
   const handleStepsPanelClick = useCallback(() => {
@@ -1212,10 +1235,10 @@ export default function App() {
             if (TaskUtils.isTaskAsset(parsed) && !Utils.isEqual(taskAsset, parsed)) {
               const asset = parsed;
               updateAllTaskStepResults(asset.root, asset.results);
-              updateTaskData(asset.root);
               setTaskAsset(asset);
               setTaskTree(asset.root);
               setTaskResults(asset.results);
+              refreshActiveTaskStep(asset.root);
             }
           } catch (error) {
             console.warn('Failed to parse lastAsset:', error);
@@ -1351,16 +1374,14 @@ export default function App() {
       </Dialog>
 
       {/* AI Dialog */}
-      {isAIDialogVisible && (
-        <div className="dialog-overlay">
-          <div className="dialog-content" style={{ width: '20rem' }}>
-            <div className="dialog-header">
-              <h2>{t('sidebar_btn_action_steps_ai_assistant_header')}</h2>
-            </div>
-            <StepAIAgent runScript={runScriptWithNewStep} />
-          </div>
-        </div>
-      )}
+      <Dialog open={isAIDialogVisible} onOpenChange={setIsAIDialogVisible}>
+        <DialogContent className="max-w-[20rem]">
+          <DialogHeader>
+            <DialogTitle>{t('sidebar_btn_action_steps_ai_assistant_header')}</DialogTitle>
+          </DialogHeader>
+          <StepAIAgent runScript={runScriptWithNewStep} />
+        </DialogContent>
+      </Dialog>
 
       {/* Header with menus */}
       <header className="sidebar-header">
@@ -1577,9 +1598,9 @@ export default function App() {
                     e.stopPropagation();
                     handleStepResultClick(step.uid);
                   }}
-                  title={step.last_error || ''}
+                  title={getStepLastError(step)}
                 >
-                  {step.last_status === 'passed' ? '✓' : (step.last_status === 'failed' ? '✗' : '○')}
+                  {getStepLastStatus(step)}
                 </div>
               </div>
             ))}
