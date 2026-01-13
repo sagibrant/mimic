@@ -1112,6 +1112,9 @@ export default function App() {
   /** ==================================================================================================================== */
   // Toggle bottom expanded
   const toggleBottomExpanded = useCallback(() => {
+    if (!isBottomExpanded) {
+      setIsTreeCollapsed(true);
+    }
     setIsBottomExpanded(!isBottomExpanded);
   }, [isBottomExpanded]);
 
