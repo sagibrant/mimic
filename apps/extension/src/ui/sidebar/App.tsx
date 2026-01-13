@@ -1145,6 +1145,14 @@ export default function App() {
     setUiMode('idle');
   }, [isIdle, activeTaskId, selectedStepUid, selectedStep, taskTree, findTaskNode, runSteps, showNotificationMessage, t]);
 
+  // handle the script change from code editor
+  const handleOnSelectedStepScriptChange = useCallback((script: string) => {
+    if (!(selectedStepUid && selectedStep)) {
+      return;
+    }
+    selectedStep.script = script;
+  }, [selectedStepUid, selectedStep]);
+
   /** ==================================================================================================================== */
   /** ===================================================== AI Dialog ==================================================== */
   /** ==================================================================================================================== */
@@ -1241,7 +1249,6 @@ export default function App() {
     };
 
   }, [isInspectStarted, selectedStep]);
-
 
   return (
     <div className="sidebar-container">
@@ -1581,7 +1588,7 @@ export default function App() {
               key={selectedStep.uid}
               ref={stepScriptEditorRef}
               initialScriptContent={selectedStep.script}
-              onScriptChange={(script) => selectedStep.script = script}
+              onScriptChange={handleOnSelectedStepScriptChange}
               runScript={handleReplaySelectedStep}
             />
           </div>

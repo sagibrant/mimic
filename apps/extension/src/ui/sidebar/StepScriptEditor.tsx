@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useImperativeHandle, useCallback } from 'react';
+import { useState, useEffect, useRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import './StepScriptEditor.css';
 import { EditorView, lineNumbers, highlightActiveLine, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { javascript } from '@codemirror/lang-javascript';
 import { autocompletion, type Completion } from '@codemirror/autocomplete';
 import { type Diagnostic, linter, lintGutter } from '@codemirror/lint';
@@ -208,6 +208,39 @@ ${codeContent}
     };
   };
 
+  const themeCompartment = useMemo(() => {
+    return new Compartment();
+  }, []);
+
+  const staticExtensions = [
+    lineNumbers(),
+    highlightActiveLine(),
+    highlightActiveLineGutter(),
+    highlightSpecialChars(),
+    drawSelection(),
+    dropCursor(),
+    rectangularSelection(),
+    crosshairCursor(),
+    javascript(),
+    codeLinter,
+    lintGutter(),
+    autocompletion({
+      override: [createCompletionSource()],
+      activateOnTyping: true,
+      maxRenderedOptions: 20
+    }),
+    EditorView.lineWrapping,
+    // scrollPastEnd(),
+    EditorView.updateListener.of(update => {
+      if (update.docChanged) {
+        const newContent = update.state.doc.toString();
+        setScriptContent(newContent);
+        onScriptChange(newContent);
+        updateVariableTypes(update.state);
+      }
+    })
+  ];
+
   // Initialize CodeMirror editor
   useEffect(() => {
     if (!editorRef.current) return;
@@ -216,35 +249,11 @@ ${codeContent}
     const startState = EditorState.create({
       doc: scriptContent,
       extensions: [
-        lineNumbers(),
-        highlightActiveLine(),
-        highlightActiveLineGutter(),
-        highlightSpecialChars(),
-        drawSelection(),
-        dropCursor(),
-        rectangularSelection(),
-        crosshairCursor(),
-        javascript(),
-        codeLinter,
-        lintGutter(),
-        autocompletion({
-          override: [createCompletionSource()],
-          activateOnTyping: true,
-          maxRenderedOptions: 20
-        }),
-        EditorView.lineWrapping,
-        // scrollPastEnd(),
-        isDark ? coolGlow : ayuLight,
-        EditorView.updateListener.of(update => {
-          if (update.docChanged) {
-            const newContent = update.state.doc.toString();
-            setScriptContent(newContent);
-            onScriptChange(newContent);
-            updateVariableTypes(update.state);
-          }
-        })
+        ...staticExtensions,
+        themeCompartment.of(isDark ? coolGlow : ayuLight)
       ]
     });
+
     const editorView = new EditorView({
       state: startState,
       parent: editorRef.current
@@ -255,6 +264,16 @@ ${codeContent}
     return () => {
       editorView.destroy();
     };
+  }, []);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (!editorViewRef.current) return;
+
+    editorViewRef.current.dispatch({
+      effects: themeCompartment.reconfigure(isDark ? coolGlow : ayuLight)
+    });
+
   }, [isDark]);
 
   // Handle script content change from parent
