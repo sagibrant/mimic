@@ -1233,7 +1233,9 @@ export default function App() {
   useEffect(() => {
     const onNodeInspected = async ({ details }: any) => {
       setInspectedObject(details);
-      setIsInspectStarted(!isInspectStarted);
+      setIsInspectStarted(pre => !pre);
+      const engine = SidebarUtils.engine;
+      await engine.toggleInspectMode();
     };
     SidebarUtils.handler.on('nodeInspected', onNodeInspected);
 
@@ -1256,7 +1258,7 @@ export default function App() {
       SidebarUtils.handler.off('stepRecorded', onStepRecorded);
     };
 
-  }, [isInspectStarted, selectedStep]);
+  }, [selectedStep]);
 
   return (
     <div className="sidebar-container">
@@ -1491,9 +1493,9 @@ export default function App() {
               className="command-btn"
               disabled={!(isIdle)}
               onClick={handleToggleInspectMode}
-              title={inspectedObject ? t('step_script_editor_btn_title_inspect') : JSON.stringify(inspectedObject, null, 2)}
+              title={!inspectedObject ? t('step_script_editor_btn_title_inspect') : JSON.stringify(inspectedObject, null, 2)}
             >
-              {inspectedObject ? "⛶" : "▣"}
+              {!inspectedObject ? "⛶" : "▣"}
             </button>
             <button
               className="command-btn"
