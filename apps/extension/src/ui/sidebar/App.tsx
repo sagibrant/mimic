@@ -1290,42 +1290,46 @@ export default function App() {
             e.preventDefault();
             onAddTaskNodeSubmit();
           }} className="space-y-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="add_new_node_type" className="text-right font-semibold">
+            <div className="grid grid-cols-12 gap-4">
+              <Label htmlFor="add_new_node_type" className="col-span-3 text-right font-semibold flex items-center justify-end">
                 {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
               </Label>
-              <Select value={addNodeType} onValueChange={(value) => setAddNodeType(value as 'task' | 'group')} className="col-span-3">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {taskNodeTypes.map(type => (
-                    <SelectItem key={type.code} value={type.code}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="col-span-9">
+                <Select value={addNodeType} onValueChange={(value) => setAddNodeType(value as 'task' | 'group')}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taskNodeTypes.map(type => (
+                      <SelectItem key={type.code} value={type.code}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="add_new_node_name" className="text-right font-semibold">
+            <div className="grid grid-cols-12 gap-4">
+              <Label htmlFor="add_new_node_name" className="col-span-3 text-right font-semibold flex items-center justify-end">
                 {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
               </Label>
-              <Input
-                type="text"
-                id="add_new_node_name"
-                value={addNodeName}
-                onChange={(e) => setAddNodeName(e.target.value)}
-                placeholder="Enter name"
-                autoComplete="off"
-                className="col-span-3"
-              />
+              <div className="col-span-9">
+                <Input
+                  type="text"
+                  id="add_new_node_name"
+                  value={addNodeName}
+                  onChange={(e) => setAddNodeName(e.target.value)}
+                  placeholder="Enter name"
+                  autoComplete="off"
+                  className="w-full"
+                />
+              </div>
             </div>
 
-            <DialogFooter className="justify-end gap-2 pt-2">
+            <DialogFooter className="flex justify-end gap-2 pt-2 flex-row">
               <DialogClose asChild>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleAddTaskNodeCanceled}>
                   {t('sidebar_dialog_cancel')}
                 </Button>
               </DialogClose>
