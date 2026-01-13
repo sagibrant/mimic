@@ -9,6 +9,11 @@ import { SettingUtils, Utils } from "@gogogo/shared";
 import { SidebarUtils } from './SidebarUtils';
 import { toast, Toaster } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '../components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 
 export default function App() {
   console.log('sidebar ==> App');
@@ -1264,11 +1269,11 @@ export default function App() {
               {alertDialogDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleConfirmDialogCancel}>
+          <AlertDialogFooter className="justify-end gap-2 pt-2">
+            <AlertDialogCancel onClick={handleConfirmDialogCancel} className="btn-outline">
               {t('sidebar_confirm_cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDialogConfirm}>
+            <AlertDialogAction onClick={handleConfirmDialogConfirm} className="btn">
               {t('sidebar_confirm_accept')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1276,61 +1281,61 @@ export default function App() {
       </AlertDialog>
 
       {/* Add Task Node Dialog */}
-      {isAddTaskNodeDialogVisible && (
-        <div className="dialog-overlay">
-          <div className="dialog-content" style={{ width: '20rem' }}>
-            <div className="dialog-header">
-              <h2>{t('sidebar_btn_action_tree_add_node_dialog_header')}</h2>
-            </div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              onAddTaskNodeSubmit();
-            }} className="flex justify-center flex-col gap-4">
-              <div className="flex items-center gap-4 mb-4">
-                <label htmlFor="add_new_node_type" className="font-semibold w-24">
-                  {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
-                </label>
-                <select
-                  id="add_new_node_type"
-                  value={addNodeType}
-                  onChange={(e) => setAddNodeType(e.target.value as 'task' | 'group')}
-                  className="flex-auto"
-                >
+      <Dialog open={isAddTaskNodeDialogVisible} onOpenChange={setIsAddTaskNodeDialogVisible}>
+        <DialogContent className="max-w-[20rem]">
+          <DialogHeader>
+            <DialogTitle>{t('sidebar_btn_action_tree_add_node_dialog_header')}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            onAddTaskNodeSubmit();
+          }} className="space-y-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="add_new_node_type" className="text-right font-semibold">
+                {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
+              </Label>
+              <Select value={addNodeType} onValueChange={(value) => setAddNodeType(value as 'task' | 'group')} className="col-span-3">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
                   {taskNodeTypes.map(type => (
-                    <option key={type.code} value={type.code}>
+                    <SelectItem key={type.code} value={type.code}>
                       {type.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="flex items-center gap-4 mb-8">
-                <label htmlFor="add_new_node_name" className="font-semibold w-24">
-                  {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
-                </label>
-                <input
-                  type="text"
-                  id="add_new_node_name"
-                  value={addNodeName}
-                  onChange={(e) => setAddNodeName(e.target.value)}
-                  className="flex-auto"
-                  placeholder="Enter name"
-                  autoComplete="off"
-                />
-              </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="add_new_node_name" className="text-right font-semibold">
+                {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
+              </Label>
+              <Input
+                type="text"
+                id="add_new_node_name"
+                value={addNodeName}
+                onChange={(e) => setAddNodeName(e.target.value)}
+                placeholder="Enter name"
+                autoComplete="off"
+                className="col-span-3"
+              />
+            </div>
 
-              <div className="flex justify-end gap-2">
-                <button type="submit" className="btn secondary">
-                  {t('sidebar_dialog_ok')}
-                </button>
-                <button type="button" className="btn" onClick={handleAddTaskNodeCanceled}>
+            <DialogFooter className="justify-end gap-2 pt-2">
+              <DialogClose asChild>
+                <Button variant="outline">
                   {t('sidebar_dialog_cancel')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                </Button>
+              </DialogClose>
+              <Button type="submit">
+                {t('sidebar_dialog_ok')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* AI Dialog */}
       {isAIDialogVisible && (
