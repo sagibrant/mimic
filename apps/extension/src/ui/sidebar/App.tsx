@@ -1108,6 +1108,7 @@ export default function App() {
   // Handle steps panel click
   const handleStepsPanelClick = useCallback(() => {
     // Deselect any selected step when clicking on the panel background
+    setSelectedStepUid('');
   }, []);
 
   /** ==================================================================================================================== */
