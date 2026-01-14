@@ -43,7 +43,8 @@ export class FrameHandler extends MsgDataHandlerBase {
 
   async init(tabId: number, frameId: number): Promise<void> {
     this.rtid.tab = tabId;
-    this.rtid.frame = frameId;
+    // sometimes chrome return frameId != 0 if navigated from build-in pages
+    this.rtid.frame = this._isPage ? 0 : frameId;
     window.addEventListener('message', (event) => {
       const data = Utils.deepClone(event.data);
       if (!(event.source && 'parent' in event.source && event.source.parent === window

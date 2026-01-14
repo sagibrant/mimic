@@ -781,6 +781,7 @@ export default function App() {
     try {
       if (settings.replaySettings.attachDebugger && !wasDebuggerAttached) {
         await SidebarUtils.engine.attachDebugger();
+        setIsDebuggerAttached(true);
       }
     } catch (error) {
       console.error('runSteps: attachDebugger failed', error);
@@ -852,6 +853,7 @@ export default function App() {
     try {
       if (settings.replaySettings.attachDebugger && !wasDebuggerAttached) {
         await SidebarUtils.engine.detachDebugger();
+        setIsDebuggerAttached(false);
       }
     } catch (error) {
       console.error('runSteps: detachDebugger failed', error);
@@ -1296,10 +1298,10 @@ export default function App() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-end gap-2 pt-2 flex-row">
-            <AlertDialogCancel onClick={handleConfirmDialogCancel} autoFocus>
+            <AlertDialogCancel onClick={handleConfirmDialogCancel}>
               {t('sidebar_confirm_cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDialogConfirm}>
+            <AlertDialogAction onClick={handleConfirmDialogConfirm} autoFocus>
               {t('sidebar_confirm_accept')}
             </AlertDialogAction>
           </AlertDialogFooter>

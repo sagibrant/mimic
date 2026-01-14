@@ -47,7 +47,10 @@ export class BackgroundUtils {
   }
 
   static async sendEvent(msgData: MessageData, timeout?: number): Promise<void> {
-    await BackgroundUtils.dispatcher.sendEvent(msgData, timeout);
+    try {
+      await BackgroundUtils.dispatcher.sendEvent(msgData, timeout);
+    }
+    catch { }
   }
 
   static async broadcastEvent(msgData: MessageData, timeout?: number): Promise<void> {

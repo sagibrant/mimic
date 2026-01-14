@@ -663,7 +663,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
     for (const tab of Object.values(this._tabs)) {
       const tabId = tab.tabId;
       try {
-        this._browserAPI.cdpAPI.detachTab(tabId);
+        await this._browserAPI.cdpAPI.detachTab(tabId);
       } catch (error) {
         this.logger.error(`detachTab: failed on tabId:${tabId}`, error);
       }
