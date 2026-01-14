@@ -215,6 +215,7 @@ export class Page extends AutomationObject implements api.Page {
 
   async close(): Promise<void> {
     await this.invokeFunction(this._rtid, 'close', []);
+    await Utils.wait(200);
   }
 
   async zoom(zoomFactor: number): Promise<void> {

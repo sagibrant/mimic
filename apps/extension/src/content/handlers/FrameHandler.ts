@@ -68,7 +68,6 @@ export class FrameHandler extends MsgDataHandlerBase {
       // register the current frame to parent frame with rtid
       window.parent.postMessage({ rtid: this.rtid }, '*');
     }
-    await ContentUtils.frame.installFrameInMAIN();
   }
 
   async installFrameInMAIN(): Promise<boolean> {

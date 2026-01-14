@@ -117,6 +117,7 @@ export class Window extends AutomationObject implements api.Window {
 
   async close(): Promise<void> {
     await this.invokeFunction(this._rtid, 'close', []);
+    await Utils.wait(200);
   }
 
   async minimize(): Promise<void> {

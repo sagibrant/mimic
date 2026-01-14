@@ -327,6 +327,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
 
     // webNavigation events
     this._browserAPI.webNavigationAPI.on('onErrorOccurred', async (ev) => {
+      this.logger.debug('onErrorOccurred -', ev);
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
@@ -334,6 +335,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       tab.updateFrameDetails(ev.frameId, { status: 'ErrorOccurred', ev: ev });
     });
     this._browserAPI.webNavigationAPI.on('onBeforeNavigate', async (ev) => {
+      this.logger.debug('onBeforeNavigate -', ev);
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
@@ -341,6 +343,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       tab.updateFrameDetails(ev.frameId, { status: 'BeforeNavigate', ev: ev });
     });
     this._browserAPI.webNavigationAPI.on('onCommitted', async (ev) => {
+      this.logger.debug('onCommitted -', ev);
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
@@ -356,6 +359,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       }
     });
     this._browserAPI.webNavigationAPI.on('onDOMContentLoaded', async (ev) => {
+      this.logger.debug('onDOMContentLoaded -', ev);
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;
@@ -368,6 +372,7 @@ export class BrowserHandler extends MsgDataHandlerBase<BrowserEvents> {
       }
     });
     this._browserAPI.webNavigationAPI.on('onCompleted', async (ev) => {
+      this.logger.debug('onCompleted -', ev);
       const tab = this._tabs[ev.tabId];
       if (Utils.isNullOrUndefined(tab)) {
         return;

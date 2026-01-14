@@ -105,13 +105,14 @@ export class ContentDispatcher extends Dispatcher {
     const frameId = (this._frameSenderInfo as any).frameId as number;
     const tabId = ((this._frameSenderInfo as any).tab as any).id as number;
     await ContentUtils.frame.init(tabId, frameId);
-    this.logger.debug("init: ==== frame sender:", this._frameSenderInfo);
+    this._contentToBackgroundChannel.startListening(true, false);
+    await ContentUtils.frame.installFrameInMAIN();
     const isRecording = await this.getConfig(RtidUtils.getBrowserRtid(), 'isRecording');
     if (isRecording) {
       await ContentUtils.frame.startRecording();
     }
-    this._contentToBackgroundChannel.startListening(true, false);
     this._contentToMainChannel.startListening();
+    this.logger.debug("init: ==== frame sender:", this._frameSenderInfo, "frameRtid", ContentUtils.frame.rtid);
   }
 
   async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<any> {

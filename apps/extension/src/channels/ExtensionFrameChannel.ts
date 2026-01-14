@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, Utils } from "@gogogo/shared";
 
 /**
  * The channel based on the chrome.runtime apis
@@ -50,6 +50,8 @@ export class ExtensionFrameChannel extends ChannelBase {
     }
     this.logger.debug('sendEvent: >>>>>> msg=', msg);
     const dest = msg.data.dest;
+    // sendEvent failed can be ignored
+    // await this.ping(dest.tab, dest.frame, msg);
     await chrome.tabs.sendMessage(dest.tab, msg, { frameId: dest.frame });
     this.logger.debug('sendEvent: <<<<<< msg=', msg);
   }
@@ -63,6 +65,7 @@ export class ExtensionFrameChannel extends ChannelBase {
     }
     this.logger.debug('sendRequest: >>>>>> msg=', msg);
     const dest = msg.data.dest;
+    await this.ping(dest.tab, dest.frame, msg);
     const response = await chrome.tabs.sendMessage(dest.tab, msg, { frameId: dest.frame });
     this.logger.debug('sendRequest: <<<<<< msg=', msg, ' response=', response);
     return response as Message;
@@ -74,5 +77,27 @@ export class ExtensionFrameChannel extends ChannelBase {
       return;
     }
     this._status = ChannelStatus.DISCONNECTED;
+  }
+
+  private async ping(tabId: number, frameId: number, msg: Message) {
+    // ping 3 times
+    for (let i = 1; i <= 3; i++) {
+      try {
+        const response = await Utils.waitResult(async () => {
+          const response = await chrome.tabs.sendMessage(tabId, 'PING', { frameId: frameId });
+          return response as string;
+        }, 100);
+        if (response === 'PONG') {
+          return;
+        }
+      } catch (error) {
+        if (i >= 2) {
+          this.logger.warn(`ping round - ${i} failed - ${tabId} - ${frameId}`, error, msg);
+        }
+        else {
+          this.logger.debug(`ping round - ${i} failed - ${tabId} - ${frameId}`, error, msg);
+        }
+      }
+    }
   }
 }
