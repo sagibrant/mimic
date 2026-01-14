@@ -26,7 +26,32 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
   const [userInput, setUserInput] = useState('');
   const [agentMode, setAgentMode] = useState<AgentMode>('agent');
   const [isLoading, setIsLoading] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?')]);
+  const initMessages: ChatMessage[] = (() => {
+    const m1 = new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?');
+    const m2 = new HumanMessage('this is the human message');
+
+    const m3 = new SystemMessage('prepare call tool');
+    (m3 as ChatMessage).messageType = 'tool';
+    const m4 = new SystemMessage('tool is called');
+    (m4 as ChatMessage).messageType = 'tool';
+    const m5 = new SystemMessage('thinking now...');
+    (m5 as ChatMessage).messageType = 'think';
+
+    const m6 = new SystemMessage('prepare call tool');
+    (m6 as ChatMessage).messageType = 'tool';
+    const m7 = new SystemMessage('tool is called');
+    (m7 as ChatMessage).messageType = 'tool';
+    const m8 = new SystemMessage('thinking now...');
+    (m8 as ChatMessage).messageType = 'think';
+
+    const m9 = new SystemMessage('now we have result');
+    (m9 as ChatMessage).messageType = 'final';
+    return [m1, m2, m3, m4, m5, m6, m7, m8, m9];
+  })();
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    // new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?')
+    ...initMessages
+  ]);
   const agent = useMemo(() => {
     const aiAgent = new AIAgent(runScript);
     return aiAgent;
@@ -85,15 +110,12 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
   };
 
   return (
-    <div className="ai-agent-container flex flex-col h-full bg-transparent">
+    <div className="ai-agent-container flex flex-col h-full bg-background text-foreground">
       {/* Chat Messages Area */}
       <div ref={chatContainerRef} className="chat-messages flex-1 overflow-y-auto p-2 space-y-4">
         {chatMessages.map((message, index) => (
           <div key={index} className={['message mb-4',
-            message.type === 'human' ? 'user-message flex justify-end' :
-              message.messageType === 'tool' ? 'tool-message flex justify-start' :
-                message.messageType === 'think' ? 'think-message flex justify-start' :
-                  'ai-message flex justify-start'
+            message.type === 'human' ? 'flex justify-end' : 'flex justify-start'
           ].join(' ')}>
             <div className={[
               'rounded-2xl px-4 py-2 max-w-[85%]',
@@ -124,7 +146,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
       {/* Fade effect between Chat Messages and User Input Area */}
       <div className="pointer-events-none relative w-full">
         <div className="absolute inset-x-0 bottom-0 h-4">
-          <div className="h-full bg-linear-to-t from-(--vscode-editor-background,#ffffff) to-transparent"></div>
+          <div className="h-full bg-linear-to-t from-background to-transparent"></div>
         </div>
       </div>
 
@@ -146,7 +168,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
         </div>
 
         {/* Bottom Controls */}
-        <div className="bottom-controls border-t border-border bg-muted/40 px-1 pt-1">
+        <div className="bottom-controls border-t border-border bg-background px-1 pt-1">
           <div className="flex flex-row items-center justify-between gap-2">
             {/* Left Controls */}
             <div className="flex items-center gap-2">

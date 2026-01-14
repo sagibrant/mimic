@@ -14,44 +14,9 @@
   overflow-y: auto;
 }
 
-.user-message .bg-blue-500 {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.ai-message .bg-gray-200 {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
 .message p {
   margin: 0;
   word-wrap: break-word;
-}
-
-/* Rounded corners for chat bubbles */
-.user-message .rounded-2xl {
-  border-top-right-radius: 0.5rem;
-}
-
-.ai-message .rounded-2xl {
-  border-top-left-radius: 0.5rem;
-}
-
-/* Styling for the input area */
-.input-area textarea {
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  resize: none;
-  width: 100%;
-  font-size: 0.75rem;
-}
-
-.input-area textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 /* Override PrimeVue default font sizes with higher specificity */
