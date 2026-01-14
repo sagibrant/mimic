@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { ThemeProvider } from '../components/theme-provider';
 
 export default function App() {
   console.log('sidebar ==> App');
@@ -1269,343 +1270,345 @@ export default function App() {
   }, []);
 
   return (
-    <div className="sidebar-container">
-      {/* Toaster for notifications */}
-      <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <div className="sidebar-container">
+        {/* Toaster for notifications */}
+        <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
 
-      {/* AlertDialog for confirmations */}
-      <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
-        <AlertDialogContent className="max-w-[20rem]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle>
-            <AlertDialogDescription className="text-left">
-              {alertDialogDescription}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex justify-end gap-2 pt-2 flex-row">
-            <AlertDialogCancel onClick={handleConfirmDialogCancel}>
-              {t('sidebar_confirm_cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDialogConfirm} autoFocus>
-              {t('sidebar_confirm_accept')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* AlertDialog for confirmations */}
+        <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+          <AlertDialogContent className="max-w-[20rem]">
+            <AlertDialogHeader>
+              <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle>
+              <AlertDialogDescription className="text-left">
+                {alertDialogDescription}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex justify-end gap-2 pt-2 flex-row">
+              <AlertDialogCancel onClick={handleConfirmDialogCancel}>
+                {t('sidebar_confirm_cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDialogConfirm} autoFocus>
+                {t('sidebar_confirm_accept')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Add Task Node Dialog */}
-      <Dialog open={isAddTaskNodeDialogVisible} onOpenChange={setIsAddTaskNodeDialogVisible}>
-        <DialogContent className="max-w-[20rem]">
-          <DialogHeader>
-            <DialogTitle>{t('sidebar_btn_action_tree_add_node_dialog_header')}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            onAddTaskNodeSubmit();
-          }} className="space-y-4 py-4">
-            <div className="grid grid-cols-12 gap-4">
-              <Label htmlFor="add_new_node_type" className="col-span-3 text-right font-semibold flex items-center justify-end">
-                {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
-              </Label>
-              <div className="col-span-9">
-                <Select value={addNodeType} onValueChange={(value) => setAddNodeType(value as 'task' | 'group')}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {taskNodeTypes.map(type => (
-                      <SelectItem key={type.code} value={type.code}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {/* Add Task Node Dialog */}
+        <Dialog open={isAddTaskNodeDialogVisible} onOpenChange={setIsAddTaskNodeDialogVisible}>
+          <DialogContent className="max-w-[20rem]">
+            <DialogHeader>
+              <DialogTitle>{t('sidebar_btn_action_tree_add_node_dialog_header')}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              onAddTaskNodeSubmit();
+            }} className="space-y-4 py-4">
+              <div className="grid grid-cols-12 gap-4">
+                <Label htmlFor="add_new_node_type" className="col-span-3 text-right font-semibold flex items-center justify-end">
+                  {t('sidebar_btn_action_tree_add_node_dialog_label_type')}
+                </Label>
+                <div className="col-span-9">
+                  <Select value={addNodeType} onValueChange={(value) => setAddNodeType(value as 'task' | 'group')}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskNodeTypes.map(type => (
+                        <SelectItem key={type.code} value={type.code}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-12 gap-4">
-              <Label htmlFor="add_new_node_name" className="col-span-3 text-right font-semibold flex items-center justify-end">
-                {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
-              </Label>
-              <div className="col-span-9">
-                <Input
-                  type="text"
-                  id="add_new_node_name"
-                  value={addNodeName}
-                  onChange={(e) => setAddNodeName(e.target.value)}
-                  placeholder="Enter name"
-                  autoComplete="off"
-                  className="w-full"
+              <div className="grid grid-cols-12 gap-4">
+                <Label htmlFor="add_new_node_name" className="col-span-3 text-right font-semibold flex items-center justify-end">
+                  {t('sidebar_btn_action_tree_add_node_dialog_label_name')}
+                </Label>
+                <div className="col-span-9">
+                  <Input
+                    type="text"
+                    id="add_new_node_name"
+                    value={addNodeName}
+                    onChange={(e) => setAddNodeName(e.target.value)}
+                    placeholder="Enter name"
+                    autoComplete="off"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="flex justify-end gap-2 pt-2 flex-row">
+                <DialogClose asChild>
+                  <Button variant="outline" onClick={handleAddTaskNodeCanceled}>
+                    {t('sidebar_dialog_cancel')}
+                  </Button>
+                </DialogClose>
+                <Button type="submit">
+                  {t('sidebar_dialog_ok')}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Dialog */}
+        <Dialog open={isAIDialogVisible} onOpenChange={setIsAIDialogVisible}>
+          <DialogContent className="max-w-[20rem]">
+            <DialogHeader>
+              <DialogTitle>{t('sidebar_btn_action_steps_ai_assistant_header')}</DialogTitle>
+            </DialogHeader>
+            <StepAIAgent runScript={runScriptWithNewStep} />
+          </DialogContent>
+        </Dialog>
+
+        {/* Header with menus */}
+        <header className="sidebar-header">
+          {/* Task menus */}
+          <div className={`menu-bar ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
+            <button className="menu-btn" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
+              {t('sidebar_btn_label_demo')}
+            </button>
+            <span className="menu-divider"></span>
+            <button className="menu-btn" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
+              {t('sidebar_btn_label_load')}
+            </button>
+            <span className="menu-divider"></span>
+            <button className="menu-btn" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
+              {t('sidebar_btn_label_save')}
+            </button>
+            <span className="menu-divider"></span>
+            <button className="menu-btn" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
+              {t('sidebar_btn_title_download')}
+            </button>
+            <span className="menu-divider"></span>
+            <button className="menu-btn" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
+              {t('sidebar_btn_label_help')}
+            </button>
+          </div>
+        </header>
+
+        {/* Middle section with task tree and steps panel */}
+        <main className="sidebar-middle">
+          {/* Task tree panel with toggle */}
+          <div className={`task-tree-panel ${isTreeCollapsed ? 'collapsed' : ''} ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
+            {/* Task tree controls */}
+            <div className="tree-controls">
+              <button
+                className="command-btn"
+                disabled={!isIdle}
+                onClick={handleToggleTreeClick}
+                title={isTreeCollapsed ? t('sidebar_btn_title_tree_expand') : t('sidebar_btn_title_tree_collapse')}
+              >
+                {isTreeCollapsed ? '→' : '←'}
+              </button>
+              {!isTreeCollapsed && (
+                <>
+                  <button
+                    className="command-btn"
+                    disabled={!(activeTaskNodeId && isIdle)}
+                    onClick={handleShowAddTaskNodeDialog}
+                    title={t('sidebar_btn_title_tree_add_node')}
+                  >
+                    +
+                  </button>
+                  <button
+                    className="command-btn"
+                    disabled={!(activeTaskNodeId && isIdle)}
+                    onClick={handleDeleteTaskNode}
+                    title={t('sidebar_btn_title_tree_delete_node')}
+                  >
+                    -
+                  </button>
+                </>
+              )}
+            </div>
+            {/* Task tree container */}
+            {!isTreeCollapsed && (
+              <div className="tree-container">
+                <TreeNode
+                  node={taskTree}
+                  activeNodeId={activeTaskNodeId}
+                  onNodeSelected={handleTaskNodeSelect}
+                  onTaskSelected={handleTaskSelect}
+                  onRenameNode={handleTaskNodeRename}
                 />
               </div>
-            </div>
-
-            <DialogFooter className="flex justify-end gap-2 pt-2 flex-row">
-              <DialogClose asChild>
-                <Button variant="outline" onClick={handleAddTaskNodeCanceled}>
-                  {t('sidebar_dialog_cancel')}
-                </Button>
-              </DialogClose>
-              <Button type="submit">
-                {t('sidebar_dialog_ok')}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* AI Dialog */}
-      <Dialog open={isAIDialogVisible} onOpenChange={setIsAIDialogVisible}>
-        <DialogContent className="max-w-[20rem]">
-          <DialogHeader>
-            <DialogTitle>{t('sidebar_btn_action_steps_ai_assistant_header')}</DialogTitle>
-          </DialogHeader>
-          <StepAIAgent runScript={runScriptWithNewStep} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Header with menus */}
-      <header className="sidebar-header">
-        {/* Task menus */}
-        <div className={`menu-bar ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
-          <button className="menu-btn" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
-            {t('sidebar_btn_label_demo')}
-          </button>
-          <span className="menu-divider"></span>
-          <button className="menu-btn" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
-            {t('sidebar_btn_label_load')}
-          </button>
-          <span className="menu-divider"></span>
-          <button className="menu-btn" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
-            {t('sidebar_btn_label_save')}
-          </button>
-          <span className="menu-divider"></span>
-          <button className="menu-btn" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
-            {t('sidebar_btn_title_download')}
-          </button>
-          <span className="menu-divider"></span>
-          <button className="menu-btn" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
-            {t('sidebar_btn_label_help')}
-          </button>
-        </div>
-      </header>
-
-      {/* Middle section with task tree and steps panel */}
-      <main className="sidebar-middle">
-        {/* Task tree panel with toggle */}
-        <div className={`task-tree-panel ${isTreeCollapsed ? 'collapsed' : ''} ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
-          {/* Task tree controls */}
-          <div className="tree-controls">
-            <button
-              className="command-btn"
-              disabled={!isIdle}
-              onClick={handleToggleTreeClick}
-              title={isTreeCollapsed ? t('sidebar_btn_title_tree_expand') : t('sidebar_btn_title_tree_collapse')}
-            >
-              {isTreeCollapsed ? '→' : '←'}
-            </button>
-            {!isTreeCollapsed && (
-              <>
-                <button
-                  className="command-btn"
-                  disabled={!(activeTaskNodeId && isIdle)}
-                  onClick={handleShowAddTaskNodeDialog}
-                  title={t('sidebar_btn_title_tree_add_node')}
-                >
-                  +
-                </button>
-                <button
-                  className="command-btn"
-                  disabled={!(activeTaskNodeId && isIdle)}
-                  onClick={handleDeleteTaskNode}
-                  title={t('sidebar_btn_title_tree_delete_node')}
-                >
-                  -
-                </button>
-              </>
             )}
           </div>
-          {/* Task tree container */}
-          {!isTreeCollapsed && (
-            <div className="tree-container">
-              <TreeNode
-                node={taskTree}
-                activeNodeId={activeTaskNodeId}
-                onNodeSelected={handleTaskNodeSelect}
-                onTaskSelected={handleTaskSelect}
-                onRenameNode={handleTaskNodeRename}
+
+          {/* Steps panel */}
+          <div className="steps-panel">
+            {/* Steps controls */}
+            <div className="steps-controls">
+              <button
+                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+                disabled={!(activeTaskId && isIdle)}
+                onClick={() => handleAddStep()}
+                title={t('sidebar_btn_title_steps_add_step')}
+              >
+                +
+              </button>
+              <button
+                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+                disabled={!(activeTaskId && isIdle && selectedStepUid)}
+                onClick={handleRemoveStep}
+                title={t('sidebar_btn_title_steps_delete_step')}
+              >
+                -
+              </button>
+              <span className="menu-divider"></span>
+              <button
+                className="command-btn"
+                disabled={!(activeTaskId && isIdle)}
+                onClick={handleRecord}
+                title={t('sidebar_btn_title_steps_record')}
+              >
+                ◉
+              </button>
+              <span className="menu-divider"></span>
+              <button
+                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+                disabled={!(activeTaskId && isIdle)}
+                onClick={handleReplay}
+                title={t('sidebar_btn_title_steps_replay')}
+              >
+                ▶
+              </button>
+              <button
+                className="command-btn"
+                disabled={!(activeTaskId && isIdle && selectedStepUid)}
+                onClick={handleReplayFromStep}
+                title={t('sidebar_btn_title_steps_replayFromStep')}
+              >
+                ▷
+              </button>
+              <span className="menu-divider"></span>
+              <button
+                className="command-btn"
+                disabled={!(activeTaskId && (isReplaying || isRecording))}
+                onClick={handleStop}
+                title={t('sidebar_btn_title_steps_stop')}
+              >
+                ■
+              </button>
+              <span className="menu-divider"></span>
+              <button
+                className="command-btn"
+                disabled={!(isIdle)}
+                onClick={toggleCDPAttach}
+                title={isDebuggerAttached ? t('sidebar_btn_title_steps_debugger_detach') : t('sidebar_btn_title_steps_debugger_attach')}
+              >
+                {isDebuggerAttached ? '☍' : '☌'}
+              </button>
+              <span className="menu-divider"></span>
+              <button
+                className="command-btn"
+                disabled={!(isIdle)}
+                onClick={openAIDialog}
+                title={t('sidebar_btn_title_steps_ai_assistant')}
+              >
+                AI
+              </button>
+            </div>
+            {/* Steps container */}
+            <div className={`steps-container ${isRecording || isReplaying ? 'readonly' : ''}`} onClick={handleStepsPanelClick}>
+              {activeSteps.map(step => (
+                <div
+                  key={step.uid}
+                  draggable={!!(activeTaskId && isIdle)}
+                  className={`step-card ${selectedStepUid === step.uid ? 'selected' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStepSelect(step.uid);
+                  }}
+                  onDragStart={(e) => {
+                    e.stopPropagation();
+                    handleDragStart(step.uid);
+                  }}
+                  onDragOver={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleDragOver(step.uid);
+                  }}
+                  onDrop={(e) => {
+                    e.stopPropagation();
+                    handleDrop(step.uid);
+                  }}
+                >
+                  <div className="step-type">
+                    <span className="step-type-icon">≡</span>
+                  </div>
+                  {!isStepEditing(step.uid) ? (
+                    <div
+                      className="step-description"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        handleStepDescriptionDblClick(step.uid);
+                      }}
+                    >
+                      {getStepDescription(step)}
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      className="step-description-edit"
+                      value={editedStepDescription}
+                      onChange={(e) => setEditedStepDescription(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveStepDescription(step.uid);
+                        if (e.key === 'Escape') cancelStepEdit();
+                      }}
+                      onBlur={() => saveStepDescription(step.uid)}
+                      autoFocus
+                    />
+                  )}
+                  <div
+                    className={`step-status ${step.last_status || 'pending'}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStepResultClick(step.uid);
+                    }}
+                    title={getStepLastError(step)}
+                  >
+                    {getStepLastStatus(step)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+
+        {/* Bottom section with tabs */}
+        <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
+          <div className="sidebar-bottom-controls">
+            <button
+              className="sidebar-bottom-control-btn"
+              disabled={!(activeTaskId && selectedStepUid && isIdle)}
+              onClick={toggleBottomExpanded}
+              title={isBottomExpanded ? t('sidebar_btn_title_bottom_collapse') : t('sidebar_btn_title_bottom_expand')}
+            >
+              ⇵
+            </button>
+          </div>
+
+          {selectedStep && (
+            <div className="sidebar-bottom-content">
+              <StepScriptEditor
+                key={selectedStep.uid}
+                ref={stepScriptEditorRef}
+                initialScriptContent={selectedStep.script}
+                onScriptChange={handleOnSelectedStepScriptChange}
+                runScript={handleReplaySelectedStep}
               />
             </div>
           )}
-        </div>
-
-        {/* Steps panel */}
-        <div className="steps-panel">
-          {/* Steps controls */}
-          <div className="steps-controls">
-            <button
-              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
-              disabled={!(activeTaskId && isIdle)}
-              onClick={() => handleAddStep()}
-              title={t('sidebar_btn_title_steps_add_step')}
-            >
-              +
-            </button>
-            <button
-              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
-              disabled={!(activeTaskId && isIdle && selectedStepUid)}
-              onClick={handleRemoveStep}
-              title={t('sidebar_btn_title_steps_delete_step')}
-            >
-              -
-            </button>
-            <span className="menu-divider"></span>
-            <button
-              className="command-btn"
-              disabled={!(activeTaskId && isIdle)}
-              onClick={handleRecord}
-              title={t('sidebar_btn_title_steps_record')}
-            >
-              ◉
-            </button>
-            <span className="menu-divider"></span>
-            <button
-              className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
-              disabled={!(activeTaskId && isIdle)}
-              onClick={handleReplay}
-              title={t('sidebar_btn_title_steps_replay')}
-            >
-              ▶
-            </button>
-            <button
-              className="command-btn"
-              disabled={!(activeTaskId && isIdle && selectedStepUid)}
-              onClick={handleReplayFromStep}
-              title={t('sidebar_btn_title_steps_replayFromStep')}
-            >
-              ▷
-            </button>
-            <span className="menu-divider"></span>
-            <button
-              className="command-btn"
-              disabled={!(activeTaskId && (isReplaying || isRecording))}
-              onClick={handleStop}
-              title={t('sidebar_btn_title_steps_stop')}
-            >
-              ■
-            </button>
-            <span className="menu-divider"></span>
-            <button
-              className="command-btn"
-              disabled={!(isIdle)}
-              onClick={toggleCDPAttach}
-              title={isDebuggerAttached ? t('sidebar_btn_title_steps_debugger_detach') : t('sidebar_btn_title_steps_debugger_attach')}
-            >
-              {isDebuggerAttached ? '☍' : '☌'}
-            </button>
-            <span className="menu-divider"></span>
-            <button
-              className="command-btn"
-              disabled={!(isIdle)}
-              onClick={openAIDialog}
-              title={t('sidebar_btn_title_steps_ai_assistant')}
-            >
-              AI
-            </button>
-          </div>
-          {/* Steps container */}
-          <div className={`steps-container ${isRecording || isReplaying ? 'readonly' : ''}`} onClick={handleStepsPanelClick}>
-            {activeSteps.map(step => (
-              <div
-                key={step.uid}
-                draggable={!!(activeTaskId && isIdle)}
-                className={`step-card ${selectedStepUid === step.uid ? 'selected' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStepSelect(step.uid);
-                }}
-                onDragStart={(e) => {
-                  e.stopPropagation();
-                  handleDragStart(step.uid);
-                }}
-                onDragOver={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleDragOver(step.uid);
-                }}
-                onDrop={(e) => {
-                  e.stopPropagation();
-                  handleDrop(step.uid);
-                }}
-              >
-                <div className="step-type">
-                  <span className="step-type-icon">≡</span>
-                </div>
-                {!isStepEditing(step.uid) ? (
-                  <div
-                    className="step-description"
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      handleStepDescriptionDblClick(step.uid);
-                    }}
-                  >
-                    {getStepDescription(step)}
-                  </div>
-                ) : (
-                  <input
-                    type="text"
-                    className="step-description-edit"
-                    value={editedStepDescription}
-                    onChange={(e) => setEditedStepDescription(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveStepDescription(step.uid);
-                      if (e.key === 'Escape') cancelStepEdit();
-                    }}
-                    onBlur={() => saveStepDescription(step.uid)}
-                    autoFocus
-                  />
-                )}
-                <div
-                  className={`step-status ${step.last_status || 'pending'}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleStepResultClick(step.uid);
-                  }}
-                  title={getStepLastError(step)}
-                >
-                  {getStepLastStatus(step)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      {/* Bottom section with tabs */}
-      <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
-        <div className="sidebar-bottom-controls">
-          <button
-            className="sidebar-bottom-control-btn"
-            disabled={!(activeTaskId && selectedStepUid && isIdle)}
-            onClick={toggleBottomExpanded}
-            title={isBottomExpanded ? t('sidebar_btn_title_bottom_collapse') : t('sidebar_btn_title_bottom_expand')}
-          >
-            ⇵
-          </button>
-        </div>
-
-        {selectedStep && (
-          <div className="sidebar-bottom-content">
-            <StepScriptEditor
-              key={selectedStep.uid}
-              ref={stepScriptEditorRef}
-              initialScriptContent={selectedStep.script}
-              onScriptChange={handleOnSelectedStepScriptChange}
-              runScript={handleReplaySelectedStep}
-            />
-          </div>
-        )}
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </ThemeProvider>
   );
 };
