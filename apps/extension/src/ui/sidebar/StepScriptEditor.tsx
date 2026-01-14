@@ -264,7 +264,7 @@ ${codeContent}
     return () => {
       editorView.destroy();
     };
-  }, []);
+  }, [onScriptChange]);
 
   useEffect(() => {
     if (!editorRef.current) return;

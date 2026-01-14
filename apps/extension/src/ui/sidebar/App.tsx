@@ -726,9 +726,16 @@ export default function App() {
       stepResult.status = 'passed';
       stepResult.result = result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+      let errorMessage = error instanceof Error ? error.stack || error.message : String(error);
       stepResult.step_end_time = Date.now();
       stepResult.status = 'failed';
+      const stepEngineInvokeFunctionIndicator = 'at StepEngine.invokeFunction';
+      if (errorMessage.includes(stepEngineInvokeFunctionIndicator)) {
+        errorMessage = errorMessage.split(stepEngineInvokeFunctionIndicator)[0].trim();
+      }
+      while (errorMessage.startsWith('Error: ')) {
+        errorMessage = errorMessage.replace('Error: ', '');
+      }
       stepResult.error = errorMessage;
     }
     return stepResult;
