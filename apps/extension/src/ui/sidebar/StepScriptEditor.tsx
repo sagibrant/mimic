@@ -11,6 +11,7 @@ import { ayuLight, coolGlow } from 'thememirror';
 import { StepScriptEditorHelper } from './StepScriptEditorHelper';
 import { SidebarUtils } from './SidebarUtils';
 import { ElementInfo } from '@gogogo/shared';
+import { Button } from '@/ui/components/ui/button';
 
 // Define the interface for the exposed methods
 export interface StepScriptEditorRef {
@@ -355,33 +356,35 @@ ${codeContent}
         <div className="editor-header">
           <label className="editor-label">{t('step_script_editor_scripts_title')}</label>
           <div>
-            <button
-              className="btn btn-inspect"
+            <Button
+              variant="ghost"
+              size="sm"
               draggable="true"
               onClick={handleToggleInspectMode}
-              onDragStart={(e) => {
+              onDragStart={(e: React.DragEvent) => {
                 e.stopPropagation();
                 handleDragStart(inspectedObject);
               }}
               title={!inspectedObject ? t('step_script_editor_btn_title_inspect') : JSON.stringify(inspectedObject.element, null, 2)}
             >
               {!inspectedObject ? "⛶" : "▣"}
-            </button>
-            <button
-              className="btn btn-run"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={runScript}
               title={t('step_script_editor_btn_title_run_script')}
             >
               ▷
-            </button>
+            </Button>
           </div>
         </div>
         <div className="editor-container" ref={editorRef}
-          onDragOver={(e) => {
+          onDragOver={(e: React.DragEvent) => {
             e.stopPropagation();
             e.preventDefault();
           }}
-          onDrop={(e) => {
+          onDrop={(e: React.DragEvent) => {
             e.stopPropagation();
             handleDrop(inspectedObject);
           }}

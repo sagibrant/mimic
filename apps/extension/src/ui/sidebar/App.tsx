@@ -1271,7 +1271,7 @@ export default function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <div className="sidebar-container">
+      <div className="sidebar-container text-sm font-sans">
         {/* Toaster for notifications */}
         <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
 
@@ -1370,25 +1370,25 @@ export default function App() {
         <header className="sidebar-header">
           {/* Task menus */}
           <div className={`menu-bar ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
-            <button className="menu-btn" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
+            <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
               {t('sidebar_btn_label_demo')}
-            </button>
+            </Button>
             <span className="menu-divider"></span>
-            <button className="menu-btn" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
+            <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
               {t('sidebar_btn_label_load')}
-            </button>
+            </Button>
             <span className="menu-divider"></span>
-            <button className="menu-btn" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
+            <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
               {t('sidebar_btn_label_save')}
-            </button>
+            </Button>
             <span className="menu-divider"></span>
-            <button className="menu-btn" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
+            <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
               {t('sidebar_btn_title_download')}
-            </button>
+            </Button>
             <span className="menu-divider"></span>
-            <button className="menu-btn" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
+            <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
               {t('sidebar_btn_label_help')}
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -1398,32 +1398,35 @@ export default function App() {
           <div className={`task-tree-panel ${isTreeCollapsed ? 'collapsed' : ''} ${isRecording || isReplaying || isBottomExpanded ? 'readonly' : ''}`}>
             {/* Task tree controls */}
             <div className="tree-controls">
-              <button
-                className="command-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!isIdle}
                 onClick={handleToggleTreeClick}
                 title={isTreeCollapsed ? t('sidebar_btn_title_tree_expand') : t('sidebar_btn_title_tree_collapse')}
               >
                 {isTreeCollapsed ? '→' : '←'}
-              </button>
+              </Button>
               {!isTreeCollapsed && (
                 <>
-                  <button
-                    className="command-btn"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     disabled={!(activeTaskNodeId && isIdle)}
                     onClick={handleShowAddTaskNodeDialog}
                     title={t('sidebar_btn_title_tree_add_node')}
                   >
                     +
-                  </button>
-                  <button
-                    className="command-btn"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     disabled={!(activeTaskNodeId && isIdle)}
                     onClick={handleDeleteTaskNode}
                     title={t('sidebar_btn_title_tree_delete_node')}
                   >
                     -
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -1445,75 +1448,83 @@ export default function App() {
           <div className="steps-panel">
             {/* Steps controls */}
             <div className="steps-controls">
-              <button
-                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={() => handleAddStep()}
                 title={t('sidebar_btn_title_steps_add_step')}
               >
                 +
-              </button>
-              <button
-                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && isIdle && selectedStepUid)}
                 onClick={handleRemoveStep}
                 title={t('sidebar_btn_title_steps_delete_step')}
               >
                 -
-              </button>
+              </Button>
               <span className="menu-divider"></span>
-              <button
-                className="command-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={handleRecord}
                 title={t('sidebar_btn_title_steps_record')}
               >
                 ◉
-              </button>
+              </Button>
               <span className="menu-divider"></span>
-              <button
-                className={`command-btn ${isBottomExpanded ? 'readonly' : ''}`}
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={handleReplay}
                 title={t('sidebar_btn_title_steps_replay')}
               >
                 ▶
-              </button>
-              <button
-                className="command-btn"
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && isIdle && selectedStepUid)}
                 onClick={handleReplayFromStep}
                 title={t('sidebar_btn_title_steps_replayFromStep')}
               >
                 ▷
-              </button>
+              </Button>
               <span className="menu-divider"></span>
-              <button
-                className="command-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(activeTaskId && (isReplaying || isRecording))}
                 onClick={handleStop}
                 title={t('sidebar_btn_title_steps_stop')}
               >
                 ■
-              </button>
+              </Button>
               <span className="menu-divider"></span>
-              <button
-                className="command-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(isIdle)}
                 onClick={toggleCDPAttach}
                 title={isDebuggerAttached ? t('sidebar_btn_title_steps_debugger_detach') : t('sidebar_btn_title_steps_debugger_attach')}
               >
                 {isDebuggerAttached ? '☍' : '☌'}
-              </button>
+              </Button>
               <span className="menu-divider"></span>
-              <button
-                className="command-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={!(isIdle)}
                 onClick={openAIDialog}
                 title={t('sidebar_btn_title_steps_ai_assistant')}
               >
                 AI
-              </button>
+              </Button>
             </div>
             {/* Steps container */}
             <div className={`steps-container ${isRecording || isReplaying ? 'readonly' : ''}`} onClick={handleStepsPanelClick}>
@@ -1586,14 +1597,15 @@ export default function App() {
         {/* Bottom section with tabs */}
         <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
           <div className="sidebar-bottom-controls">
-            <button
-              className="sidebar-bottom-control-btn"
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={!(activeTaskId && selectedStepUid && isIdle)}
               onClick={toggleBottomExpanded}
               title={isBottomExpanded ? t('sidebar_btn_title_bottom_collapse') : t('sidebar_btn_title_bottom_expand')}
             >
               ⇵
-            </button>
+            </Button>
           </div>
 
           {selectedStep && (
