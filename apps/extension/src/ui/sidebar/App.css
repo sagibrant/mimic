@@ -154,7 +154,7 @@
   min-width: 40px;
   height: 100%;
   padding: 0 12px;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,60 +247,4 @@
   min-width: 0;
 }
 
-/* Dark Mode Styles */
-@media (prefers-color-scheme: dark) {
-  .sidebar-container {
-    color: #e0e0e0;
-    background-color: #121212;
-  }
-
-  .sidebar-header {
-    border-bottom-color: var(--color-sidebar-border);
-    background-color: var(--color-sidebar);
-  }
-
-  .task-tree-panel {
-    border-right-color: #333;
-    background-color: var(--color-sidebar);
-  }
-
-  .tree-controls,
-  .steps-controls {
-    background-color: var(--color-sidebar);
-    border-bottom-color: #333;
-  }
-
-  .step-card {
-    border-color: #333;
-    background-color: #1e1e1e;
-  }
-
-  .step-card:hover {
-    border-color: #555;
-  }
-
-  .step-card:hover .step-type-icon {
-    color: #ddd;
-  }
-
-  .step-type {
-    border-right-color: #333;
-  }
-
-  .step-type:active {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .step-type-icon {
-    color: #aaa;
-  }
-
-  .sidebar-bottom {
-    border-top-color: #333;
-    background-color: var(--color-sidebar);
-  }
-
-  .sidebar-bottom-controls {
-    background-color: var(--color-sidebar);
-  }
-}
+/* Dark Mode Styles removed: rely on CSS variables from global theme */
