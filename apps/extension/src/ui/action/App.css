@@ -40,7 +40,8 @@
 
 .action-container [data-slot="command-item"][data-disabled="true"] {
   opacity: 0.5;
-  pointer-events: none;
+  cursor: not-allowed;
+  pointer-events: auto;
 }
 
 .action-container [data-slot="command-item"][data-selected="true"] {
@@ -48,15 +49,26 @@
   color: var(--color-accent-foreground);
 }
 
+.action-container [data-slot="command-list"] {
+  padding: 5px;
+}
 
-/* Icon styling */
 .icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
+  height: 20px;
   text-align: center;
   font-size: 16px;
   font-style: normal;
+  line-height: 1;
 }
+.icon::before {
+  display: block;
+  line-height: 1;
+}
+
 
 .store-icon::before {
   content: '⚖';
