@@ -63,7 +63,6 @@ const ZipStorePlugin = require('./ZipStorePlugin');
 const UnpackedExtensionPlugin = require('./UnpackedExtensionPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const EvalCheckPlugin = require('./EvalCheckPlugin');
-const { VueLoaderPlugin } = require('vue-loader');
 
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -183,7 +182,7 @@ module.exports = (env) => {
      */
     resolve: {
       // File extensions to resolve automatically
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.html', '.css', '.vue', '.json'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.html', '.css', '.json'],
       alias: {
         /**
          * Path alias configuration
@@ -221,7 +220,6 @@ module.exports = (env) => {
           test: /\.(ts|tsx)$/,
           loader: 'ts-loader',
           options: {
-            appendTsSuffixTo: [/\.vue$/],
             transpileOnly: true,
             compilerOptions: {
               module: 'esnext',
@@ -230,13 +228,7 @@ module.exports = (env) => {
           },
           exclude: /node_modules/, // Exclude node_modules to improve build performance
         },
-        // 2. Process Vue single-file components
-        {
-          test: /\.vue$/,
-          loader: 'vue-loader',
-          exclude: /node_modules/
-        },
-        // 3. HTML loader
+        // 2. HTML loader
         {
           test: /\.html$/,
           loader: 'html-loader',
@@ -244,7 +236,7 @@ module.exports = (env) => {
           include: path.resolve(rootDir, 'src/ui'), // Only ui html
           exclude: /node_modules/,
         },
-        // 4. css
+        // 3. css
         {
           test: /\.css$/,
           use: [
@@ -266,7 +258,7 @@ module.exports = (env) => {
             /node_modules\/primeicons/
           ]
         },
-        // 5. Load font assets for PrimeIcons
+        // 4. Load font assets for PrimeIcons
         {
           test: /\.(woff2?|ttf|eot|svg)$/,
           type: 'asset/resource',
@@ -295,8 +287,6 @@ module.exports = (env) => {
           resource.request = path.resolve(rootDir, 'build/async_hooks-zone.cjs');  // Adjust if path differs
         }
       ),
-      // Required for Vue single-file component(SFC) support 
-      new VueLoaderPlugin(),
       new CopyWebpackPlugin({
         patterns: [
           {
