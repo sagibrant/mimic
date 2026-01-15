@@ -243,8 +243,8 @@
 
 /* Bottom Section Styles */
 .sidebar-bottom {
-  border-top: 1px solid #e0e0e0;
-  background-color: #f5f5f5;
+  border-top: 1px solid var(--color-sidebar-border);
+  background-color: var(--color-sidebar);
   display: flex;
   flex-direction: row;
   flex: 0 0 auto;
@@ -267,7 +267,7 @@
 .sidebar-bottom-controls {
   display: flex;
   justify-content: flex-end;
-  background-color: #f5f5f5;
+  background-color: var(--color-sidebar);
   user-select: none;
 }
 

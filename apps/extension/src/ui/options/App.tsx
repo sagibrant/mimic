@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Utils, Settings, SettingUtils, CryptoUtil } from "@gogogo/shared";
-
-// Define notification interface
-interface Notification {
-  visible: boolean;
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
+import { ThemeProvider } from '../components/theme-provider';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { toast, Toaster } from 'sonner';
 
 export default function App() {
   console.log('options ==>');
@@ -19,40 +19,9 @@ export default function App() {
   const [replaySettings, setReplaySettings] = useState<string>(JSON.stringify(settings.replaySettings, null, 2));
   const [recordSettings, setRecordSettings] = useState<string>(JSON.stringify(settings.recordSettings, null, 2));
 
-  // Notification state
-  const [notification, setNotification] = useState<Notification>({
-    visible: false,
-    message: '',
-    type: 'info'
-  });
-
   // Translation function
   const t = (key: string): string => {
     return chrome.i18n.getMessage(key) || key; // Fallback to key if message not found
-  };
-
-  // Initialize component
-  useEffect(() => {
-    // Initialize theme based on system preferences
-    updateTheme();
-
-    // Setup theme change listener
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleThemeChange = () => updateTheme();
-    mediaQuery.addEventListener('change', handleThemeChange);
-
-    // Cleanup event listener
-    return () => {
-      mediaQuery.removeEventListener('change', handleThemeChange);
-    };
-  }, []);
-
-  /**
-   * Update theme class based on system preference
-   */
-  const updateTheme = () => {
-    document.documentElement.classList.toggle('dark-theme',
-      window.matchMedia('(prefers-color-scheme: dark)').matches);
   };
 
   /**
@@ -155,177 +124,159 @@ export default function App() {
   };
 
   /**
-   * Show notification using snackbar
+   * Show notification using sonner toast
    */
   const showNotification = (message: string, type: 'success' | 'error' | 'info'): void => {
-    setNotification({
-      visible: true,
-      message,
-      type
-    });
-
-    // Hide after 3 seconds
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, visible: false }));
-    }, 3000);
+    const fn = type === 'success' ? toast.success : type === 'error' ? toast.error : toast.info;
+    fn(message, { duration: 3000 });
   };
 
   return (
-    <div className="settings-container">
-      <h1>{t('options_label_settings')}</h1>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <div className="settings-container text-sm font-sans">
+        <Toaster position="bottom-right" className="text-sm p-2 max-w-xs" />
+        <h1>{t('options_label_settings')}</h1>
 
-      <form onSubmit={saveSettings}>
-        {/* Store URL Field */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="storeURL">
-            {t('options_label_storeURL')}
-          </label>
-          <div className="input-container">
-            <input
-              id="storeURL"
-              value={settings.storeURL}
-              onChange={(e) => setSettings(prev => ({ ...prev, storeURL: e.target.value }))}
-              type="url"
-              className="setting-input"
-              placeholder={t('options_placeholder_storeURL')}
-            />
+        <form onSubmit={saveSettings}>
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="storeURL">
+              {t('options_label_storeURL')}
+            </Label>
+            <div className="input-container">
+              <Input
+                id="storeURL"
+                value={settings.storeURL}
+                onChange={(e) => setSettings(prev => ({ ...prev, storeURL: e.target.value }))}
+                type="url"
+                className="w-full"
+                placeholder={t('options_placeholder_storeURL')}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* AI BaseURL Field */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="ai_baseURL">
-            {t('options_label_ai_baseURL')}
-          </label>
-          <div className="input-container">
-            <input
-              id="ai_baseURL"
-              value={settings.aiSettings.baseURL}
-              onChange={(e) => setSettings(prev => ({
-                ...prev,
-                aiSettings: { ...prev.aiSettings, baseURL: e.target.value }
-              }))}
-              type="url"
-              className="setting-input"
-              placeholder={t('options_placeholder_ai_baseURL')}
-            />
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="ai_baseURL">
+              {t('options_label_ai_baseURL')}
+            </Label>
+            <div className="input-container">
+              <Input
+                id="ai_baseURL"
+                value={settings.aiSettings.baseURL}
+                onChange={(e) => setSettings(prev => ({
+                  ...prev,
+                  aiSettings: { ...prev.aiSettings, baseURL: e.target.value }
+                }))}
+                type="url"
+                className="w-full"
+                placeholder={t('options_placeholder_ai_baseURL')}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* AI Models Field */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="ai_models">
-            {t('options_label_ai_models')}
-          </label>
-          <div className="input-container">
-            <input
-              id="ai_models"
-              value={settings.aiSettings.models}
-              onChange={(e) => setSettings(prev => ({
-                ...prev,
-                aiSettings: { ...prev.aiSettings, models: e.target.value }
-              }))}
-              type="text"
-              className="setting-input"
-              placeholder={t('options_placeholder_ai_models')}
-            />
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="ai_models">
+              {t('options_label_ai_models')}
+            </Label>
+            <div className="input-container">
+              <Input
+                id="ai_models"
+                value={settings.aiSettings.models}
+                onChange={(e) => setSettings(prev => ({
+                  ...prev,
+                  aiSettings: { ...prev.aiSettings, models: e.target.value }
+                }))}
+                type="text"
+                className="w-full"
+                placeholder={t('options_placeholder_ai_models')}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* AI API Key Field */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="ai_apiKey">
-            {t('options_label_ai_apiKey')}
-          </label>
-          <div className="input-container">
-            <input
-              id="ai_apiKey"
-              value={settings.aiSettings.apiKey}
-              onChange={(e) => setSettings(prev => ({
-                ...prev,
-                aiSettings: { ...prev.aiSettings, apiKey: e.target.value }
-              }))}
-              type="password"
-              className="setting-input"
-              placeholder={t('options_placeholder_ai_apiKey')}
-            />
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="ai_apiKey">
+              {t('options_label_ai_apiKey')}
+            </Label>
+            <div className="input-container">
+              <Input
+                id="ai_apiKey"
+                value={settings.aiSettings.apiKey}
+                onChange={(e) => setSettings(prev => ({
+                  ...prev,
+                  aiSettings: { ...prev.aiSettings, apiKey: e.target.value }
+                }))}
+                type="password"
+                className="w-full"
+                placeholder={t('options_placeholder_ai_apiKey')}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Log Level Select */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="logLevel">
-            {t('options_label_logLevel')}
-          </label>
-          <div className="select-container">
-            <select
-              id="logLevel"
-              value={settings.logLevel}
-              onChange={(e) => setSettings(prev => ({ ...prev, logLevel: e.target.value as any }))}
-              className="setting-select"
-            >
-              <option value="TRACE">TRACE</option>
-              <option value="DEBUG">DEBUG</option>
-              <option value="LOG">LOG</option>
-              <option value="INFO">INFO</option>
-              <option value="WARN">WARN</option>
-              <option value="ERROR">ERROR</option>
-            </select>
-            <div className="select-arrow"></div>
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="logLevel">
+              {t('options_label_logLevel')}
+            </Label>
+            <div className="select-container">
+              <Select
+                value={settings.logLevel}
+                onValueChange={(value) => setSettings(prev => ({ ...prev, logLevel: value as any }))}
+              >
+                <SelectTrigger className="w-full" id="logLevel">
+                  <SelectValue placeholder="Select log level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TRACE">TRACE</SelectItem>
+                  <SelectItem value="DEBUG">DEBUG</SelectItem>
+                  <SelectItem value="LOG">LOG</SelectItem>
+                  <SelectItem value="INFO">INFO</SelectItem>
+                  <SelectItem value="WARN">WARN</SelectItem>
+                  <SelectItem value="ERROR">ERROR</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        {/* Replay Settings */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="replaySettings">
-            {t('options_label_replaySettings')}
-          </label>
-          <div className="textarea-container">
-            <textarea
-              id="replaySettings"
-              value={replaySettings}
-              onChange={(e) => setReplaySettings(e.target.value)}
-              className="setting-textarea"
-              rows={5}
-              placeholder={t('options_placeholder_json')}
-            ></textarea>
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="replaySettings">
+              {t('options_label_replaySettings')}
+            </Label>
+            <div className="textarea-container">
+              <Textarea
+                id="replaySettings"
+                value={replaySettings}
+                onChange={(e) => setReplaySettings(e.target.value)}
+                rows={5}
+                placeholder={t('options_placeholder_json')}
+                className="w-full"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Record Settings */}
-        <div className="settings-group">
-          <label className="setting-label" htmlFor="recordSettings">
-            {t('options_label_recordSettings')}
-          </label>
-          <div className="textarea-container">
-            <textarea
-              id="recordSettings"
-              value={recordSettings}
-              onChange={(e) => setRecordSettings(e.target.value)}
-              className="setting-textarea"
-              rows={5}
-              placeholder={t('options_placeholder_json')}
-            ></textarea>
+          <div className="settings-group">
+            <Label className="setting-label" htmlFor="recordSettings">
+              {t('options_label_recordSettings')}
+            </Label>
+            <div className="textarea-container">
+              <Textarea
+                id="recordSettings"
+                value={recordSettings}
+                onChange={(e) => setRecordSettings(e.target.value)}
+                rows={5}
+                placeholder={t('options_placeholder_json')}
+                className="w-full"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="settings-actions">
-          <button type="submit" className="btn btn-primary">
-            {t('options_btn_label_apply')}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={resetSettings}>
-            {t('options_btn_label_reset')}
-          </button>
-        </div>
-      </form>
-
-      {/* Notification Snackbar */}
-      <div
-        className={`snackbar ${notification.visible ? 'snackbar-visible' : ''} ${notification.type === 'success' ? 'snackbar-success' : ''} ${notification.type === 'error' ? 'snackbar-error' : ''} ${notification.type === 'info' ? 'snackbar-info' : ''}`}
-      >
-        {notification.message}
+          <div className="settings-actions">
+            <Button type="submit">
+              {t('options_btn_label_apply')}
+            </Button>
+            <Button type="button" variant="outline" onClick={resetSettings}>
+              {t('options_btn_label_reset')}
+            </Button>
+          </div>
+        </form>
       </div>
-    </div>
+    </ThemeProvider>
   );
 };
