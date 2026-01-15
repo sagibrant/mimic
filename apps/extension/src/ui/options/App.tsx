@@ -50,8 +50,9 @@ export default function App() {
         throw new Error('The input settings are invalid.');
       }
 
-      // encrypt the sensitive values before storage
-      if (newSettings.aiSettings.apiKey) {
+      // if apiKey is same, we do not encrypt it again
+      if (newSettings.aiSettings.apiKey !== originalSettings.aiSettings.apiKey) {
+        // encrypt the sensitive values before storage
         newSettings.aiSettings.apiKey = await CryptoUtil.encrypt(newSettings.aiSettings.apiKey);
       }
 

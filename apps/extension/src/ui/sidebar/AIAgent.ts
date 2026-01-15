@@ -746,15 +746,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
       const result2 = await this.runScript(`let a = 1; console.log('debug log', a); throw new Error("Simulated error"); `, false);
       console.log('runScript with error, result expect to be Error: Simulated error, now the result is: ', result2);
     }
-    // {
-    //   const result = await this.analyzePageWithVisionModel();
-    //   if (!result) return;
-    //   for (const element of result.elements) {
-    //     const elem = await SidebarUtils.engine.getElementFromPoint((element.bbox[0] + element.bbox[2]) / 2, (element.bbox[1] + element.bbox[3]) / 2);
-    //     console.log("element-", element, " in ", element.bbox, " is ", elem);
-    //     const script = `await ${elem.pageScript}.${elem.elementScript}.highlight();`;
-    //     await SidebarUtils.engine.runScript(script);
-    //   }
-    // }
+    {
+      const result = await this.analyzePageWithVisionModel();
+      if (!result) return;
+      for (const element of result.elements) {
+        const elem = await SidebarUtils.engine.getElementFromPoint((element.bbox[0] + element.bbox[2]) / 2, (element.bbox[1] + element.bbox[3]) / 2);
+        console.log("element-", element, " in ", element.bbox, " is ", elem);
+        const script = `await ${elem.pageScript}.${elem.elementScript}.highlight();`;
+        await SidebarUtils.engine.runScript(script);
+      }
+    }
   }
 }

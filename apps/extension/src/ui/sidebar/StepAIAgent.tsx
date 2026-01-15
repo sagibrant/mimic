@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './StepAIAgent.css';
 import { HumanMessage, SystemMessage } from "langchain";
 import { AIAgent, ChatMessage } from './AIAgent';
@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { Send } from 'lucide-react';
-import { SettingUtils } from '@gogogo/shared';
+import { CryptoUtil, SettingUtils } from '@gogogo/shared';
 
 interface StepAIAgentProps {
   runScript: (script: string, newStep: boolean) => Promise<any>;
@@ -51,12 +51,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
     ...initMessages
   ]);
 
-  const agent = useMemo(() => {
-    if (!model) return null;
-    const aiSettings = SettingUtils.getSettings().aiSettings;
-    const aiAgent = new AIAgent(aiSettings.baseURL, aiSettings.apiKey, model, runScript);
-    return aiAgent;
-  }, [model, runScript]);
+  const agent = useRef<AIAgent | null>(null);
 
   // Refs
   const inputTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +66,19 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
       setModel(models[0]);
     }
   }, [runScript]);
+
+  useEffect(() => {
+    if (!model) {
+      agent.current = null;
+      return;
+    }
+    const initAgent = async () => {
+      const aiSettings = SettingUtils.getSettings().aiSettings;
+      const apiKey = await CryptoUtil.decrypt(aiSettings.apiKey);
+      agent.current = new AIAgent(aiSettings.baseURL, apiKey, model, runScript);
+    };
+    initAgent();
+  }, [model, runScript]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -88,7 +96,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
   };
 
   const handleSend = async () => {
-    if (!userInput.trim() || isLoading || !agent) {
+    if (!userInput.trim() || isLoading || !agent.current) {
       return;
     }
     try {
@@ -98,7 +106,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
       setChatMessages(prev => [...prev, userMessage]);
       setUserInput('');
       setIsLoading(true);
-      for await (const msg of agent.invoke(userInputValue)) {
+      for await (const msg of agent.current.invoke(userInputValue)) {
         setChatMessages(prev => [...prev, msg]);
       }
       if (inputTextAreaRef.current) {
@@ -114,7 +122,7 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
 
   const handleInspect = async () => {
     console.log('Inspect functionality triggered');
-    await agent?.toolTest();
+    await agent.current?.toolTest();
   };
 
   return (
