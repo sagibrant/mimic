@@ -80,21 +80,15 @@ export default function App({ }: AppProps) {
       <Command className="action-container">
         <CommandList>
           <CommandItem onSelect={openStore} disabled={!isStoreSupported}>
-            <span>
-              <Store size={16} className="text-popover-foreground" />
-            </span>
+            <Store size={16} className="text-popover-foreground" />
             <span>{t('action_btn_label_store')}</span>
           </CommandItem>
           <CommandItem onSelect={openSidebar}>
-            <span>
-              <PanelRight size={16} className="text-popover-foreground" />
-            </span>
+            <PanelRight size={16} className="text-popover-foreground" />
             <span>{t('action_btn_label_sidebar')}</span>
           </CommandItem>
           <CommandItem onSelect={openOptions}>
-            <span>
-              <SquareCheck size={16} className="text-popover-foreground" />
-            </span>
+            <SquareCheck size={16} className="text-popover-foreground" />
             <span>{t('action_btn_label_options')}</span>
           </CommandItem>
         </CommandList>
