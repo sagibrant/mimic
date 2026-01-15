@@ -38,26 +38,7 @@
   margin-bottom: 0;
 }
 
-.menu-btn {
-  padding: 6px 12px;
-  border: none;
-  background-color: transparent;
-  color: #555;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 2px;
-}
-
-.menu-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #333;
-}
-
-.menu-btn:disabled {
-  color: #ccc;
-  cursor: not-allowed;
-}
+/* removed unused .menu-btn styles */
 
 /* Middle Section Styles */
 .sidebar-middle {
@@ -72,7 +53,7 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-border);
-  background-color: var(--color-card);
+  background-color: var(--color-sidebar);
   min-width: 160px;
   max-width: 160px;
 }
@@ -95,29 +76,11 @@
   align-items: center;
   padding: 4px;
   border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-sidebar);
   user-select: none;
 }
 
-.command-btn {
-  padding: 6px;
-  border: none;
-  background-color: transparent;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 2px;
-  font-size: 16px;
-}
-
-.command-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #333;
-}
-
-.command-btn:disabled {
-  color: #ccc;
-  cursor: not-allowed;
-}
+/* removed unused .command-btn styles */
 
 .tree-container {
   flex: 1;
@@ -140,7 +103,7 @@
   align-items: center;
   padding: 4px;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-card);
+  background-color: var(--color-sidebar);
   user-select: none;
 }
 
@@ -271,23 +234,7 @@
   user-select: none;
 }
 
-.sidebar-bottom-control-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #555;
-}
-
-.sidebar-bottom-control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #333;
-}
-
-.sidebar-bottom-control-btn:disabled {
-  color: #ccc;
-  cursor: not-allowed;
-}
+/* removed unused bottom control button styles */
 
 .sidebar-bottom-content {
   display: flex;
@@ -312,41 +259,14 @@
     background-color: var(--color-sidebar);
   }
 
-  .menu-btn {
-    color: #ccc;
-    background-color: transparent;
-  }
-
-  .menu-btn:hover {
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .menu-btn:disabled {
-    color: #555;
-  }
-
   .task-tree-panel {
     border-right-color: #333;
-    background-color: #1e1e1e;
-  }
-
-  .command-btn {
-    color: #ccc;
-  }
-
-  .command-btn:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .command-btn:disabled {
-    color: #555;
+    background-color: var(--color-sidebar);
   }
 
   .tree-controls,
   .steps-controls {
-    background-color: #1e1e1e;
+    background-color: var(--color-sidebar);
     border-bottom-color: #333;
   }
 
@@ -377,23 +297,10 @@
 
   .sidebar-bottom {
     border-top-color: #333;
-    background-color: #1e1e1e;
+    background-color: var(--color-sidebar);
   }
 
   .sidebar-bottom-controls {
-    background-color: #1e1e1e;
-  }
-
-  .sidebar-bottom-control-btn {
-    color: #ccc;
-  }
-
-  .sidebar-bottom-control-btn:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .sidebar-bottom-control-btn:disabled {
-    color: #555;
+    background-color: var(--color-sidebar);
   }
 }

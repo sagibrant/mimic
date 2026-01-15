@@ -12,6 +12,7 @@ import { StepScriptEditorHelper } from './StepScriptEditorHelper';
 import { SidebarUtils } from './SidebarUtils';
 import { ElementInfo } from '@gogogo/shared';
 import { Button } from '@/ui/components/ui/button';
+import { Label } from '@/ui/components/ui/label';
 
 // Define the interface for the exposed methods
 export interface StepScriptEditorRef {
@@ -354,7 +355,7 @@ ${codeContent}
       {/* script editor with codemirror */}
       <div className="editor-section">
         <div className="editor-header">
-          <label className="editor-label">{t('step_script_editor_scripts_title')}</label>
+          <Label className="editor-label">{t('step_script_editor_scripts_title')}</Label>
           <div>
             <Button
               variant="ghost"
