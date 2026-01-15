@@ -1339,6 +1339,7 @@ export default function App() {
                     placeholder="Enter name"
                     autoComplete="off"
                     className="w-full"
+                    autoFocus
                   />
                 </div>
               </div>
