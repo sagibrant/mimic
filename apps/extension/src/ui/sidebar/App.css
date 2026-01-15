@@ -59,14 +59,6 @@
   cursor: not-allowed;
 }
 
-.menu-divider {
-  width: 1px;
-  height: 16px;
-  background-color: var(--color-border);
-  margin: 0 4px;
-}
-
-
 /* Middle Section Styles */
 .sidebar-middle {
   display: flex;

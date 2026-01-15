@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { Separator } from "../components/ui/separator"
 import { ThemeProvider } from '../components/theme-provider';
 
 export default function App() {
@@ -1373,19 +1374,19 @@ export default function App() {
             <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleDemoTask} title={t('sidebar_btn_title_demo')}>
               {t('sidebar_btn_label_demo')}
             </Button>
-            <span className="menu-divider"></span>
+            <Separator orientation="vertical" />
             <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleLoadTask} title={t('sidebar_btn_title_load')}>
               {t('sidebar_btn_label_load')}
             </Button>
-            <span className="menu-divider"></span>
+            <Separator orientation="vertical" />
             <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleSaveTask} title={t('sidebar_btn_title_save')}>
               {t('sidebar_btn_label_save')}
             </Button>
-            <span className="menu-divider"></span>
+            <Separator orientation="vertical" />
             <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleDownloadTask} title={t('sidebar_btn_label_download')}>
               {t('sidebar_btn_title_download')}
             </Button>
-            <span className="menu-divider"></span>
+            <Separator orientation="vertical" />
             <Button variant="ghost" size="sm" disabled={!isIdle} onClick={handleOpenHelpDocument} title={t('sidebar_btn_title_help')}>
               {t('sidebar_btn_label_help')}
             </Button>
@@ -1400,7 +1401,7 @@ export default function App() {
             <div className="tree-controls">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!isIdle}
                 onClick={handleToggleTreeClick}
                 title={isTreeCollapsed ? t('sidebar_btn_title_tree_expand') : t('sidebar_btn_title_tree_collapse')}
@@ -1411,7 +1412,7 @@ export default function App() {
                 <>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     disabled={!(activeTaskNodeId && isIdle)}
                     onClick={handleShowAddTaskNodeDialog}
                     title={t('sidebar_btn_title_tree_add_node')}
@@ -1420,7 +1421,7 @@ export default function App() {
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     disabled={!(activeTaskNodeId && isIdle)}
                     onClick={handleDeleteTaskNode}
                     title={t('sidebar_btn_title_tree_delete_node')}
@@ -1450,7 +1451,7 @@ export default function App() {
             <div className="steps-controls">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={() => handleAddStep()}
                 title={t('sidebar_btn_title_steps_add_step')}
@@ -1459,27 +1460,27 @@ export default function App() {
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && isIdle && selectedStepUid)}
                 onClick={handleRemoveStep}
                 title={t('sidebar_btn_title_steps_delete_step')}
               >
                 -
               </Button>
-              <span className="menu-divider"></span>
+              <Separator orientation="vertical" />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={handleRecord}
                 title={t('sidebar_btn_title_steps_record')}
               >
                 ◉
               </Button>
-              <span className="menu-divider"></span>
+              <Separator orientation="vertical" />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && isIdle)}
                 onClick={handleReplay}
                 title={t('sidebar_btn_title_steps_replay')}
@@ -1488,37 +1489,37 @@ export default function App() {
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && isIdle && selectedStepUid)}
                 onClick={handleReplayFromStep}
                 title={t('sidebar_btn_title_steps_replayFromStep')}
               >
                 ▷
               </Button>
-              <span className="menu-divider"></span>
+              <Separator orientation="vertical" />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(activeTaskId && (isReplaying || isRecording))}
                 onClick={handleStop}
                 title={t('sidebar_btn_title_steps_stop')}
               >
                 ■
               </Button>
-              <span className="menu-divider"></span>
+              <Separator orientation="vertical" />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(isIdle)}
                 onClick={toggleCDPAttach}
                 title={isDebuggerAttached ? t('sidebar_btn_title_steps_debugger_detach') : t('sidebar_btn_title_steps_debugger_attach')}
               >
                 {isDebuggerAttached ? '☍' : '☌'}
               </Button>
-              <span className="menu-divider"></span>
+              <Separator orientation="vertical" />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 disabled={!(isIdle)}
                 onClick={openAIDialog}
                 title={t('sidebar_btn_title_steps_ai_assistant')}
