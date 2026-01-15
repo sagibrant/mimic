@@ -40,10 +40,17 @@ export default function TreeNode({
     }
   }, [isEditing]);
 
-  const handleClick = () => {
+  const handleIconsClick = () => {
     if (node.type === 'group') {
       setIsExpanded(!isExpanded);
     }
+    onNodeSelected(node.id);
+    if (node.type === 'task') {
+      onTaskSelected(node.id);
+    }
+  };
+
+  const handleClick = () => {
     onNodeSelected(node.id);
     if (node.type === 'task') {
       onTaskSelected(node.id);
@@ -69,7 +76,7 @@ export default function TreeNode({
 
   return (
     <div className="tree-node">
-      <div className="node-content" onClick={handleClick} onDoubleClick={handleDoubleClick}>
+      <div className="node-content">
         {/* Indentation guides */}
         {Array.from({ length: depth }).map((_, index) => (
           <div key={index} className={`indent-guide ${index === depth - 1 ? 'last' : ''}`}></div>
@@ -85,7 +92,10 @@ export default function TreeNode({
         {/* Node label */}
         {!isEditing ? (
           <span className={`node-label ${isActive ? 'active' : ''}`}>
-            <span className="node-type-icon">
+            <span className="node-type-icon" onClick={(e) => {
+              e.stopPropagation();
+              handleIconsClick();
+            }}>
               {node.type === 'group' ?
                 (
                   isExpanded ? (<PackageOpen size={16} />) : (<Package size={16} />)
@@ -95,7 +105,7 @@ export default function TreeNode({
                 )
               }
             </span>
-            <span className="node-name">
+            <span className="node-name" onClick={handleClick} onDoubleClick={handleDoubleClick}>
               {node.name}
             </span>
           </span>
