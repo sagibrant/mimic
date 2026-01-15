@@ -1597,8 +1597,8 @@ export default function App() {
 
         {/* Bottom section with tabs */}
         <footer className={`sidebar-bottom ${isBottomExpanded ? 'expanded' : ''} ${isRecording || isReplaying ? 'readonly' : ''}`}>
-          {selectedStep && (
-            <div className="sidebar-bottom-content">
+          <div className="sidebar-bottom-content">
+            {selectedStep && (
               <StepScriptEditor
                 key={selectedStep.uid}
                 ref={stepScriptEditorRef}
@@ -1606,8 +1606,8 @@ export default function App() {
                 onScriptChange={handleOnSelectedStepScriptChange}
                 runScript={handleReplaySelectedStep}
               />
-            </div>
-          )}
+            )}
+          </div>
           <div className="sidebar-bottom-controls">
             <Button
               variant="ghost"
