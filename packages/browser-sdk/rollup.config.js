@@ -3,6 +3,12 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import alias from '@rollup/plugin-alias';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const config = [
   // ES module build
@@ -14,6 +20,11 @@ const config = [
       sourcemap: true
     },
     plugins: [
+      alias({
+        entries: [
+          { find: '@gogogo/shared', replacement: path.resolve(__dirname, '../shared/dist/es/index.mjs') }
+        ]
+      }),
       nodeResolve({
         browser: false
       }),
@@ -38,6 +49,12 @@ const config = [
       sourcemap: true
     },
     plugins: [
+      alias({
+        entries: [
+          { find: '@gogogo/shared', replacement: path.resolve(__dirname, '../shared/dist/cjs/index.js') }
+        ]
+      }),
+
       nodeResolve({
         browser: false
       }),
@@ -61,11 +78,17 @@ const config = [
       format: 'umd',
       name: 'GogogoWeb',
       sourcemap: true,
-    globals: {
-      'openai': 'OpenAI'
-    }
+      globals: {
+        'openai': 'OpenAI'
+      }
     },
     plugins: [
+      alias({
+        entries: [
+          { find: '@gogogo/shared', replacement: path.resolve(__dirname, '../shared/dist/browser/index.js') }
+        ]
+      }),
+
       nodeResolve({
         browser: true
       }),
@@ -85,7 +108,14 @@ const config = [
   {
     input: 'src/index.ts',
     output: [{ file: 'dist/types/index.d.ts', format: 'es' }],
-    plugins: [dts()]
+    plugins: [
+      alias({
+        entries: [
+          { find: '@gogogo/shared', replacement: path.resolve(__dirname, '../shared/dist/types/index.d.ts') }
+        ]
+      }),
+      dts()
+    ]
   }
 ];
 
