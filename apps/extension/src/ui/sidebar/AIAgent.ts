@@ -77,8 +77,8 @@ You are an AI assistant that helps identify UI elements on a webpage screenshot 
 
 ## Output Requirements:
 - Return at most 20 elements; prioritize the most significant and relevant.
-- Use a normalized 0–1000 coordinate system:
-  - bbox MUST be [xmin, ymin, xmax, ymax] with each value in 0–1000
+- Use a normalized 0-1000 coordinate system:
+  - bbox MUST be [xmin, ymin, xmax, ymax] with each value in 0-1000
 - Ensure bounding boxes tightly encompass the entire target element.
 - Round bbox values to integers; clamp to image bounds.
 - Eliminate duplicates: if boxes overlap heavily (IoU > 0.5), keep the best single match.
@@ -105,7 +105,7 @@ Fields:
 * \`elements\`: Matched elements based on the user's description (≤20 items)
 * \`elements[].type\`: The element type (e.g., button, input, link, checkbox, dropdown, image, text, etc.)
 * \`elements[].description\`: A concise description of the element's purpose or visible text/content
-* \`elements[].bbox\`: The bounding box [xmin, ymin, xmax, ymax] with each value in 0–1000
+* \`elements[].bbox\`: The bounding box [xmin, ymin, xmax, ymax] with each value in 0-1000
 * \`elements[].confidence\`: Optional confidence in [0,1] indicating match strength for each element
 * \`errors\`: Optional errors (e.g., no matching elements found)
 
@@ -494,7 +494,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
         if (toolName === "run_gogogo_script") {
           guidance += "Use Gogogo API only. Review API definition and document. Simplify the script or consider analyze_page_with_vision for Q&A.";
         } else if (toolName === "get_element_from_point") {
-          guidance += "Verify bbox coordinates in normalized 0–1000 space and consider alternative candidate elements.";
+          guidance += "Verify bbox coordinates in normalized 0-1000 space and consider alternative candidate elements.";
         } else if (toolName === "analyze_page_with_vision") {
           guidance += "Refine the userPrompt or reduce the number of requested elements.";
         }
