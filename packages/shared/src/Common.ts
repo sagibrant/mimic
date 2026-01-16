@@ -125,7 +125,17 @@ export class Utils {
 
     // 5. Plain objects: Treat objects with no own properties as empty (null is excluded since checked above)
     if (typeof value === "object") {
-      return Object.keys(value).length === 0;
+      if (value instanceof Date || value instanceof RegExp) {
+        return false;
+      }
+      if ((value as any) instanceof Map || (value as any) instanceof Set) {
+        return (value as any).size === 0;
+      }
+      const proto = Object.getPrototypeOf(value);
+      if (proto === Object.prototype) {
+        return Object.keys(value).length === 0;
+      }
+      return false;
     }
 
     // Other types (e.g., number, boolean, function, etc.): Not empty

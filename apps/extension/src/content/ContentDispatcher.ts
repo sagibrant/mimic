@@ -95,7 +95,7 @@ export class ContentDispatcher extends Dispatcher {
         return;
       }
 
-      console.log('ContentDispatcher: message from MAIN world:', msg, ' sender:', sender);
+      this.logger.debug('message from MAIN world:', msg, ' sender:', sender);
       this.onMessage(msg, sender, responseCallback);
     });
   }
