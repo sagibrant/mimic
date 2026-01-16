@@ -6,6 +6,8 @@
   "homepage": "https://qagogogo.com/",
   "type": "module",
   "browser": "./dist/browser/index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.mjs",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
