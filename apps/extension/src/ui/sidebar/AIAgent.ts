@@ -35,15 +35,14 @@ export interface ChatMessage extends BaseMessage {
 export const UIElement = z.object({
   type: z.string().describe("The type of the element (e.g., button, input, link, checkbox, dropdown, image, etc.)"),
   description: z.string().describe("A concise description of the element's purpose or content."),
-  bbox: z.array(z.number()).describe("The bounding box of the element [xmin, ymin, xmax, ymax]"),
-  confidence: z.number().min(0).max(1).optional().describe("Optional confidence score in [0,1] indicating match strength")
+  bbox: z.array(z.number()).describe("The bounding box of the element [xmin, ymin, xmax, ymax]")
 });
 
 export const UIPageDetails = z.object({
   summary: z.string().describe("The summary of the main topic of the screenshot (maximum 50 words)"),
-  answer: z.optional(z.nullable(z.string())).describe("The answer to the user's question based on the content of the screenshot (if any, optional)"),
+  answer: z.string().nullable().optional().describe("Optional answer to the user's question based on the screenshot; use null when not applicable"),
   elements: z.array(UIElement).describe("Array of UI elements found in the screenshot that match the user's description (maximum 20 items)"),
-  errors: z.optional(z.nullable(z.array(z.string()))).describe("Optional array of error messages (if any, optional, such as no matching elements found, screenshot not related to the user's query or image processing issues)")
+  errors: z.array(z.string()).nullable().optional().describe("Optional array of error messages or null (e.g., no matching elements found, screenshot not related to the user's query, image processing issues)")
 });
 
 export class AIAgent {
@@ -82,7 +81,7 @@ You are an AI assistant that helps identify UI elements on a webpage screenshot 
 - Ensure bounding boxes tightly encompass the entire target element.
 - Round bbox values to integers; clamp to image bounds.
 - Eliminate duplicates: if boxes overlap heavily (IoU > 0.5), keep the best single match.
-- Internally estimate confidence for each candidate; select the highest-confidence, most relevant elements. Confidence may be included as an optional number in the output.
+- Internally estimate confidence for each candidate; select the highest-confidence, most relevant elements.
 
 ## Output Format:
 \`\`\`json
@@ -92,8 +91,7 @@ You are an AI assistant that helps identify UI elements on a webpage screenshot 
   "elements": {
     "type": string,
     "description": string,
-    "bbox": [number, number, number, number],
-    "confidence": number
+    "bbox": [number, number, number, number]
   }[], 
   "errors": string[]
 }
@@ -106,7 +104,6 @@ Fields:
 * \`elements[].type\`: The element type (e.g., button, input, link, checkbox, dropdown, image, text, etc.)
 * \`elements[].description\`: A concise description of the element's purpose or visible text/content
 * \`elements[].bbox\`: The bounding box [xmin, ymin, xmax, ymax] with each value in 0-1000
-* \`elements[].confidence\`: Optional confidence in [0,1] indicating match strength for each element
 * \`errors\`: Optional errors (e.g., no matching elements found)
 
 ## Decision Policy:
