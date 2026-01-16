@@ -24,31 +24,8 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
   const [model, setModel] = useState('');
   const [modelOptions, setModelOptions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const initMessages: ChatMessage[] = (() => {
-    const m1 = new SystemMessage('Hello! I\'m your AI assistant. \nHow can I help you today?');
-    const m2 = new HumanMessage('this is the human message');
-
-    const m3 = new SystemMessage('prepare call tool');
-    (m3 as ChatMessage).messageType = 'tool';
-    const m4 = new SystemMessage('tool is called');
-    (m4 as ChatMessage).messageType = 'tool';
-    const m5 = new SystemMessage('thinking now...');
-    (m5 as ChatMessage).messageType = 'think';
-
-    const m6 = new SystemMessage('prepare call tool');
-    (m6 as ChatMessage).messageType = 'tool';
-    const m7 = new SystemMessage('tool is called');
-    (m7 as ChatMessage).messageType = 'tool';
-    const m8 = new SystemMessage('thinking now...');
-    (m8 as ChatMessage).messageType = 'think';
-
-    const m9 = new SystemMessage('now we have result');
-    (m9 as ChatMessage).messageType = 'final';
-    return [m1, m2, m3, m4, m5, m6, m7, m8, m9];
-  })();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    // new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?')
-    ...initMessages
+    new SystemMessage('Hello! I\'m your AI assistant. How can I help you today?')
   ]);
 
   const agent = useRef<AIAgent | null>(null);
@@ -118,11 +95,6 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleInspect = async () => {
-    console.log('Inspect functionality triggered');
-    await agent.current?.toolTest();
   };
 
   return (
@@ -208,17 +180,6 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
 
             {/* Right Controls */}
             <div className="flex items-center space-x-2">
-              {/* Inspect Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={handleInspect}
-                title="Inspect elements on the page"
-              >
-                🔍
-              </Button>
-
               {/* Send Button */}
               <Button
                 type="button"
