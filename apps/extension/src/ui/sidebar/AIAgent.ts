@@ -489,7 +489,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           apiKey: apiKey,
           dangerouslyAllowBrowser: true,
         },
-        temperature: type === 'vision' ? 0 : 0.5, // Lower temperature for vision tasks for more consistent results
+        temperature: type === 'vision' ? 0 : 0.3, // Lower temperature for vision tasks for more consistent results
         topP: 0.8,
         maxTokens: 10240,
         streaming: type === 'general', // Enable streaming only for general chat model, keep vision model with full response
@@ -533,7 +533,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
         const content = typeof msg.content === 'string' ? msg.content
           : msg.content.map((block) => block.type === 'text' ? block.text : JSON.stringify(block, null, 2)).join('\n');
 
-        return content.length > 2000 ? content.substring(0, 2000) + '...' : content;
+        return content;
       };
 
       const lastMessage = messages[messages.length - 1];
@@ -556,7 +556,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
                 break;
               }
               case 'run_gogogo_script': {
-                toolCallMsg = `Running script\n${toolCall.args?.script?.length > 100 ? toolCall.args?.script.substring(0, 100) + '...' : toolCall.args?.script}`;
+                if (toolCall.args?.script) {
+                  toolCallMsg = `Running script
+\`\`\`javascript
+ ${toolCall.args?.script}
+\`\`\``;
+                }
+                else {
+                  toolCallMsg = `Running script`;
+                }
                 break;
               }
               case 'get_page_info': {
@@ -574,7 +582,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
               default:
                 toolCallMsg = `Unrecognized tool call: ${toolCall.name}`;
             }
-            const chatMessage = new AIMessage(`🔧 ${toolCallMsg}`) as ChatMessage;
+            const chatMessage = new AIMessage(`${toolCallMsg}`) as ChatMessage;
             chatMessage.messageType = 'tool';
             chatMsgs.push(chatMessage);
           }
@@ -588,7 +596,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
             return [chatMessage];
           }
           else {
-            const chatMessage = new AIMessage(`💭 Thinking: ${content}`) as ChatMessage;
+            const chatMessage = new AIMessage(`Thinking:\n${content}`) as ChatMessage;
             chatMessage.messageType = 'think';
             return [chatMessage];
           }
@@ -609,7 +617,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           case 'run_gogogo_script': {
             if (toolMessage.artifact) {
               const jsonArtifact = JSON.stringify(toolMessage.artifact);
-              toolCallResultMsg = `Script executed successfully\nResult: ${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+              if (jsonArtifact) {
+                toolCallResultMsg = `Script executed successfully\n
+\`\`\`json
+${jsonArtifact}
+\`\`\``;
+              }
+              else {
+                toolCallResultMsg = 'Script executed successfully';
+              }
             }
             else {
               toolCallResultMsg = 'Script executed successfully';
@@ -619,7 +635,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           case 'get_page_info': {
             if (toolMessage.artifact) {
               const jsonArtifact = JSON.stringify(toolMessage.artifact);
-              toolCallResultMsg = `Page information retrieved:\n${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+              if (jsonArtifact) {
+                toolCallResultMsg = `Page information retrieved
+\`\`\`json
+${jsonArtifact}
+\`\`\``;
+              }
+              else {
+                toolCallResultMsg = 'Page information retrieved successfully';
+              }
             }
             else {
               toolCallResultMsg = 'Page information retrieved successfully';
@@ -629,7 +653,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           case 'analyze_page_with_vision': {
             if (toolMessage.artifact) {
               const jsonArtifact = JSON.stringify(toolMessage.artifact);
-              toolCallResultMsg = `Page analysis complete:\n${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+              if (jsonArtifact) {
+                toolCallResultMsg = `Page analysis completed:
+\`\`\`json
+${jsonArtifact}
+\`\`\``;
+              }
+              else {
+                toolCallResultMsg = 'Page analysis completed';
+              }
             }
             else {
               toolCallResultMsg = 'Page analysis complete';
@@ -639,7 +671,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           case 'get_element_from_point': {
             if (toolMessage.artifact) {
               const jsonArtifact = JSON.stringify(toolMessage.artifact);
-              toolCallResultMsg = `Element retrieved from coordinates:\n${jsonArtifact.length > 100 ? jsonArtifact.substring(0, 100) + '...' : jsonArtifact}`;
+              if (jsonArtifact) {
+                toolCallResultMsg = `Element retrieved from coordinates:
+\`\`\`json
+${jsonArtifact}
+\`\`\``;
+              }
+              else {
+                toolCallResultMsg = 'Element retrieved from coordinates';
+              }
             }
             else {
               toolCallResultMsg = 'Element retrieved from coordinates';
@@ -651,7 +691,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
             toolCallResultMsg = content;
           }
         }
-        const chatMessage = new AIMessage(`🔧 ${toolCallResultMsg}`) as ChatMessage;
+        const chatMessage = new AIMessage(`${toolCallResultMsg}`) as ChatMessage;
         chatMessage.messageType = 'tool';
         return [chatMessage];
       }
