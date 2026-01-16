@@ -70,8 +70,6 @@ export class CDPOverlay {
   /**
    * Highlight a rectangle using the Overlay domain.
    * @param rect - Rectangle coordinates and style
-   * @param successCallback - Called on success
-   * @param failCallback - Called on error
    */
   async highlightRect(
     rect: unknown
@@ -95,8 +93,6 @@ export class CDPOverlay {
 
   /**
    * Hide any active overlay highlight.
-   * @param successCallback - Called on success
-   * @param failCallback - Called on error
    */
   async hideHighlight(): Promise<void> {
     await this._cdp.sendCommand(this._tabId, "Overlay.hideHighlight", undefined);

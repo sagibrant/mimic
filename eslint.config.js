@@ -32,7 +32,12 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.strict,
-  ...tailwind.configs["flat/recommended"], 
+  ...tailwind.configs["flat/recommended"].map(cfg => ({
+    ...cfg,
+    files: [
+      'apps/extension/src/**/*.{js,ts,tsx,vue}',
+    ],
+  })),
   eslintConfigPrettier,
 
   // JavaScript 自定义规则

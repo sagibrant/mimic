@@ -371,8 +371,6 @@ export class ChromeDevToolsProtocol extends EventEmitter<CDPEvents> {
    * Emulate a device (screen size, user agent, etc.) for a tab.
    * @param tabId - Tab ID to emulate
    * @param emulationSettings - Device emulation configuration
-   * @param successCallback - Called on success
-   * @param failCallback - Called on error
    */
   async emulateDevice(tabId: number, emulationSettings: CDPEmulationSettings): Promise<void> {
     const tab = this.getTabInfo({ tabId });

@@ -188,8 +188,6 @@ export class CDPDOM {
   /**
    * Highlight a rectangle on the page.
    * @param rect - Rectangle coordinates and style
-   * @param successCallback - Called on success
-   * @param failCallback - Called on error
    */
   async highlightRect(
     rect: unknown,
@@ -204,8 +202,6 @@ export class CDPDOM {
 
   /**
    * Hide any active DOM highlight.
-   * @param successCallback - Called on success
-   * @param failCallback - Called on error
    */
   async hideHighlight(): Promise<void> {
     await this._cdp.sendCommand(this._tabId, "DOM.hideHighlight", undefined);

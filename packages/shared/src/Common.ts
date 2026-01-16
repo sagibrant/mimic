@@ -40,15 +40,6 @@ export interface NameValuePair {
   value?: unknown;
 }
 
-/**
- * successCallback wrapper
- */
-export type SuccessCallback = (result: any) => {};
-/**
- * failCallback wrapper
- */
-export type FailCallback = (result: any) => {};
-
 export class Utils {
   /**
    * Checks if the provided value is `null` or `undefined`.

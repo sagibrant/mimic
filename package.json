@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Gogogo enables reliable end-to-end automation on your browser.",
+  "type": "module",
   "directories": {
     "doc": "docs",
     "example": "examples",
@@ -52,7 +53,7 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "eslint-plugin-tailwindcss": "^3.18.2",
+    "eslint-plugin-tailwindcss": "4.0.0-beta.0",
     "eslint-plugin-vue": "^10.6.2",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
