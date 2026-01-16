@@ -543,6 +543,7 @@ for (const inputMode of inputModes) {
         } else {
           expect(checked).toBeFalsy();
         }
+        await page.text(radio_labes[i]).highlight();
         await page.text(radio_labes[i]).click(defaultOptions);
         console.log(`
             await page.text('${radio_labes[i]}').click(${defaultOptions ? JSON.stringify(defaultOptions) : defaultOptions})
