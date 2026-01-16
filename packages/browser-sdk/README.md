@@ -29,7 +29,7 @@ await page.element('#submit-btn').first().click();
 
 // Example: Use AIClient
 const ai = new AIClient();
-await ai.init().setModel('gpt-4o').chat('hello');
+await ai.init({baseURL: 'xxx', apiKey: 'xxx'}).setModel('gpt-4o').chat('hello');
 ```
 
 ## Usage (Direct UMD Import)
