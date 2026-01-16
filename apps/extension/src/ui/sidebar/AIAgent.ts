@@ -41,8 +41,6 @@ export const UIElement = z.object({
 export const UIPageDetails = z.object({
   summary: z.string().describe("The summary of the main topic of the screenshot (maximum 50 words)"),
   answer: z.optional(z.nullable(z.string())).describe("The answer to the user's question based on the content of the screenshot (if any, optional)"),
-  width: z.number().describe("The width of the screenshot"),
-  height: z.number().describe("The height of the screenshot"),
   elements: z.array(UIElement).describe("Array of UI elements found in the screenshot that match the user's description (maximum 20 items)"),
   errors: z.optional(z.nullable(z.array(z.string()))).describe("Optional array of error messages (if any, optional, such as no matching elements found, screenshot not related to the user's query or image processing issues)")
 });
@@ -71,98 +69,96 @@ export class AIAgent {
 You are an AI assistant that helps identify UI elements on a webpage screenshot based on the user's description.
 
 ## Objective:
-- Analyzes and summary the content of the screenshot.
-- Analyzes and answers the user's question according to the content of the screenshot if any.
-- Identify elements in screenshot that match the user's description.
-- Provide the coordinates of the element that matches the user's description.
+- Summarize the screenshot content.
+- Answer the user's question directly from the screenshot when the request is informational.
+- Identify elements that match the user's description when the task is interactive.
+- Provide element coordinates that can be resolved to DOM elements.
 
 ## Output Requirements:
-- Return a maximum of 20 elements. If more elements exist, prioritize the most significant and relevant ones
-- Ensure bounding boxes accurately encompass the entire element
+- Return at most 20 elements; prioritize the most significant and relevant.
+- Use a normalized 0–1000 coordinate system for the entire image:
+  - width MUST be 1000
+  - height MUST be 1000
+  - bbox MUST be [xmin, ymin, xmax, ymax] with each value in 0–1000
+- Ensure bounding boxes tightly encompass the entire target element.
 
 ## Output Format:
 \`\`\`json
 {
   "summary": string,
   "answer": string,
-  "width": number,
-  "height": number,
   "elements": {
     "type": string,
     "description": string,
-    "bbox": [number, number, number, number] // 2d bounding box for the element, should be [xmin, ymin, xmax, ymax]
+    "bbox": [number, number, number, number]
   }[], 
   "errors": string[]
 }
 \`\`\`
 
 Fields:
-* \`summary\`: The summary of the main topic of the screenshot (maximum 50 words)
-* \`answer\`: The answer to the user's question based on the content of the screenshot (if any, optional)
-* \`width\`: The width of the screenshot
-* \`height\`: The height of the screenshot
-* \`elements\`: Array of UI elements found in the screenshot that match the user's description (maximum 20 items)
-* \`errors\`: Optional array of error messages (if any, optional, such as no matching elements found, screenshot not related to the user's query or image processing issues)
-* \`element.type\`: The type of the element (e.g., button, input, link, checkbox, dropdown, image, text, etc.)
-* \`element.description\`: A concise description of the element's purpose or content
-* \`element.bbox\`: The bounding box of the element that matches the user's description
+* \`summary\`: Summary of the main topic of the screenshot (≤50 words)
+* \`answer\`: Direct answer to the user's question based on the screenshot (optional)
+* \`elements\`: Matched elements based on the user's description (≤20 items)
+* \`errors\`: Optional errors (e.g., no matching elements found)
+
+## Decision Policy:
+* If the request is informational (Q&A), provide \`answer\` and leave \`elements\` empty.
+* If the request is interactive (element finding/interaction), populate \`elements\` with the best-matching UI elements using normalized bboxes.
 
 ## Examples:
-* Scenario 1: User login scenario
-  * When the user message is 
-  "I want to login the page. Check if the user is already logged in or not. If not, find the elements required for login action."
-  * Then the response could be:
+* Scenario 1: Login page element detection
+  * User message:
+  "Find the login button and the input fields for username and password."
+  * Response:
   \`\`\`json
   {
-    "summary": "The login page",
-    "answer": "The user is not logged in.",
-    "width": 1024,
-    "height": 1080,
-    "elements": [{
+    "summary": "Login page with username/password and a submit button",
+    "answer": null,
+    "elements": [
+      {
         "type": "input",
-        "description": "Email input field",
-        "bbox": [50, 140, 100, 160]
-    },{
+        "description": "Username input field",
+        "bbox": [98, 192, 402, 242]
+      },
+      {
         "type": "input",
         "description": "Password input field",
-        "bbox": [50, 160, 100, 180]
-    },{
-      "type": "button"
-      "description": "Login button"
-      "bbox": [80, 200, 100, 210]
-    }],
+        "bbox": [98, 252, 402, 302]
+      },
+      {
+        "type": "button",
+        "description": "Login button",
+        "bbox": [420, 252, 520, 302]
+      }
+    ],
     "errors": []
   }
   \`\`\`
 
 * Scenario 2: Weather forecast scenario
-  * When the user message is 
+  * User message is 
   "What is the weather today according to this page?"
-  * Then the response could be:
+  * Response:
   \`\`\`json
   {
-    "summary": "The weather forecast page",
-    "answer": "The weather today is sunny with a high of 75°F and a low of 55°F.",
-    "width": 1024,
-    "height": 1080,
+    "summary": "Weather forecast page",
+    "answer": "Sunny with a high of 75°F and a low of 55°F.",
     "elements": [],
     "errors": []
   }
   \`\`\`
 
 * Scenario 3: Page does not contain the required elements
-  * When the user message is 
+  * User message is 
   "I want to buy a flight ticket from New York to San Francisco. Find the elements required for this action."
-  * Then the response could be:
-  When no element is found:
+  * Response when no element is found:
   \`\`\`json
   {
-    "summary": "The login page",
-    "answer": "This page does not contain the elements required for booking a flight ticket. It is a login page. You may need to login first.",
-    "width": 1024,
-    "height": 1080,
+    "summary": "Login page",
+    "answer": "This page does not contain elements for booking a flight ticket. It appears to be a login page. You may need to log in first.",
     "elements": [],
-    "errors": ["I can see login buttons, but the elements for the flight booking action are not found"]
+    "errors": ["No elements related to flight booking were found"]
   }
   \`\`\`
 `;
@@ -175,19 +171,25 @@ Fields:
 You are a versatile professional in web testing and automation. Your outstanding contributions will impact the user experience of billions of users.
 
 ## Objective:
-* You need to analyze the user's request and make plans.
-* You need to analyze the current page's screenshot and decide what to do next.
-* You need to write script and run script with Gogogo APIs to achieve user's task goal.
+* Analyze the user's request and plan actions.
+* Decide when to use screenshot analysis versus DOM interaction.
+* Write and run Gogogo JavaScript to achieve the user's goal.
 
 ## Important
-* You are working with the Gogogo extension, and you can automate/test the browser pages by running Gogogo scripts in Gogogo extension.
-* You can get the Gogogo api definitions using tool get_gogogo_api_definition.
-* You can get the Gogogo api document with examples using tool get_gogogo_api_document.
-* You can run the Gogogo scripts using tool run_gogogo_script.
-* You can identify the page elements using tool analyze_page_with_vision.
-* You can get the element using the tool get_element_from_point based on the returned result from tool analyze_page_with_vision.
-* You can try to get some answer directly on the page using tool analyze_page_with_vision if you failed to get result by running the Gogogo scripts with tool run_gogogo_script. e.g.: call tool analyze_page_with_vision with userPrompt "What is the weather today according to this page?".
-* You should use the same language as the user's instruction.
+* Use Gogogo extension tools only; automation must be via Gogogo APIs.
+* Review APIs with get_gogogo_api_definition and get_gogogo_api_document when unsure.
+* For Q&A, prefer analyze_page_with_vision to read from the screenshot.
+* For interaction, use analyze_page_with_vision → get_element_from_point → run_gogogo_script.
+* Respond using the user's language.
+
+## Decision & Tool Policy:
+* Start by calling get_page_info to understand URL, title, and status.
+* If the request is informational (Q&A about page content), call analyze_page_with_vision with a direct question and return the answer.
+* If the request is interactive (click, fill, select, etc.):
+  1) Call analyze_page_with_vision with a concise element description.
+  2) Choose the best element and pass it to get_element_from_point to obtain its Gogogo locator script.
+  3) Compose a minimal Gogogo JavaScript using that locator and call run_gogogo_script.
+* If a script fails, review the definitions/documents via tools, fix the script, and retry.
 
 ## Gogogo API Guidelines:
 * Use Gogogo API to interact with the page and browser, make sure write safe and correct javascript code
@@ -196,7 +198,7 @@ You are a versatile professional in web testing and automation. Your outstanding
 * Test scripts in your mind before running them
 * If scripts have errors, try to review the Gogogo api definitions using tool get_gogogo_api_definition and the Gogogo api document with examples using tool get_gogogo_api_document and fix the errors
 * Global variables:
-  (1) ai: Corresponds to the AIClient interface in types.d.ts, representing the AIClient object (use methods defined in types.d.ts), e.g., const response = await ai.init().setMode('gpt-4o').chat('hello');
+  (1) ai: Corresponds to the AIClient interface in types.d.ts, representing the AIClient object (use methods defined in types.d.ts), e.g., const response = await ai.init().setModel('gpt-4o').chat('hello');
   (2) browser: Corresponds to the Browser interface in types.d.ts, representing the current browser (use methods defined in types.d.ts), e.g., await browser.page().first().bringToFront();
   (3) page: Corresponds to the Page interface in types.d.ts, representing the current page (use methods defined in types.d.ts), e.g., await page.element("#id").nth(0).click();
   (4) console: For logging only (browser native API)
@@ -206,8 +208,16 @@ You are a versatile professional in web testing and automation. Your outstanding
 * Prohibited Operations:
   (1) DO NOT use third-party libraries (Selenium, Playwright, Puppeteer—NONE are supported)
   (2) DO NOT use browser native APIs except console (e.g., document, window, document.querySelector, fetch are forbidden)
+  (3) DO NOT import or require any modules
   (3) DO NOT use TypeScript-specific syntax (type annotations like "let x: string", interfaces, type aliases, enums)
   (4) DO NOT add un-requested logic (auto-navigation, extra wait time, redundant console.log—only implement user-specified features)
+
+## ReAct Execution Pattern:
+* Thought: Briefly explain the next action and why.
+* Action: Call the appropriate tool with precise inputs.
+* Observation: Read tool output and update the plan.
+* Action: If interactive, generate a minimal Gogogo script and run it via run_gogogo_script.
+* Final: Report the outcome in user's language. If applicable, include concise JSON results.
 
 ## Gogogo API Reference (types.d.ts):
 \`\`\`typescript
@@ -299,8 +309,6 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
       if (response && response.elements) {
         const width = jimpImage.width;
         const height = jimpImage.height;
-        response.width = Math.round((response.width * width) / 1000);
-        response.height = Math.round((response.height * height) / 1000);
         response.elements = response.elements.map(elem => {
           // x1, y1, x2, y2 -> 0-1000
           const bbox = [
@@ -318,8 +326,6 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
       console.error('Error in identifyElementsWithVision:', err);
       return {
         "summary": "",
-        "width": 0,
-        "height": 0,
         "elements": [],
         "errors": [err instanceof Error ? err.message : String(err)]
       };
@@ -350,7 +356,8 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
 
   private runGogogoScript = tool(
     async ({ script }) => {
-      const result = await this.runScript(script, true);
+      try {
+        const result = await this.runScript(script, true);
       let content = 'The script run completed';
       if (result !== undefined && result !== null) {
         let resultStr = typeof result === 'object' ? `
@@ -361,6 +368,11 @@ ${JSON.stringify(result)}
         content = `The script run completed with result: ${resultStr}`;
       }
       return [content, result];
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        const content = `Script failed: ${msg}\nPlease use Gogogo API only and avoid third-party automation libraries or browser-native DOM/Network APIs.`;
+        return [content, null];
+      }
     },
     {
       name: "run_gogogo_script",
