@@ -151,14 +151,14 @@ export abstract class Dispatcher {
 
     // response:
     if (msg.type === 'response' && msg.syncId) {
-      if (msg.syncId in this._responseTimeoutId) {
+      if (msg.syncId in this._responseTimeoutId && !Utils.isNullOrUndefined(this._responseTimeoutId[msg.syncId])) {
         const timeoutId = this._responseTimeoutId[msg.syncId];
-        delete this._responseTimeoutId[msg.syncId];
+        this._responseTimeoutId[msg.syncId] = undefined as never;
         clearTimeout(timeoutId);
       }
-      if (msg.syncId in this._responseCallbacks) {
+      if (msg.syncId in this._responseCallbacks && !Utils.isNullOrUndefined(this._responseCallbacks[msg.syncId])) {
         const cachedResponseCallback = this._responseCallbacks[msg.syncId];
-        delete this._responseCallbacks[msg.syncId];
+        this._responseCallbacks[msg.syncId] = undefined as never;
         cachedResponseCallback(msg.data);
         this.logger.debug('onMessage: <------ response handled by cachedResponseCallback, msg=', msg, ' sender=', sender);
       }
@@ -313,10 +313,10 @@ export abstract class Dispatcher {
       if (timeout > 0) {
         const timeoutId = setTimeout(() => {
           if (syncId in this._responseTimeoutId) {
-            delete this._responseTimeoutId[syncId];
+            this._responseTimeoutId[syncId] = undefined as never;
           }
           if (syncId in this._responseCallbacks) {
-            delete this._responseCallbacks[syncId];
+            this._responseCallbacks[syncId] = undefined as never;
             this.logger.error(`============ request timeout after ${timeout}ms. \r\nmessage: ${JSON.stringify(msg)}`);
             reject(new Error(`Request timed out after ${timeout}ms`));
           }
