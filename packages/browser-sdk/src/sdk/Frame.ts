@@ -168,7 +168,7 @@ export class Frame extends AutomationObject implements api.Frame {
   /** ==================================================================================================================== */
 
   async sync(timeout: number = 5000): Promise<void> {
-    const check = async () => {
+    const check = async (): Promise<boolean> => {
       try {
         const readyState = await this.readyState();
         return readyState === 'complete';
@@ -222,11 +222,11 @@ export class Frame extends AutomationObject implements api.Frame {
 
   async document(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
-      get: async (_target, _prop) => {
+      get: async (_target, _prop): Promise<void> => {
         //console.log(`getting ${prop} from ${target}`);
       },
 
-      set: (_target, _prop, _value, _receiver) => {
+      set: (_target, _prop, _value, _receiver): boolean => {
         //console.log(`setting ${prop} from ${target} to ${value}`);
         return true;
       },

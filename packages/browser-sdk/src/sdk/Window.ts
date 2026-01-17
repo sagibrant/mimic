@@ -144,7 +144,7 @@ export class Window extends AutomationObject implements api.Window {
   override on(event: string, listener: Listener): this {
     return super.on(event, listener);
   }
-  emit(event: 'page' | 'close', data?: any) {
+  emit(event: 'page' | 'close', data?: any): void {
     if (event === 'page') {
       const tabInfo = data;
       if (!Utils.isNullOrUndefined(tabInfo?.id) && typeof tabInfo.id === 'number') {

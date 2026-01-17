@@ -93,7 +93,7 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
 
   protected abstract locateObjects(): Promise<T[]>;
 
-  resolve(objects: T[]) {
+  resolve(objects: T[]): void {
     this.objects = objects;
   }
 

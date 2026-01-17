@@ -20,8 +20,9 @@
  * limitations under the License.
  */
 
-import { MsgUtils, Utils, Logger, AODesc, AutomationObject, InvokeAction, Rtid } from "@gogogo/shared";
+import { MsgUtils, Utils, Logger, AODesc, AutomationObject, InvokeAction, Rtid, Dispatcher } from "@gogogo/shared";
 import { RuntimeUtils } from "./RuntimeUtils";
+import { ObjectRepository } from './ObjectRepository'
 
 export interface IMsgChannel {
   setDefaultTimeout(timeout: number): void;
@@ -38,11 +39,11 @@ export class ChannelBase implements IMsgChannel {
     this.logger = new Logger(prefix);
   }
 
-  get dispatcher() {
+  get dispatcher(): Dispatcher {
     return RuntimeUtils.dispatcher;
   }
 
-  get repo() {
+  get repo(): ObjectRepository {
     return RuntimeUtils.repo;
   }
 

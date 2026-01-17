@@ -43,7 +43,7 @@ class MainToContentChannel extends ChannelBase {
     this._status = ChannelStatus.CONNECTED;
   }
 
-  startListening() {
+  startListening(): void {
     if (this._listener) {
       return;
     }
@@ -56,7 +56,7 @@ class MainToContentChannel extends ChannelBase {
     }
   }
 
-  stopListening() {
+  stopListening(): void {
     if (Utils.isNullOrUndefined(this._listener)) {
       return;
     }

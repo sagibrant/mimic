@@ -174,7 +174,7 @@ export class Page extends AutomationObject implements api.Page {
   }
 
   async sync(timeout: number = 5000): Promise<void> {
-    const check = async () => {
+    const check = async (): Promise<boolean> => {
       const status = await this.status();
       return status === 'complete';
     };
@@ -268,7 +268,7 @@ export class Page extends AutomationObject implements api.Page {
   override on(event: string, listener: Listener): this {
     return super.on(event, listener);
   }
-  emit(event: 'close' | 'dialog' | 'domcontentloaded', _data?: any) {
+  emit(event: 'close' | 'dialog' | 'domcontentloaded', _data?: any): void {
     if (event === 'close') {
       super.emit('close', this);
     }
@@ -286,11 +286,11 @@ export class Page extends AutomationObject implements api.Page {
 
   async document(): Promise<api.JSObject> {
     const rawObj = new Proxy(this, {
-      get: async (_target, _prop) => {
+      get: async (_target, _prop): Promise<void> => {
         //console.log(`getting ${ prop } from ${ target } `);
       },
 
-      set: (_target, _prop, _value, _receiver) => {
+      set: (_target, _prop, _value, _receiver): boolean => {
         //console.log(`setting ${ prop } from ${ target } to ${ value } `);
         return true;
       },

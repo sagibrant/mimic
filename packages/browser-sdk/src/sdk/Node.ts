@@ -122,7 +122,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
 
   async checkStates(states?: ('visible' | 'hidden' | 'enabled' | 'disabled' | 'editable')[], timeout: number = 5000): Promise<boolean> {
     states = states ?? ['visible', 'enabled'];
-    const check = async () => {
+    const check = async (): Promise<boolean> => {
       const result = await this.invokeFunction(this._rtid, 'checkStates', [states]) as boolean;
       return result;
     };

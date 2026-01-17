@@ -48,7 +48,7 @@ export class ObjectRepository {
     this._textObjects = new Map();
   }
 
-  public clear() {
+  public clear(): void {
     for (const obj of this._browserObjects.values()) {
       obj.clearListeners();
     }

@@ -134,7 +134,7 @@ export class Expect extends ChannelBase implements api.Expect {
     super();
   }
 
-  private assert(check: boolean, reason: string, expected?: unknown, actual?: unknown) {
+  private assert(check: boolean, reason: string, expected?: unknown, actual?: unknown): void {
     if ((this._not && !check) || (!this._not && check)) {
       return;
     }
@@ -156,7 +156,7 @@ export class Expect extends ChannelBase implements api.Expect {
     }
   }
 
-  changeMode(mode: 'log' | 'report' | 'error') {
+  changeMode(mode: 'log' | 'report' | 'error'): void {
     if (['log', 'report', 'error'].includes(mode)) {
       this._mode = mode;
     }

@@ -32,7 +32,7 @@ export class RuntimeUtils {
     RuntimeUtils._dispatcher = dispatcher;
   }
 
-  static get dispatcher() {
+  static get dispatcher(): Dispatcher {
     // init with build-in MainToContentDispatcher for web package
     if (Utils.isNullOrUndefined(RuntimeUtils._dispatcher)) {
       RuntimeUtils._dispatcher = new MainToContentDispatcher();
@@ -44,7 +44,7 @@ export class RuntimeUtils {
     RuntimeUtils._repo = repo;
   }
 
-  static get repo() {
+  static get repo(): ObjectRepository {
     if (Utils.isNullOrUndefined(RuntimeUtils._repo)) {
       RuntimeUtils._repo = new ObjectRepository();
     }

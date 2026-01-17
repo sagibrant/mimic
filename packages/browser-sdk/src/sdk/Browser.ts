@@ -146,7 +146,7 @@ export class Browser extends AutomationObject implements api.Browser {
   }
 
   async clearCookies(options?: { name?: string | RegExp, domain?: string | RegExp, path?: string | RegExp }): Promise<void> {
-    const getValueWrapper = (value: string | RegExp | undefined) => {
+    const getValueWrapper = (value: string | RegExp | undefined): string | RegExp | undefined | api.RegExpSpec => {
       if (value instanceof RegExp) {
         return Utils.toRegExpSpec(value);
       }
@@ -190,7 +190,7 @@ export class Browser extends AutomationObject implements api.Browser {
   override on(event: string, listener: Listener): this {
     return super.on(event, listener);
   }
-  emit(event: 'window' | 'page', data?: any) {
+  emit(event: 'window' | 'page', data?: any): void {
     if (event === 'window') {
       const windowInfo = data;
       if (!Utils.isNullOrUndefined(windowInfo?.id) && typeof windowInfo.id === 'number') {

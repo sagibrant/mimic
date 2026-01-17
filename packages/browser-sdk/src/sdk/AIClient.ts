@@ -39,7 +39,7 @@ export class AIClient extends ChannelBase implements api.AIClient {
   /** ====================================================== methods ===================================================== */
   /** ==================================================================================================================== */
 
-  init(options?: any) {
+  init(options?: any): this {
     this._openai = undefined;
     this._model = undefined;
     this._systemPrompt = undefined;
@@ -50,12 +50,12 @@ export class AIClient extends ChannelBase implements api.AIClient {
     return this;
   }
 
-  setModel(model: string) {
+  setModel(model: string): this {
     this._model = model;
     return this;
   }
 
-  setSystemPrompt(prompt: string) {
+  setSystemPrompt(prompt: string): this {
     this._systemPrompt = prompt;
     return this;
   }
