@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Selector, LocatorUtils, MsgDataHandlerBase } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Selector, LocatorUtils, MsgDataHandlerBase } from "@gogogo/shared";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { TabInfo, WindowInfo } from "../api/BrowserWrapperTypes";
 import { BackgroundUtils } from "../BackgroundUtils";
@@ -28,6 +28,7 @@ import { BackgroundUtils } from "../BackgroundUtils";
 export class WindowHandler extends MsgDataHandlerBase {
   private readonly _windowId: number;
   private readonly _browserAPI: ChromeExtensionAPI;
+/** the device scale factor is decided by --force-device-scale-factor or same as the desktop scale */
   private _deviceScaleFactor: number | undefined = undefined;
 
   constructor(windowId: number, browserAPI: ChromeExtensionAPI) {

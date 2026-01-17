@@ -29,8 +29,6 @@ export interface BrowserInfo {
   majorVersion: number;
 };
 
-/** the device scale factor is decided by --force-device-scale-factor or same as the desktop scale */
-export const deviceScaleFactor: number | undefined = undefined;
 /**
  * Detects the current browser name and version
  * Compatible with Chrome, Edge, Firefox, and Safari

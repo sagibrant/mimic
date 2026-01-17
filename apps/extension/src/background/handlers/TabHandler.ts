@@ -47,6 +47,7 @@ export class TabHandler extends MsgDataHandlerBase {
   private readonly _cdpDOM: CDPDOM;
 
   private _inspectMode: 'searchForNode' | 'none';
+/** the device scale factor is decided by --force-device-scale-factor or same as the desktop scale */
   private _deviceScaleFactor: number | undefined = undefined;
 
   constructor(tabId: number, browserAPI: ChromeExtensionAPI) {

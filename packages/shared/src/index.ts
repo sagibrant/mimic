@@ -13,15 +13,15 @@ export * as RtidUtils from './RtidUtils';
 export * as MsgUtils from './MsgUtils';
 export * as BrowserUtils from './BrowserUtils';
 export * as StorageUtils from './StorageUtils';
+export * as CryptoUtil from './CryptoUtil';
 export * as LocatorUtils from './LocatorUtils';
 export * as DOMPathUtils from './DOMPathUtils';
-export * as CryptoUtil from './CryptoUtil';
+export * as KeyDefinitionUtils from './KeyDefinitionUtils';
 // Export all shared class utilities
 export * from './SettingUtils';
 export * from './Logger';
 export * from './DOMNode';
 export * from './EventEmitter';
-export * from './KeyDefinitions';
 
 // Export messaging utilities
 export * from './Messaging/ChannelBase';
