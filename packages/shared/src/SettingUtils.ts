@@ -52,16 +52,7 @@ export interface Settings {
   recordSettings: RecordSettings;
 }
 
-interface InternalSettingsCache {
-  settings: Settings;
-  onChangedListener?: (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void;
-}
-
-const cachedSettings: InternalSettingsCache = {
-  settings: getDefaultSettings()
-};
-
-export function getDefaultSettings(): Settings {
+function getDefaultSettings(): Settings {
   return {
     storeURL: '',
     logLevel: 'WARN',
@@ -86,7 +77,7 @@ export function getDefaultSettings(): Settings {
   };
 }
 
-export function isSettings(data: unknown): data is Settings {
+function isSettings(data: unknown): data is Settings {
   if (Utils.isNullOrUndefined(data)) {
     return false;
   }
@@ -137,7 +128,7 @@ export function isSettings(data: unknown): data is Settings {
   return true;
 }
 
-export function parse2Settings(text: string): Settings | null {
+function parse2Settings(text: string): Settings | null {
   try {
     const settings = JSON.parse(text) as unknown;
     if (!isSettings(settings)) {
@@ -150,88 +141,94 @@ export function parse2Settings(text: string): Settings | null {
   }
 }
 
-export async function init(): Promise<void> {
-  try {
-    if (!cachedSettings.onChangedListener) {
-      cachedSettings.onChangedListener = (changes, areaName): void => {
-        if (areaName !== 'local') {
-          return;
-        }
-        if ('settings' in changes) {
-          const newValue = changes['settings'].newValue;
-          if (newValue && typeof newValue === 'string') {
-            const newSettings = parse2Settings(newValue);
-            if (newSettings) {
-              cachedSettings.settings = newSettings;
+interface InternalSettingsCache {
+  settings: Settings;
+  onChangedListener?: (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void;
+}
+
+const cachedSettings: InternalSettingsCache = {
+  settings: getDefaultSettings()
+};
+
+export const SettingUtils = {
+  isSettings: isSettings,
+  parse2Settings: parse2Settings,
+  async init(): Promise<void> {
+    try {
+      if (!cachedSettings.onChangedListener) {
+        cachedSettings.onChangedListener = (changes, areaName): void => {
+          if (areaName !== 'local') {
+            return;
+          }
+          if ('settings' in changes) {
+            const newValue = changes['settings'].newValue;
+            if (newValue && typeof newValue === 'string') {
+              const newSettings = parse2Settings(newValue);
+              if (newSettings) {
+                cachedSettings.settings = newSettings;
+              }
+            }
+            else {
+              cachedSettings.settings = getDefaultSettings();
             }
           }
-          else {
-            cachedSettings.settings = getDefaultSettings();
+        };
+        StorageUtils.AddOnChangedListener(cachedSettings.onChangedListener);
+      }
+      await SettingUtils.load();
+    } catch (error) {
+      console.error('init Error:', error);
+    }
+  },
+  async load(data?: Settings): Promise<Settings | undefined> {
+    try {
+      if (data && isSettings(data)) {
+        const newSettings = data as Settings;
+        cachedSettings.settings = newSettings;
+      }
+      else {
+        const result = await StorageUtils.get('settings');
+        if (result) {
+          const newSettings = parse2Settings(result);
+          if (newSettings) {
+            cachedSettings.settings = newSettings;
           }
         }
-      };
-      StorageUtils.AddOnChangedListener(cachedSettings.onChangedListener);
-    }
-    await load();
-  } catch (error) {
-    console.error('init Error:', error);
-  }
-}
-
-export async function load(data?: Settings): Promise<Settings | undefined> {
-  try {
-    if (data && isSettings(data)) {
-      const newSettings = data as Settings;
-      cachedSettings.settings = newSettings;
-    }
-    else {
-      const result = await StorageUtils.get('settings');
-      if (result) {
-        const newSettings = parse2Settings(result);
-        if (newSettings) {
-          cachedSettings.settings = newSettings;
-        }
       }
+      return cachedSettings.settings;
+    } catch (error) {
+      console.error('load Error:', error, ' data:', data);
+      return cachedSettings.settings;
     }
-    return cachedSettings.settings;
-  } catch (error) {
-    console.error('load Error:', error, ' data:', data);
-    return cachedSettings.settings;
-  }
-}
-
-export async function save(settings?: Settings): Promise<Settings> {
-  try {
-    if (settings && !isSettings(settings)) {
-      throw new Error('Invalid Settings');
+  },
+  async save(settings?: Settings): Promise<Settings> {
+    try {
+      if (settings && !isSettings(settings)) {
+        throw new Error('Invalid Settings');
+      }
+      settings = settings || cachedSettings.settings;
+      const strValue = JSON.stringify(settings, null, 2);
+      await StorageUtils.set('settings', strValue);
+      cachedSettings.settings = settings;
+      return cachedSettings.settings;
+    } catch (error) {
+      console.error('save Error:', error, ' settings:', settings);
+      return cachedSettings.settings;
     }
-    settings = settings || cachedSettings.settings;
-    const strValue = JSON.stringify(settings, null, 2);
-    await StorageUtils.set('settings', strValue);
-    cachedSettings.settings = settings;
+  },
+  getSettings(): Settings {
     return cachedSettings.settings;
-  } catch (error) {
-    console.error('save Error:', error, ' settings:', settings);
-    return cachedSettings.settings;
+  },
+  getStoreURL(): string {
+    return cachedSettings.settings.storeURL;
+  },
+  getLogLevel(): string {
+    return cachedSettings.settings.logLevel;
+  },
+  getReplaySettings(): ReplaySettings {
+    return cachedSettings.settings.replaySettings;
+  },
+  getRecordSettings(): RecordSettings {
+    return cachedSettings.settings.recordSettings;
   }
-}
-
-export function getSettings(): Settings {
-  return cachedSettings.settings;
-}
-
-export function getStoreURL(): string {
-  return cachedSettings.settings.storeURL;
-}
-
-export function getLogLevel(): string {
-  return cachedSettings.settings.logLevel;
-}
-
-export function getReplaySettings(): ReplaySettings {
-  return cachedSettings.settings.replaySettings;
-}
-
-export function getRecordSettings(): RecordSettings {
-  return cachedSettings.settings.recordSettings;
 }

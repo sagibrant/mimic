@@ -19,7 +19,7 @@ export * as LocatorUtils from './LocatorUtils';
 export * as DOMPathUtils from './DOMPathUtils';
 export * as KeyDefinitionUtils from './KeyDefinitionUtils';
 export type { KeyboardModifier } from './KeyDefinitionUtils';
-export * as SettingUtils from './SettingUtils';
+export { SettingUtils } from './SettingUtils';
 export type { Settings } from './SettingUtils';
 // Export all shared class utilities
 export * from './Logger';
