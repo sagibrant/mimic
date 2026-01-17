@@ -125,7 +125,7 @@ class RecordObject {
     }
   }
 
-  async receiveEvent(event: Event) {
+  async receiveEvent(event: Event) : Promise<void> {
     if (this._events.length > 0 && this._events[this._events.length - 1] === event) {
       return;
     }

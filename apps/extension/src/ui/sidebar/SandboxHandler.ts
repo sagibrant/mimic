@@ -41,7 +41,7 @@ export class SandboxHandler extends MsgDataHandlerBase {
       RuntimeUtils.repo.clear();
 
       // overwrite the Utils.wait because the wait in sandbox/sidebar is not stable
-      Utils.wait = async (timeout: number): Promise<void> => {
+      const wait = async (timeout: number): Promise<void> => {
         if (RuntimeUtils.dispatcher) {
           console.error('new wait called:', timeout);
           const rtid = RtidUtils.getAgentRtid();
@@ -61,7 +61,9 @@ export class SandboxHandler extends MsgDataHandlerBase {
           return new Promise(resolve => setTimeout(resolve, timeout));
         }
       };
-
+      (globalThis as any).gogogo_wait = {
+        wait: wait
+      };
       // reset the page in case the tab is switched before the script execution
       // may fail due to the extension inactive
       // then we need to return error and user need to run again
@@ -85,7 +87,7 @@ export class SandboxHandler extends MsgDataHandlerBase {
           `return (async () => { ${script} })()`
         );
         // Inject whitelisted globals as arguments
-        result = await func(fetch, console, ai, browser, page, expect, Utils.wait, BrowserLocator);
+        result = await func(fetch, console, ai, browser, page, expect, wait, BrowserLocator);
       }
       else {
         // Non-isolated mode: use direct eval to access local scope

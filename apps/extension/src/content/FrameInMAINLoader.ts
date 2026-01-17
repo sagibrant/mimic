@@ -22,5 +22,5 @@
 
 import { FrameInMAIN } from "./FrameInMAIN";
 
-let frameInMAIN = new FrameInMAIN();
+const frameInMAIN = new FrameInMAIN();
 frameInMAIN.init();

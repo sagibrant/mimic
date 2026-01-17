@@ -8,7 +8,7 @@ import { type Diagnostic, linter, lintGutter } from '@codemirror/lint';
 import { syntaxTree } from '@codemirror/language';
 import { JSHINT, LintError, LintOptions } from 'jshint';
 import { ayuLight, coolGlow } from 'thememirror';
-import { StepScriptEditorHelper } from './StepScriptEditorHelper';
+import { MethodDefinition, StepScriptEditorHelper } from './StepScriptEditorHelper';
 import { SidebarUtils } from './SidebarUtils';
 import { ElementInfo } from '@gogogo/shared';
 import { Button } from '@/ui/components/ui/button';
@@ -169,7 +169,7 @@ ${codeContent}
 
       const methods = StepScriptEditorHelper.getTypeMethods(typeName);
 
-      return methods.map((method: any) => {
+      return methods.map((method: MethodDefinition) => {
         const paramsStr = method.params.join(', ');
         const label = `${method.name}(${paramsStr})`;
         const info = `${method.name}(${paramsStr}): ${method.returnType}`;
@@ -237,7 +237,7 @@ ${codeContent}
         let completions = createCompletions(type);
 
         if (methodPrefix) {
-          completions = completions.filter((completion: any) =>
+          completions = completions.filter((completion: Completion) =>
             completion.label.toLowerCase().startsWith(methodPrefix)
           );
         }
@@ -294,7 +294,7 @@ ${codeContent}
 
     editorViewRef.current = editorView;
 
-    const onNodeInspected = async ({ details }: any) => {
+    const onNodeInspected = async ({ details }: { details: ElementInfo }) => {
       setInspectedObject(details);
     };
     SidebarUtils.handler.on('nodeInspected', onNodeInspected);

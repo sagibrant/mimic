@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, RtidUtils, AODesc, AutomationObject, SettingUtils, Settings, MsgDataHandlerBase } from "@gogogo/shared";
+import { BrowserUtils, RtidUtils, AODesc, AutomationObject, SettingUtils, Settings, MsgDataHandlerBase, Utils } from "@gogogo/shared";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { BrowserHandler } from "./BrowserHandler";
 

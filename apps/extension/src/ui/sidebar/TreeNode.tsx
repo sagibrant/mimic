@@ -7,7 +7,6 @@ export interface TreeNodeType {
   name: string;
   type: 'group' | 'task';
   children?: TreeNodeType[];
-  steps?: any[];
 }
 
 interface TreeNodeProps {

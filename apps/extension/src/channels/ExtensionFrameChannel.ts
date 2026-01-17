@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, Utils } from "@gogogo/shared";
 
 /**
  * The channel based on the chrome.runtime apis
