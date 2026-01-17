@@ -43,7 +43,6 @@ export class SandboxHandler extends MsgDataHandlerBase {
       // overwrite the Utils.wait because the wait in sandbox/sidebar is not stable
       const wait = async (timeout: number): Promise<void> => {
         if (RuntimeUtils.dispatcher) {
-          console.error('new wait called:', timeout);
           const rtid = RtidUtils.getAgentRtid();
           const reqMsgData = MsgUtils.createMessageData('command', rtid, {
             name: 'invoke',
