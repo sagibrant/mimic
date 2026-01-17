@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message, WaitUtils } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message } from "@gogogo/shared";
 
 /**
  * The channel based on the chrome.runtime apis
@@ -83,7 +83,7 @@ export class ExtensionFrameChannel extends ChannelBase {
     // ping 3 times
     for (let i = 1; i <= 3; i++) {
       try {
-        const response = await WaitUtils.waitResult(async () => {
+        const response = await Utils.waitResult(async () => {
           const response = await chrome.tabs.sendMessage(tabId, 'PING', { frameId: frameId });
           return response as string;
         }, 100);

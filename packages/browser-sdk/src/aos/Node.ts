@@ -21,7 +21,6 @@
  */
 
 import * as api from "@gogogo/shared";
-import { WaitUtils } from "@gogogo/shared";
 import { Rtid, RtidUtils, Utils, SettingUtils } from "@gogogo/shared";
 import { AutomationObject } from "../aos/AutomationObject";
 
@@ -127,7 +126,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
       const result = await this.invokeFunction(this._rtid, 'checkStates', [states]) as boolean;
       return result;
     };
-    const result = await WaitUtils.waitChecked(check, timeout);
+    const result = await Utils.waitChecked(check, timeout);
     return result;
   }
 

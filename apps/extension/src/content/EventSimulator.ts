@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, Utils, KeyboardModifier, KeyDefinitionUtils, ClickOptions, Point, TextInputOptions, WaitUtils } from "@gogogo/shared";
+import { BrowserUtils, Utils, KeyboardModifier, KeyDefinitionUtils, ClickOptions, Point, TextInputOptions } from "@gogogo/shared";
 
 /**
  * Enum for mouse button identifiers (matches W3C standards)
@@ -885,7 +885,7 @@ export class EventSimulator {
 
       // 2) Hold the button for specified duration (mimics physical click delay)
       if (delayBetweenDownUp > 0) {
-        await WaitUtils.wait(delayBetweenDownUp);
+        await Utils.wait(delayBetweenDownUp);
       }
 
       // 3) Release the button
@@ -913,7 +913,7 @@ export class EventSimulator {
     if (clickCount === 2) {
       // Short delay between clicks (matches OS double-click timing expectations)
       if (delayBetweenClick > 0) {
-        await WaitUtils.wait(delayBetweenClick);
+        await Utils.wait(delayBetweenClick);
       }
       await performClickCycle();
 
@@ -1077,7 +1077,7 @@ export class EventSimulator {
       }
       else {
         if (delayBetweenDownUp > 0) {
-          await WaitUtils.wait(delayBetweenDownUp);
+          await Utils.wait(delayBetweenDownUp);
         }
         if (target.nodeName.toLowerCase() === 'input' || target.nodeName.toLowerCase() === 'textarea') {
           (target as HTMLInputElement | HTMLTextAreaElement).value += char;
@@ -1089,7 +1089,7 @@ export class EventSimulator {
       }
 
       if (delayBetweenChar > 0) {
-        await WaitUtils.wait(delayBetweenChar);
+        await Utils.wait(delayBetweenChar);
       }
     }
 
@@ -1100,7 +1100,7 @@ export class EventSimulator {
     // {
     //   this.dispatchKeyboardEvent('keydown', target, 'Enter', 'Enter');
     //   if (delayBetweenDownUp > 0) {
-    //     await WaitUtils.wait(delayBetweenDownUp);
+    //     await Utils.wait(delayBetweenDownUp);
     //   }
     //   this.dispatchKeyboardEvent('keyup', target, 'Enter', 'Enter');
 
@@ -1144,7 +1144,7 @@ export class EventSimulator {
       }
     }
     if (delayBetweenDownUp > 0) {
-      await WaitUtils.wait(delayBetweenDownUp);
+      await Utils.wait(delayBetweenDownUp);
     }
     const reverseTokens = Utils.deepClone(tokens);
     reverseTokens.reverse();
@@ -1267,7 +1267,7 @@ export class EventSimulator {
     EventSimulator.simulateFocus(dragSource);
 
     // Natural delay after press
-    await WaitUtils.wait(50);
+    await Utils.wait(50);
 
     // 2. Start drag operation
     this.dispatchDragEvent('dragstart', dragSource, { x: startPoint.x, y: startPoint.y, dataTransfer });
@@ -1315,7 +1315,7 @@ export class EventSimulator {
     }
 
     // Natural delay after drop
-    await WaitUtils.wait(50);
+    await Utils.wait(50);
 
     // 4. Release mouse button
     this.dispatchPointerEvent('pointerup', dragSource, { x: endPoint.x, y: endPoint.y, button: button });
@@ -1390,7 +1390,7 @@ export class EventSimulator {
     );
 
     if (holdDuration > 0) {
-      await WaitUtils.wait(holdDuration);
+      await Utils.wait(holdDuration);
     }
 
     // Touch end event (removed unused wait function)

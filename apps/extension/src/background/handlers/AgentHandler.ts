@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, RtidUtils, AODesc, AutomationObject, SettingUtils, Settings, MsgDataHandlerBase, WaitUtils } from "@gogogo/shared";
+import { BrowserUtils, RtidUtils, AODesc, AutomationObject, SettingUtils, Settings, MsgDataHandlerBase } from "@gogogo/shared";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { BrowserHandler } from "./BrowserHandler";
 
@@ -61,7 +61,7 @@ export class AgentHandler extends MsgDataHandlerBase<AgentEvent> {
   }
 
   async wait(timeout: number): Promise<void> {
-    await WaitUtils.wait(timeout);
+    await Utils.wait(timeout);
   }
 
   /** ==================================================================================================================== **/

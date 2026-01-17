@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, LocatorUtils, RectInfo, MessageData, Selector, Dispatcher, DOMElementDescription, AODesc, MsgUtils, AO, RtidUtils, DOMPathUtils, ElementInfo, WaitUtils } from "@gogogo/shared";
+import { Utils, LocatorUtils, RectInfo, MessageData, Selector, Dispatcher, DOMElementDescription, AODesc, MsgUtils, AO, RtidUtils, DOMPathUtils, ElementInfo } from "@gogogo/shared";
 import { ObjectRepository } from "./ObjectRepository";
 import { FrameHandler } from "./handlers/FrameHandler";
 
@@ -919,9 +919,9 @@ export class ContentUtils {
     document.body.appendChild(rect_elem);
     for (let i = 0; i < 3; i++) {
       rect_elem.style.display = 'block';
-      await WaitUtils.wait(300);
+      await Utils.wait(300);
       rect_elem.style.display = 'none';
-      await WaitUtils.wait(200);
+      await Utils.wait(200);
     }
     document.body.removeChild(rect_elem);
   }

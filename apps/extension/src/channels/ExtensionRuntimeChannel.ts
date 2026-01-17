@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils, WaitUtils } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@gogogo/shared";
 
 /**
  * The channel based on the chrome.runtime apis
@@ -180,7 +180,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     // ping 3 times
     for (let i = 1; i <= 3; i++) {
       try {
-        const response = await WaitUtils.waitResult(async () => {
+        const response = await Utils.waitResult(async () => {
           const response = await chrome.runtime.sendMessage(undefined, 'PING');
           return response as string;
         }, 100);

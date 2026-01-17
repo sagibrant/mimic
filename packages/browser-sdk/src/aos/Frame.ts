@@ -21,7 +21,6 @@
  */
 
 import * as api from "@gogogo/shared";
-import { WaitUtils } from "@gogogo/shared";
 import { Rtid, RtidUtils, Utils } from "@gogogo/shared";
 import { FrameLocator } from "../locators/FrameLocator";
 import { ElementLocator } from "../locators/ElementLocator";
@@ -178,7 +177,7 @@ export class Frame extends AutomationObject implements api.Frame {
         return false;
       }
     };
-    const result = await WaitUtils.waitChecked(check, timeout);
+    const result = await Utils.waitChecked(check, timeout);
     if (!result) {
       this.logger.warn('sync: status is still not Completed');
     }

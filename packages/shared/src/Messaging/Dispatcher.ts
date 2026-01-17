@@ -24,7 +24,6 @@ import { Logger } from './../Logger';
 import * as Utils from './../Utils';
 import * as MsgUtils from './../MsgUtils';
 import * as RtidUtils from './../RtidUtils';
-import { WaitUtils } from '../WaitUtils';
 import { Message, MessageData } from '../types/protocol';
 import { IChannel } from './ChannelBase';
 import { IMsgDataHandler } from './MsgDataHandler';
@@ -99,7 +98,7 @@ export abstract class Dispatcher {
         throw new Error('Cannot find the communication channel');
       }
       if (channel.async) {
-        const response = await WaitUtils.waitResult(async () => {
+        const response = await Utils.waitResult(async () => {
           return await channel.sendRequest(request);
         }, timeout);
         this.logger.debug('sendRequest: <====== data=', data, ' response result=', response.data);
@@ -133,7 +132,7 @@ export abstract class Dispatcher {
         throw new Error('Cannot find the communication channel');
       }
       if (channel.async) {
-        await WaitUtils.waitResult(async () => {
+        await Utils.waitResult(async () => {
           return await channel.sendEvent(event);
         }, timeout);
       }

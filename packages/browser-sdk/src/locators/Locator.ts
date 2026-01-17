@@ -21,7 +21,6 @@
  */
 
 import * as api from "@gogogo/shared";
-import { WaitUtils } from "@gogogo/shared";
 import { Utils, SettingUtils, QueryInfo } from "@gogogo/shared";
 import { ChannelBase } from "../Channel";
 import { AutomationObject } from "../aos/AutomationObject";
@@ -229,7 +228,7 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
       if (performance.now() >= endTime) {
         break;
       }
-      await WaitUtils.wait(500);
+      await Utils.wait(500);
     }
     const count = objects.length;
     let name = this.constructor?.name ?? 'Object';

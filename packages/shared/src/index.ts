@@ -23,7 +23,6 @@ export type { KeyboardModifier } from './KeyDefinitionUtils';
 export * from './Logger';
 export * from './DOMNode';
 export * from './EventEmitter';
-export * from './WaitUtils';
 export * from './SettingUtils';
 
 // Export messaging utilities

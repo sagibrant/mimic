@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, MsgDataHandlerBase, Settings, SettingUtils, WaitUtils } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, MsgDataHandlerBase, Settings, SettingUtils } from "@gogogo/shared";
 import { expect, BrowserLocator, RuntimeUtils, AIClient } from "@gogogo/browser-sdk";
 
 export class SandboxHandler extends MsgDataHandlerBase {
@@ -40,9 +40,10 @@ export class SandboxHandler extends MsgDataHandlerBase {
       // clear the cached objects
       RuntimeUtils.repo.clear();
 
-      // overwrite the WaitUtils.wait because the wait in sandbox/sidebar is not stable
-      WaitUtils.wait = async (timeout: number): Promise<void> => {
+      // overwrite the Utils.wait because the wait in sandbox/sidebar is not stable
+      Utils.wait = async (timeout: number): Promise<void> => {
         if (RuntimeUtils.dispatcher) {
+          console.error('new wait called:', timeout);
           const rtid = RtidUtils.getAgentRtid();
           const reqMsgData = MsgUtils.createMessageData('command', rtid, {
             name: 'invoke',
@@ -53,7 +54,7 @@ export class SandboxHandler extends MsgDataHandlerBase {
           });
           const resMsgData = await RuntimeUtils.dispatcher.sendRequest(reqMsgData, timeout + 1000);
           if (resMsgData.status !== 'OK' && resMsgData.error) {
-            console.error('WaitUtils.wait with background failed', resMsgData.error);
+            console.error('Utils.wait with background failed', resMsgData.error);
           }
         }
         else {
@@ -84,7 +85,7 @@ export class SandboxHandler extends MsgDataHandlerBase {
           `return (async () => { ${script} })()`
         );
         // Inject whitelisted globals as arguments
-        result = await func(fetch, console, ai, browser, page, expect, WaitUtils.wait, BrowserLocator);
+        result = await func(fetch, console, ai, browser, page, expect, Utils.wait, BrowserLocator);
       }
       else {
         // Non-isolated mode: use direct eval to access local scope
