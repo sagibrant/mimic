@@ -20,14 +20,15 @@
  * limitations under the License.
  */
 
-import { BrowserUtils } from "./Common";
+import * as BrowserUtils from "./BrowserUtils";
 
 export class CryptoUtil {
   // Private static secret key (derived from chrome.runtime.id)
   private static _secretKey: CryptoKey | null = null;
 
   /**
-   * Initialize/derive the secret key from chrome.runtime.id (once)
+   * Initialize/derive the secret key from chrome.runtime.id (hardcoded for now)
+   * Todo: change to user generated in future
    */
   private static async _getSecretKey(): Promise<CryptoKey> {
     if (CryptoUtil._secretKey) return CryptoUtil._secretKey;

@@ -60,7 +60,7 @@
  * // Remove listener
  * emitter.off("login", myLoginListener);
  */
-import { Utils } from "./Common";
+import * as Utils from "./Utils";
 import { Logger } from "./Logger";
 
 // EventMap defines the structure of events: event names mapped to their payload types

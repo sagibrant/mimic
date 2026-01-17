@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import { Utils } from "./Common";
-import { StorageUtils } from "./Storage";
+import * as Utils from "./Utils";
+import * as StorageUtils from "./StorageUtils";
 
 interface AISettings {
   apiKey: string;

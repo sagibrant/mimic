@@ -36,37 +36,35 @@ declare global {
   };
 }
 
-export class StorageUtils {
-  static async get(key: string): Promise<string | null> {
-    if (typeof chrome !== 'undefined' && chrome?.storage?.local) {
-      const result = await chrome.storage.local.get([key]);
-      if (key in result && typeof result[key] === 'string') {
-        return result[key] as string
-      }
+export async function get(key: string): Promise<string | null> {
+  if (typeof chrome !== 'undefined' && chrome?.storage?.local) {
+    const result = await chrome.storage.local.get([key]);
+    if (key in result && typeof result[key] === 'string') {
+      return result[key] as string
     }
-    else if (typeof localStorage !== 'undefined') {
-      const result = localStorage.getItem(key);
-      return result;
-    }
-    // todo: add node env support
-    return null;
   }
-
-  static async set(key: string, value: string): Promise<void> {
-    if (typeof chrome !== 'undefined' && chrome?.storage?.local) {
-      const obj: Record<string, string> = {};
-      obj[key] = value;
-      await chrome.storage.local.set(obj);
-    }
-    else if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(key, value);
-    }
-    // todo: add node env support
+  else if (typeof localStorage !== 'undefined') {
+    const result = localStorage.getItem(key);
+    return result;
   }
+  // todo: add node env support
+  return null;
+}
 
-  static AddOnChangedListener(listener: (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void): void {
-    if (typeof chrome !== 'undefined' && chrome?.storage?.onChanged) {
-      chrome.storage.onChanged.addListener(listener);
-    }
+export async function set(key: string, value: string): Promise<void> {
+  if (typeof chrome !== 'undefined' && chrome?.storage?.local) {
+    const obj: Record<string, string> = {};
+    obj[key] = value;
+    await chrome.storage.local.set(obj);
+  }
+  else if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(key, value);
+  }
+  // todo: add node env support
+}
+
+export function AddOnChangedListener(listener: (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, areaName: string) => void): void {
+  if (typeof chrome !== 'undefined' && chrome?.storage?.onChanged) {
+    chrome.storage.onChanged.addListener(listener);
   }
 }

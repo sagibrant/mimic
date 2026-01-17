@@ -21,7 +21,9 @@
  */
 
 import { Logger } from './../Logger';
-import { Utils, MsgUtils, RtidUtils } from './../Common';
+import * as Utils from './../Utils';
+import * as MsgUtils from './../MsgUtils';
+import * as RtidUtils from './../RtidUtils';
 import { Message, MessageData } from '../types/protocol';
 import { IChannel } from './ChannelBase';
 import { IMsgDataHandler } from './MsgDataHandler';

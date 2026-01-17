@@ -8,15 +8,20 @@
  */
 
 // Export all shared utilities
-export * from './Common';
-export * from './Storage';
-export * from './Settings';
+export * as Utils from './Utils';
+export * as RtidUtils from './RtidUtils';
+export * as MsgUtils from './MsgUtils';
+export * as BrowserUtils from './BrowserUtils';
+export * as StorageUtils from './StorageUtils';
+export * as LocatorUtils from './LocatorUtils';
+export * as DOMPathUtils from './DOMPathUtils';
+
+export * from './SettingUtils';
 export * from './Logger';
 export * from './CryptoUtil';
-export * from './DOMPath';
+export * from './DOMNode';
 export * from './EventEmitter';
 export * from './KeyDefinitions';
-export * from './LocatorUtils';
 
 // Export messaging utilities
 export * from './Messaging/ChannelBase';

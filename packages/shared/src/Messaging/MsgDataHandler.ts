@@ -20,9 +20,10 @@
  * limitations under the License.
  */
 
+import * as Utils from './../Utils';
+import * as RtidUtils from './../RtidUtils';
 import { AODesc, AutomationObject, ElementInfo, InvokeAction, MessageData, queryActionName, recordActionName, RecordedStep, Rtid } from "../types/protocol";
 import { EventEmitter, EventMap } from "../EventEmitter";
-import { RtidUtils, Utils } from "../Common";
 
 /**
  * Callback type for delivering handler results

@@ -19,8 +19,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Utils } from "./Common";
-import { SettingUtils } from "./Settings";
+import * as Utils from "./Utils";
+import { SettingUtils } from "./SettingUtils";
 
 export enum LogLevel {
   TRACE = 1, // Lowest priority

@@ -20,8 +20,16 @@
  * limitations under the License.
  */
 
-import { NameValuePair, Utils, RectInfo } from "@gogogo/shared";
+import { Utils, RectInfo } from "@gogogo/shared";
 import { ContentUtils } from "./ContentUtils";
+
+/**
+ * Represents a key-value pair, optionally typed.
+ */
+export interface NameValuePair {
+  name: string;
+  value?: unknown;
+}
 
 export interface DomNodeFilter {
     /**

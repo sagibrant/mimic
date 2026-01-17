@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, QueryInfo, RecordedStep, Rtid, ClickOptions, Point, RectInfo, TextInputOptions, LocatorUtils, MsgDataHandlerBase, KeyDefinitionUtils, ElementInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, QueryInfo, RecordedStep, Rtid, ClickOptions, Point, RectInfo, TextInputOptions, LocatorUtils, MsgDataHandlerBase, KeyDefinitionUtils, ElementInfo } from "@gogogo/shared";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { FrameInfo, TabInfo, WindowInfo } from "../api/BrowserWrapperTypes";
 import { WebNavigationEventDetails } from "../api/ChromeWebNavigationAPI";
@@ -47,6 +47,7 @@ export class TabHandler extends MsgDataHandlerBase {
   private readonly _cdpDOM: CDPDOM;
 
   private _inspectMode: 'searchForNode' | 'none';
+  private _deviceScaleFactor: number | undefined = undefined;
 
   constructor(tabId: number, browserAPI: ChromeExtensionAPI) {
     const rtid = RtidUtils.getTabRtid(tabId, -1);
@@ -652,12 +653,12 @@ export class TabHandler extends MsgDataHandlerBase {
       return rect;
     }
     else if (propName === 'deviceScaleFactor' || propName === 'device_scale_factor') {
-      if (!Utils.isNullOrUndefined(BrowserUtils.deviceScaleFactor)) {
-        return BrowserUtils.deviceScaleFactor;
+      if (!Utils.isNullOrUndefined(this._deviceScaleFactor)) {
+        return this._deviceScaleFactor;
       }
       const devicePixelRatio = await this._queryContentProperty('device_pixel_ratio') as number;
-      BrowserUtils.deviceScaleFactor = devicePixelRatio / (this.zoomFactor || 1);
-      return BrowserUtils.deviceScaleFactor;
+      this._deviceScaleFactor = devicePixelRatio / (this.zoomFactor || 1);
+      return this._deviceScaleFactor;
     }
     else if (propName === 'active') {
       const tab = await this._browserAPI.tabAPI.get(this._tabId);

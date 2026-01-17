@@ -28,6 +28,7 @@ import { BackgroundUtils } from "../BackgroundUtils";
 export class WindowHandler extends MsgDataHandlerBase {
   private readonly _windowId: number;
   private readonly _browserAPI: ChromeExtensionAPI;
+  private _deviceScaleFactor: number | undefined = undefined;
 
   constructor(windowId: number, browserAPI: ChromeExtensionAPI) {
     const rtid = RtidUtils.getWindowRtid(windowId);
@@ -139,10 +140,10 @@ export class WindowHandler extends MsgDataHandlerBase {
         || Utils.isNullOrUndefined(window.width) || Utils.isNullOrUndefined(window.height)) {
         throw new Error('The window rect is not available.')
       }
-      if (Utils.isNullOrUndefined(BrowserUtils.deviceScaleFactor)) {
-        BrowserUtils.deviceScaleFactor = await this._queryActiveTabProperty('device_scale_factor') as number;
+      if (Utils.isNullOrUndefined(this._deviceScaleFactor)) {
+        this._deviceScaleFactor = await this._queryActiveTabProperty('device_scale_factor') as number;
       }
-      const deviceScaleFactor = BrowserUtils.deviceScaleFactor ?? 1;
+      const deviceScaleFactor = this._deviceScaleFactor ?? 1;
       let rect = {
         left: window.left * deviceScaleFactor,
         top: window.top * deviceScaleFactor,

@@ -1,5 +1,3 @@
-import { BrowserUtils } from "./Common";
-
 /**
  * @copyright 2026 Sagi All Rights Reserved.
  * @author: Sagi <sagibrant@hotmail.com>
@@ -21,6 +19,8 @@ import { BrowserUtils } from "./Common";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as BrowserUtils from './BrowserUtils';
+
 export interface KeyDefinition {
   key: string;
   keyCode: number;
