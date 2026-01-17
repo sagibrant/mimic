@@ -70,13 +70,6 @@ export function getKeyDescription(key: string, pressedModifiers: Set<KeyboardMod
 }
 
 /**
- * Key Definitions Map
- * Map from 'key', 'code' and 'shiftKey' to KeyDescription
- * Reference: https://www.w3.org/TR/uievents-key/
- */
-export const KeyDefinitions: Map<string, KeyDescription> = buildLayoutClosure();
-
-/**
  * US Keyboard Layout
  * Reference: https://www.w3.org/TR/uievents-code/#code-value-tables
  * Map from 'code' to KeyDefinition
@@ -207,6 +200,13 @@ const USKeyboardLayout: Record<string, KeyDefinition> = {
   'NumpadDecimal': { 'keyCode': 46, 'shiftKeyCode': 110, 'key': '\u0000', 'shiftKey': '.', 'location': 3 },
   'NumpadEnter': { 'keyCode': 13, 'key': 'Enter', 'text': '\r', 'location': 3 },
 };
+
+/**
+ * Key Definitions Map
+ * Map from 'key', 'code' and 'shiftKey' to KeyDescription
+ * Reference: https://www.w3.org/TR/uievents-key/
+ */
+export const KeyDefinitions: Map<string, KeyDescription> = buildLayoutClosure();
 
 /**
    * 
