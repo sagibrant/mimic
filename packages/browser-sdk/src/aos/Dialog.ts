@@ -21,7 +21,7 @@
  */
 
 import * as api from "@gogogo/shared";
-import { Rtid, RtidUtils, Utils} from "@gogogo/shared";
+import { Rtid, RtidUtils, Utils } from "@gogogo/shared";
 import { ChannelBase } from "../Channel";
 import { PageLocator } from "../locators/PageLocator";
 

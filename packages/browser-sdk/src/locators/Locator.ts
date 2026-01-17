@@ -22,7 +22,7 @@
 
 import * as api from "@gogogo/shared";
 import { Utils, SettingUtils, QueryInfo } from "@gogogo/shared";
-import { ChannelBase } from "./Channel";
+import { ChannelBase } from "../Channel";
 import { AutomationObject } from "../aos/AutomationObject";
 
 export interface LocatorOrdinalOption {

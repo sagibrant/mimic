@@ -24,7 +24,7 @@ import * as api from "@gogogo/shared";
 import { Rtid, Utils, SettingUtils } from "@gogogo/shared";
 import { Locator } from "./Locator";
 import { Page } from "../aos/Page";
-import { Frame } from "./Frame";
+import { Frame } from "../aos/Frame";
 import { ElementLocator } from "./ElementLocator";
 import { TextLocator } from "./TextLocator";
 

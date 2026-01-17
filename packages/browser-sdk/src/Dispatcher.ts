@@ -22,6 +22,12 @@
 import { AODesc, AutomationObject, ChannelBase, ChannelStatus, Dispatcher, IChannel, Message, MessageData, MsgDataHandlerBase, MsgUtils, Rtid, RtidUtils, Settings, SettingUtils, Utils } from "@gogogo/shared";
 import { RuntimeUtils } from "./RuntimeUtils";
 
+interface ChromeObj {
+  runtime?: {
+    id?: string
+  };
+};
+
 /**
  * The channel based on the CustomEvent API for communication between the MAIN world and the Content script world.
  */
@@ -34,6 +40,7 @@ class MainToContentChannel extends ChannelBase {
 
   constructor() {
     super();
+    const chrome = (typeof globalThis !== 'undefined' && 'chrome' in globalThis) ? (globalThis as typeof globalThis & { chrome: ChromeObj }).chrome : undefined;
     if (typeof chrome !== 'undefined' && typeof chrome.runtime?.id === 'string') {
       this._source = 'content';
     }
@@ -155,7 +162,7 @@ class GogogoEventHandler extends MsgDataHandlerBase {
       }
     }
     else if (event === 'pageCreated') {
-      const tabInfo = data;
+      const tabInfo = data as { windowId: number };
       {
         const rtid = RtidUtils.getBrowserRtid();
         const browser = repo.getBrowser(rtid);
@@ -186,7 +193,7 @@ class GogogoEventHandler extends MsgDataHandlerBase {
       }
     }
     else if (event === 'dialogOpened') {
-      const dialogInfo = data;
+      const dialogInfo = data as { tabId: number }
       if (!Utils.isNullOrUndefined(dialogInfo?.tabId) && typeof dialogInfo.tabId === 'number') {
         const rtid = RtidUtils.getTabRtid(dialogInfo.tabId);
         const page = repo.getPage(rtid);

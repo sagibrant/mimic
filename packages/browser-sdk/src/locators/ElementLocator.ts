@@ -24,8 +24,8 @@ import * as api from "@gogogo/shared";
 import { Rtid, RtidUtils, Utils, SettingUtils } from "@gogogo/shared";
 import { Locator } from "./Locator";
 import { Page } from "../aos/Page";
-import { Frame } from "../sdk/Frame";
-import { Element } from "./Element";
+import { Frame } from "../aos/Frame";
+import { Element } from "../aos/Element";
 import { TextLocator } from "./TextLocator";
 
 export class ElementLocator extends Locator<Element> implements api.ElementLocator {
@@ -393,7 +393,7 @@ export class ElementLocator extends Locator<Element> implements api.ElementLocat
 
   async $0(): Promise<api.JSObject> {
     const elem = await this.get();
-    return await elem.$0;
+    return await elem.$0();
   }
 
 }

@@ -24,8 +24,8 @@ import * as api from "@gogogo/shared";
 import { Rtid, Utils, SettingUtils } from "@gogogo/shared";
 import { Locator } from "./Locator";
 import { Page } from "../aos/Page";
-import { Frame } from "./Frame";
-import { Element } from "./Element";
+import { Frame } from "../aos/Frame";
+import { Element } from "../aos/Element";
 import { Text } from "../aos/Text";
 
 export class TextLocator extends Locator<Text> implements api.TextLocator {
