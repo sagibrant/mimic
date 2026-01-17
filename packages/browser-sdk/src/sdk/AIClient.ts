@@ -25,6 +25,7 @@ import { Utils } from "@gogogo/shared";
 import { ChannelBase } from "./Channel";
 import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { ClientOptions } from "openai";
 
 export class AIClient extends ChannelBase implements api.AIClient {
   private _openai: OpenAI | undefined = undefined;
@@ -32,14 +33,11 @@ export class AIClient extends ChannelBase implements api.AIClient {
   private _systemPrompt: string | undefined;
   private _history: Array<ChatCompletionMessageParam> = [];
 
-  constructor() {
-    super();
-  }
   /** ==================================================================================================================== */
   /** ====================================================== methods ===================================================== */
   /** ==================================================================================================================== */
 
-  init(options?: any): this {
+  init(options?: ClientOptions): this {
     this._openai = undefined;
     this._model = undefined;
     this._systemPrompt = undefined;

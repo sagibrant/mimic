@@ -25,6 +25,12 @@ import { Rtid, RtidUtils, Utils} from "@gogogo/shared";
 import { ChannelBase } from "./Channel";
 import { PageLocator } from "./PageLocator";
 
+interface DialogInfo extends Record<string, unknown> {
+  type?: 'alert' | 'confirm' | 'prompt' | 'beforeunload';
+  message?: string;
+  defaultPrompt?: string;
+}
+
 export class Dialog extends ChannelBase implements api.Dialog {
   private readonly _pageLocator: PageLocator;
   private _pageRtid?: Rtid;
@@ -53,7 +59,7 @@ export class Dialog extends ChannelBase implements api.Dialog {
   }
   async opened(): Promise<boolean> {
     const tabRtid = await this.tabRtid();
-    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as any;
+    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as DialogInfo | null;
     if (dialogInfo) {
       return true;
     }
@@ -63,8 +69,8 @@ export class Dialog extends ChannelBase implements api.Dialog {
   }
   async type(): Promise<'alert' | 'confirm' | 'prompt' | 'beforeunload'> {
     const tabRtid = await this.tabRtid();
-    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as any;
-    if (dialogInfo) {
+    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as DialogInfo | null;
+    if (dialogInfo && dialogInfo.type) {
       return dialogInfo.type;
     }
     else {
@@ -73,9 +79,9 @@ export class Dialog extends ChannelBase implements api.Dialog {
   }
   async defaultValue(): Promise<string> {
     const tabRtid = await this.tabRtid();
-    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as any;
+    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as DialogInfo | null;
     if (dialogInfo) {
-      return dialogInfo.defaultPrompt;
+      return dialogInfo.defaultPrompt || '';
     }
     else {
       throw new Error('Dialog is closed');
@@ -83,9 +89,9 @@ export class Dialog extends ChannelBase implements api.Dialog {
   }
   async message(): Promise<string> {
     const tabRtid = await this.tabRtid();
-    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as any;
+    const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as DialogInfo | null;
     if (dialogInfo) {
-      return dialogInfo.message;
+      return dialogInfo.message || '';
     }
     else {
       throw new Error('Dialog is closed');
@@ -94,7 +100,7 @@ export class Dialog extends ChannelBase implements api.Dialog {
   async accept(promptText?: string): Promise<void> {
     const tabRtid = await this.tabRtid();
     if (promptText === undefined) {
-      const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as any;
+      const dialogInfo = await this.invokeFunction(tabRtid, 'getJavaScriptDialog', []) as DialogInfo | null;
       const type = dialogInfo?.type;
       const defaultPrompt = dialogInfo?.defaultPrompt;
       if (type === 'prompt') {

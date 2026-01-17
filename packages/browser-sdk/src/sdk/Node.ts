@@ -74,7 +74,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     const frame = await this.ownerFrame();
     let frameElem = await frame.ownerElement();
     while (frameElem) {
-      const frameRect = await (frameElem as any as Node).getContentClientRect();
+      const frameRect = await (frameElem as unknown as Node).getContentClientRect();
       rect.top += frameRect.top;
       rect.left += frameRect.left;
       rect.bottom += frameRect.top;
@@ -92,12 +92,12 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     await this.invokeFunction(this._rtid, 'highlight', []);
   }
 
-  async getProperty(name: string): Promise<any> {
+  async getProperty(name: string): Promise<unknown> {
     const result = await this.invokeFunction(this._rtid, 'getProperty', [name]);
-    return result as any;
+    return result;
   }
 
-  async setProperty(name: string, value: any): Promise<void> {
+  async setProperty(name: string, value: unknown): Promise<void> {
     await this.invokeFunction(this._rtid, 'setProperty', [name, value]);
   }
 
@@ -111,7 +111,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     return result as api.RectInfo;
   }
 
-  async dispatchEvent(type: string, options?: Object): Promise<void> {
+  async dispatchEvent(type: string, options?: object): Promise<void> {
     await this.invokeFunction(this._rtid, 'dispatchEvent', [type, options]);
   }
 

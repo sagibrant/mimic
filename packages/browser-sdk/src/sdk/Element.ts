@@ -363,6 +363,6 @@ export class Element extends Node implements api.Element {
       },
     });
 
-    return rawObj as any;
+    return rawObj as unknown as api.JSObject;
   }
 }

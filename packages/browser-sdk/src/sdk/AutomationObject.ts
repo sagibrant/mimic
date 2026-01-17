@@ -23,7 +23,7 @@
 import { Rtid } from "@gogogo/shared";
 import { ChannelBase } from "./Channel";
 
-export type Listener = (...args: any[]) => any | Promise<any>;
+export type Listener = (...args: unknown[]) => unknown | Promise<unknown>;
 
 export class AutomationObject extends ChannelBase {
   protected readonly _rtid: Rtid;
@@ -51,12 +51,14 @@ export class AutomationObject extends ChannelBase {
     if (!this._listeners.has(event)) {
       this._listeners.set(event, []);
     }
-    const listeners = this._listeners.get(event)!;
-    listeners.push(listener);
+    const listeners = this._listeners.get(event);
+    if (listeners) {
+      listeners.push(listener);
+    }
     return this;
   }
 
-  emit(event: string, args: any): void {
+  emit(event: string, args: unknown): void {
     const listeners = this._listeners.get(event);
     if (!listeners || listeners.length === 0) {
       return;
@@ -77,7 +79,6 @@ export class AutomationObject extends ChannelBase {
         }
       } catch (error) {
         this.logger.error(`Sync listener error for "${String(event)}"`, error);
-      } finally {
       }
     }
   }
