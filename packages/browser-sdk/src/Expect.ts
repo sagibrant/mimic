@@ -29,6 +29,7 @@ import { Page } from "./aos/Page";
 import { Frame } from "./aos/Frame";
 import { Element } from "./aos/Element";
 import { Text } from "./aos/Text";
+import { AutomationObject } from "./aos/AutomationObject";
 
 /**
  * Assertion Error Class: Carries full values but displays concise messages
@@ -66,7 +67,7 @@ const formatValueBrief = (value: unknown): string => {
 
   // Custom classes
   if ([Browser, Window, Page, Frame, Element, Text].some(cls => value instanceof cls)) {
-    return `${value.constructor.name}["${JSON.stringify((value as any).rtid())}"]`;
+    return `${value.constructor.name}["${JSON.stringify((value as AutomationObject).rtid())}"]`;
   }
 
   // Arrays
@@ -186,7 +187,7 @@ export class Expect extends ChannelBase implements api.Expect {
     let isEqual: boolean;
     if ([Browser, Window, Page, Frame, Element, Text].some(cls =>
       this.actual instanceof cls && expected instanceof cls)) {
-      isEqual = RtidUtils.isRtidEqual((this.actual as any).rtid(), (expected as any).rtid());
+      isEqual = RtidUtils.isRtidEqual((this.actual as AutomationObject).rtid(), (expected as AutomationObject).rtid());
     } else {
       isEqual = deepEqual(this.actual, expected);
     }
