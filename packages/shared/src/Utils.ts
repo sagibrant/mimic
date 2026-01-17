@@ -507,7 +507,7 @@ export function getCombinations<T>(arr: T[], k: number): T[][] {
   return result;
 }
 
-interface GogogoWait {
+interface Gogogo {
   wait: (ms: number) => Promise<void>
 };
 
@@ -517,9 +517,9 @@ interface GogogoWait {
  * @returns 
  */
 export async function wait(ms: number): Promise<void> {
-  const gogogo_wait = (typeof globalThis !== 'undefined' && 'gogogo_wait' in globalThis) ? (globalThis as typeof globalThis & { gogogo_wait: GogogoWait }).gogogo_wait : undefined;
-  if (gogogo_wait) {
-    return await gogogo_wait.wait(ms);
+  const gogogo = (typeof globalThis !== 'undefined' && 'gogogo' in globalThis) ? (globalThis as typeof globalThis & { gogogo: Gogogo }).gogogo : undefined;
+  if (gogogo && typeof gogogo.wait === 'function') {
+    return await gogogo.wait(ms);
   }
   else {
     return new Promise(resolve => setTimeout(resolve, ms));
