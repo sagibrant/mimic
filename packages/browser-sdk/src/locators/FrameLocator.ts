@@ -154,7 +154,7 @@ export class FrameLocator extends Locator<Frame> implements api.FrameLocator {
     return await frame.sync(timeout);
   }
 
-  async executeScript<Args extends any[], Result>(func: (...args: Args) => Result, args?: Args): Promise<Result> {
+  async executeScript<Args extends unknown[], Result>(func: (...args: Args) => Result, args?: Args): Promise<Result> {
     const frame = await this.get();
     return await frame.executeScript(func, args);
   }

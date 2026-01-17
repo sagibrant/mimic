@@ -224,7 +224,7 @@ export class PageLocator extends Locator<Page> implements api.PageLocator {
     return await page.captureScreenshot();
   }
 
-  async executeScript<Args extends any[], Result>(func: (...args: Args) => Result, args: Args): Promise<Result> {
+  async executeScript<Args extends unknown[], Result>(func: (...args: Args) => Result, args: Args): Promise<Result> {
     const page = await this.get();
     return await page.executeScript(func, args);
   }

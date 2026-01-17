@@ -234,7 +234,7 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
       await this.invokeFunction(tabRtid, 'mouseDragAndDrop', [startPoint, targetPoint, steps]);
     }
     else {
-      const rtid = Utils.isFunction((target as any).rtid) ? (target as any).rtid() as unknown : undefined;
+      const rtid = ('rtid' in target && Utils.isFunction(target.rtid)) ? target.rtid() as unknown : undefined;
       if (Utils.isNullOrUndefined(rtid) || !RtidUtils.isRtid(rtid)) {
         throw new Error('Invalid target for dragTo');
       }
@@ -327,8 +327,8 @@ export class Node extends AutomationObject implements api.MouseActions, api.Keyb
     if (!isConnected) {
       throw new Error('Element is not connected to the DOM');
     }
-    if (Utils.isFunction((obj as any).scrollIntoViewIfNeeded)) {
-      await (obj as any).scrollIntoViewIfNeeded();
+    if ('scrollIntoViewIfNeeded' in obj && Utils.isFunction(obj.scrollIntoViewIfNeeded)) {
+      await obj.scrollIntoViewIfNeeded();
     }
     const boundingBox = await obj.boundingBox();
     if (!boundingBox) {

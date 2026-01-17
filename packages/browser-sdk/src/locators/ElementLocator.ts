@@ -27,6 +27,7 @@ import { Page } from "../aos/Page";
 import { Frame } from "../aos/Frame";
 import { Element } from "../aos/Element";
 import { TextLocator } from "./TextLocator";
+import { AutomationObject } from "../aos/AutomationObject";
 
 export class ElementLocator extends Locator<Element> implements api.ElementLocator {
 
@@ -50,8 +51,14 @@ export class ElementLocator extends Locator<Element> implements api.ElementLocat
       else if (parent instanceof Element) {
         rtid = parent.rtid();
       }
-      else if (Utils.isFunction((parent as any).rtid)) {
-        rtid = (parent as any).rtid() as Rtid;
+      else if (parent instanceof AutomationObject) {
+        rtid = parent.rtid();
+      }
+      else if (parent && typeof parent === 'object' && 'rtid' in parent && Utils.isFunction(parent.rtid)) {
+        rtid = parent.rtid() as Rtid;
+        if (!RtidUtils.isRtid(rtid)) {
+          rtid = undefined;
+        }
       }
 
       if (SettingUtils.getReplaySettings().autoSync) {
@@ -66,8 +73,6 @@ export class ElementLocator extends Locator<Element> implements api.ElementLocat
     if (Utils.isNullOrUndefined(rtid) || !RtidUtils.isRtid(rtid)) {
       return [];
     }
-
-
 
     const queryInfo = super.createQueryInfo();
     const options = this.primary ? this.primary as api.ElementLocatorOptions : undefined;
@@ -265,11 +270,11 @@ export class ElementLocator extends Locator<Element> implements api.ElementLocat
     const elem = await this.get();
     return await elem.highlight();
   }
-  async getProperty(name: string): Promise<any> {
+  async getProperty(name: string): Promise<unknown> {
     const elem = await this.get();
     return await elem.getProperty(name);
   }
-  async setProperty(name: string, value: any): Promise<void> {
+  async setProperty(name: string, value: unknown): Promise<void> {
     const elem = await this.get();
     return await elem.setProperty(name, value);
   }
@@ -339,7 +344,7 @@ export class ElementLocator extends Locator<Element> implements api.ElementLocat
     return await elem.setFileInputFiles(files);
   }
 
-  async dispatchEvent(type: string, options?: Object): Promise<void> {
+  async dispatchEvent(type: string, options?: object): Promise<void> {
     const elem = await this.get();
     return await elem.dispatchEvent(type, options);
   }

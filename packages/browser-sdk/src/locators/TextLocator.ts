@@ -136,15 +136,15 @@ export class TextLocator extends Locator<Text> implements api.TextLocator {
     const text = await this.get();
     return await text.highlight();
   }
-  async getProperty(name: string): Promise<any> {
+  async getProperty(name: string): Promise<unknown> {
     const text = await this.get();
     return await text.getProperty(name);
   }
-  async setProperty(name: string, value: any): Promise<void> {
+  async setProperty(name: string, value: unknown): Promise<void> {
     const text = await this.get();
     return await text.setProperty(name, value);
   }
-  async dispatchEvent(type: string, options?: Object): Promise<void> {
+  async dispatchEvent(type: string, options?: object): Promise<void> {
     const text = await this.get();
     return await text.dispatchEvent(type, options);
   }
