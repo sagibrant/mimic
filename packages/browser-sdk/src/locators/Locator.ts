@@ -103,7 +103,7 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
       return undefined;
     }
 
-    let queryInfo: QueryInfo = {};
+    const queryInfo: QueryInfo = {};
 
     if (this.primary) {
       queryInfo.primary = [];
@@ -176,7 +176,7 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
   /** ================================================= locator methods ================================================== */
   /** ==================================================================================================================== */
   filter(options?: api.LocatorFilterOption | api.LocatorFilterOption[]): api.Locator<T> {
-    let mandatory = [];
+    const mandatory = [];
     if (this.mandatory) {
       mandatory.push(...this.mandatory);
     }
@@ -196,7 +196,7 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
   }
 
   prefer(options?: api.LocatorFilterOption | api.LocatorFilterOption[]): api.Locator<T> {
-    let assistive = [];
+    const assistive = [];
     if (this.assistive) {
       assistive.push(...this.assistive);
     }
