@@ -21,7 +21,7 @@
  */
 
 // Type definition for chrome storage API
-type ChromeStorage = {
+interface ChromeStorage {
   storage?: {
     local?: {
       get: (keys: string[]) => Promise<Record<string, unknown>>;

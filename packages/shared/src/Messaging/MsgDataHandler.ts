@@ -162,7 +162,7 @@ export abstract class MsgDataHandlerBase<T extends EventMap = Record<string, unk
       return result;
     }
 
-    throw new Error(`Unsupported type - ${type}`);
+    throw new Error(`Unsupported type - ${String(type as unknown)}`);
   }
 
   /** handle the config action */
