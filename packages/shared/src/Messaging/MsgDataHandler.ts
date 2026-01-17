@@ -46,7 +46,7 @@ export interface IMsgDataHandler {
 /**
  * the base class for MessageData handler
  */
-export abstract class MsgDataHandlerBase<T extends EventMap = any> extends EventEmitter<T> implements IMsgDataHandler {
+export abstract class MsgDataHandlerBase<T extends EventMap = Record<string, unknown>> extends EventEmitter<T> implements IMsgDataHandler {
   readonly rtid: Rtid;
   readonly config: Record<string, unknown>;
 
@@ -344,11 +344,11 @@ export abstract class MsgDataHandlerBase<T extends EventMap = any> extends Event
     if (!(funcName in this)) {
       throw new Error(`Unknown function name - '${funcName}'`);
     }
-    const func = (this as any)[funcName];
+    const func = (this as Record<string, unknown>)[funcName];
     if (!Utils.isFunction(func)) {
       throw new Error(`Invalid function name - '${funcName}'`);
     }
-    const result = await func.apply(this, args);
+    const result = await (func as (...args: unknown[]) => Promise<unknown>).apply(this, args ?? []);
     return result;
   }
 

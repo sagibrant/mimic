@@ -38,12 +38,12 @@ export enum ChannelStatus {
 /**
  * Defines event types emitted by a basic communication channel
  */
-export interface ChannelEvents {
+export interface ChannelEvents extends Record<string, unknown> {
   /**
    * Triggered when the channel receives a message
    * @property msg - The received message object
    */
-  message: { msg: Message, sender?: any, responseCallback?: (response: Message) => void };
+  message: { msg: Message, sender?: unknown, responseCallback?: (response: Message) => void };
 
   /**
    * Triggered when the channel is disconnected
@@ -64,7 +64,7 @@ export interface ClientInfo {
 /**
  * Defines event types emitted by a channel client
  */
-export interface ChannelClientEvents {
+export interface ChannelClientEvents extends Record<string, unknown> {
   /**
    * Triggered when the channel successfully connects
    * @property client - Information about the connected client
