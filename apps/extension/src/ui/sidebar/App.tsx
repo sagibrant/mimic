@@ -1009,6 +1009,8 @@ export default function App() {
       );
       return;
     }
+    setIsTreeCollapsed(true);
+    setIsBottomExpanded(false);
     setIsAIDialogVisible(true);
   }, []);
 
@@ -1146,7 +1148,7 @@ export default function App() {
 
   // Handle steps panel click
   const handleStepsPanelClick = useCallback(() => {
-    // Deselect any selected step when clicking on the panel background
+    setIsTreeCollapsed(true);
     setSelectedStepUid('');
     setIsBottomExpanded(false);
   }, []);
@@ -1520,7 +1522,7 @@ export default function App() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                disabled={!(activeTaskId && isIdle)}
+                disabled={!(activeTaskId && isIdle && !isBottomExpanded)}
                 onClick={() => handleAddStep()}
                 title={t('sidebar_btn_title_steps_add_step')}
               >
@@ -1529,7 +1531,7 @@ export default function App() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                disabled={!(activeTaskId && isIdle && selectedStepUid)}
+                disabled={!(activeTaskId && isIdle && selectedStepUid && !isBottomExpanded)}
                 onClick={handleRemoveStep}
                 title={t('sidebar_btn_title_steps_delete_step')}
               >
@@ -1549,7 +1551,7 @@ export default function App() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                disabled={!(activeTaskId && isIdle)}
+                disabled={!(activeTaskId && isIdle && !isBottomExpanded)}
                 onClick={handleReplay}
                 title={t('sidebar_btn_title_steps_replay')}
               >
@@ -1558,7 +1560,7 @@ export default function App() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                disabled={!(activeTaskId && isIdle && selectedStepUid)}
+                disabled={!(activeTaskId && isIdle && selectedStepUid && !isBottomExpanded)}
                 onClick={handleReplayFromStep}
                 title={t('sidebar_btn_title_steps_replayFromStep')}
               >
