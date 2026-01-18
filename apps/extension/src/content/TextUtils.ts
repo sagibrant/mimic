@@ -116,14 +116,14 @@ export class TextFilterUtils {
         };
 
         // include all text nodes
-        let filter_text: DomNodeFilter = {
+        const filter_text: DomNodeFilter = {
             properties: [{ name: 'nodeType', value: Node.TEXT_NODE }],
             attributes: []
         };
         filter.includes.push(filter_text);
 
         // exclude all element nodes
-        let filter_elem_all: DomNodeFilter = {
+        const filter_elem_all: DomNodeFilter = {
             properties: [
                 { name: 'nodeType', value: Node.ELEMENT_NODE },
                 { name: 'nodeName', value: '*' },
@@ -142,7 +142,7 @@ export class TextFilterUtils {
         };
 
         // include all text nodes
-        let filter_text: DomNodeFilter = {
+        const filter_text: DomNodeFilter = {
             properties: [{ name: 'nodeType', value: Node.TEXT_NODE }],
             attributes: []
         };
@@ -150,7 +150,7 @@ export class TextFilterUtils {
 
 
         // include all input element
-        let filter_elem_input: DomNodeFilter = {
+        const filter_elem_input: DomNodeFilter = {
             properties: [
                 { name: 'nodeType', value: Node.ELEMENT_NODE },
                 { name: 'nodeName', value: 'INPUT' },
@@ -160,7 +160,7 @@ export class TextFilterUtils {
         filter.includes.push(filter_elem_input);
 
         // include textarea element
-        let filter_elem_textarea: DomNodeFilter = {
+        const filter_elem_textarea: DomNodeFilter = {
             properties: [
                 { name: 'nodeType', value: Node.ELEMENT_NODE },
                 { name: 'nodeName', value: 'TEXTAREA' },
@@ -170,7 +170,7 @@ export class TextFilterUtils {
         filter.includes.push(filter_elem_textarea);
 
         // include select element
-        let filter_elem_select: DomNodeFilter = {
+        const filter_elem_select: DomNodeFilter = {
             properties: [
                 { name: 'nodeType', value: Node.ELEMENT_NODE },
                 { name: 'nodeName', value: 'SELECT' },
@@ -213,7 +213,7 @@ export class TextUtils {
             const shadowRoot = ContentUtils.getShadowRoot(elem);
             if (shadowRoot && shadowRoot.childNodes && shadowRoot.childNodes.length > 0) {
                 shadowRoot.childNodes.forEach(childNode => {
-                    let childNodeTextItems = TextUtils.getNodeTextItems(childNode, filter);
+                    const childNodeTextItems = TextUtils.getNodeTextItems(childNode, filter);
                     if (childNodeTextItems && childNodeTextItems.length > 0) {
                         result = result.concat(childNodeTextItems);
                     }
@@ -253,7 +253,7 @@ export class TextUtils {
 
         // get TextItem for TEXT_NODE
         if (node.nodeType === Node.TEXT_NODE) {
-            let item = TextUtils.getNodeTextItemForTextNode(node, filter.visibilityLevel);
+            const item = TextUtils.getNodeTextItemForTextNode(node, filter.visibilityLevel);
             if (item) {
                 result.push(item);
             }
@@ -262,7 +262,7 @@ export class TextUtils {
 
         // get TextItem for ELEMENT_NODE
         if (node.nodeType === Node.ELEMENT_NODE) {
-            let item = TextUtils.getNodeTextItemForElementNode(node, filter.visibilityLevel);
+            const item = TextUtils.getNodeTextItemForElementNode(node, filter.visibilityLevel);
             if (item) {
                 result.push(item);
                 return result;
@@ -284,27 +284,27 @@ export class TextUtils {
         }
         visibilityLevel = visibilityLevel ?? 'char';
 
-        let range = document.createRange();
+        const range = document.createRange();
         range.selectNodeContents(node);
-        let text = range.toString();
+        const text = range.toString();
         // filter the blank text
         if (ContentUtils.isTrimNoise(text)) {
             return null;
         }
         // filter the invisible text
-        let textRect = range.getBoundingClientRect();
+        const textRect = range.getBoundingClientRect();
         if (!ContentUtils.isRectangleVisible(textRect)) {
             return null;
         }
-        let rects = range.getClientRects();
+        const rects = range.getClientRects();
         if (!(rects && rects.length > 0)) {
             return null;
         }
-        let elem = ContentUtils.getElementByNode(node);
+        const elem = ContentUtils.getElementByNode(node);
         if (!elem) {
             return null;
         }
-        let style = getComputedStyle(elem);
+        const style = getComputedStyle(elem);
         if (!style) {
             return null;
         }
@@ -345,12 +345,12 @@ export class TextUtils {
             }
 
             let chars: TextItem[] = [];
-            let words: TextItem[] = [];
+            const words: TextItem[] = [];
             for (; charIndex < text.length; charIndex++) {
                 range.setStart(node, charIndex);
                 range.setEnd(node, charIndex + 1);
-                let charRect = range.getBoundingClientRect();
-                let charValue = text[charIndex]; //range.toString();
+                const charRect = range.getBoundingClientRect();
+                const charValue = text[charIndex]; //range.toString();
                 let isSameLine = true;
                 if (direction === 'vertical-rl' || direction === 'vertical-lr') {
                     isSameLine = Math.abs(charRect.left - rect.left) < 1;
@@ -401,7 +401,7 @@ export class TextUtils {
             }
             // line
             if (words.length > 0) {
-                let lineTextItem = TextUtils.tryGetOuterTextItem(words, 'line');
+                const lineTextItem = TextUtils.tryGetOuterTextItem(words, 'line');
                 if (lineTextItem) {
                     rangeTextItem.childItems.push(lineTextItem);
                 }
@@ -420,7 +420,7 @@ export class TextUtils {
         if (!node || node.nodeType !== Node.ELEMENT_NODE || !(node instanceof Element)) {
             return null;
         }
-        let elem = node as Element;
+        const elem = node as Element;
         const elemTextItem: TextItem = {
             type: 'element',
             text: '',
@@ -460,7 +460,7 @@ export class TextUtils {
         if (ContentUtils.isTrimNoise(elemTextItem.text)) {
             return null;
         }
-        let elemRect = elem.getBoundingClientRect();
+        const elemRect = elem.getBoundingClientRect();
         if (!ContentUtils.isRectangleVisible(elemRect)) {
             return null;
         }
@@ -470,7 +470,7 @@ export class TextUtils {
         elemTextItem.rects = [elemRect];
 
         let direction: TextDirection = 'horizontal-lr';
-        let style = getComputedStyle(elem);
+        const style = getComputedStyle(elem);
         if (style.writingMode === 'vertical-rl' || style.writingMode === 'vertical-lr') {
             direction = style.writingMode;
         } else if (style.writingMode === 'horizontal-tb') {
@@ -504,7 +504,7 @@ export class TextUtils {
         if (type === 'line') {
             separator = ' ';
         }
-        let item: TextItem = {
+        const item: TextItem = {
             type: type,
             text: '',
             rects: [],
@@ -516,7 +516,7 @@ export class TextUtils {
         if (ContentUtils.isTrimNoise(item.text)) {
             return null;
         }
-        let rect: Partial<RectInfo> = {};
+        const rect: Partial<RectInfo> = {};
         rect.left = textItems.reduce((pre, cur) => pre.rects[0].left > cur.rects[0].left ? cur : pre, textItems[0]).rects[0].left;
         rect.top = textItems.reduce((pre, cur) => pre.rects[0].top > cur.rects[0].top ? cur : pre, textItems[0]).rects[0].top;
         rect.right = textItems.reduce((pre, cur) => pre.rects[0].right < cur.rects[0].right ? cur : pre, textItems[0]).rects[0].right;
@@ -553,7 +553,7 @@ export class TextUtils {
         // check if all the properties are matched
         if (Array.isArray(filter.properties) && filter.properties.length > 0) {
             filter.properties.forEach((nameValuePair) => {
-                let valueMatched = (nameValuePair.value === '*') || ((node as any)[nameValuePair.name] === nameValuePair.value);
+                const valueMatched = (nameValuePair.value === '*') || ((node as any)[nameValuePair.name] === nameValuePair.value);
                 if (valueMatched === true && matched !== false) {
                     matched = true;
                 } else if (valueMatched === false) {

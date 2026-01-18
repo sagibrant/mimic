@@ -352,13 +352,13 @@ export class ExtensionChannelClient extends ChannelClient {
       // connectResponse
       if (msg.type === 'event' && msg.data.type === 'config' && msg.data.action.name === 'set') {
         if (msg.data.status === 'OK' && msg.data.action.params?.name === 'clientInfo') {
-          let clientInfo = msg.data.action.params?.value as ExtensionClientInfo;
+          const clientInfo = msg.data.action.params?.value as ExtensionClientInfo;
           if (Utils.isNullOrUndefined(clientInfo)) {
             this.logger.warn('onMessage: Connection failed as the clientInfo is missing', msg);
             return;
           }
           this._clientInfo = clientInfo;
-          let channel = new ExtensionPortChannel(port);
+          const channel = new ExtensionPortChannel(port);
           this._channel = channel;
           // remove the listeners as the channel will capture the events
           this._port.onMessage.removeListener(this._listener.onMessage);
@@ -521,12 +521,12 @@ export class ExtensionChannelHost extends ChannelHost {
   }
 
   private isSupportedBackgroundClient(port: chrome.runtime.Port): boolean {
-    let id = port.sender?.id;
+    const id = port.sender?.id;
     return !Utils.isEmpty(id) && id === this._extensionId;
   }
 
   private isSupportedExtensionClient(port: chrome.runtime.Port): boolean {
-    let id = port.sender?.id;
+    const id = port.sender?.id;
     return !Utils.isEmpty(id) && this._allowedExternalExtensionIds.includes(id);
   }
 
@@ -565,7 +565,7 @@ export class ExtensionChannelHost extends ChannelHost {
       connectionId += '-dup';
     }
 
-    let clientInfo: ExtensionClientInfo = {
+    const clientInfo: ExtensionClientInfo = {
       id: connectionId,
       type: mode,
       isReconnected,

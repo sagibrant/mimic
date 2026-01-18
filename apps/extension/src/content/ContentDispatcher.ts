@@ -129,7 +129,7 @@ export class ContentDispatcher extends Dispatcher {
 
   protected override getChannel(msg: Message): IChannel {
     const dest = msg.data.dest;
-    let contextType = RtidUtils.getRtidContextType(dest);
+    const contextType = RtidUtils.getRtidContextType(dest);
     if (contextType !== 'MAIN') {
       return this._contentToBackgroundChannel;
     }

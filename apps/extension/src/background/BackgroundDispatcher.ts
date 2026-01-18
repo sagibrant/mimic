@@ -79,7 +79,7 @@ export class BackgroundDispatcher extends Dispatcher {
 
   protected override getChannel(msg: Message): IChannel {
     const dest = msg.data.dest;
-    let contextType = RtidUtils.getRtidContextType(dest);
+    const contextType = RtidUtils.getRtidContextType(dest);
     if (contextType === 'content' || contextType === 'MAIN') {
       return this._backgroundToFrameChannel;
     }
@@ -104,8 +104,8 @@ export class BackgroundDispatcher extends Dispatcher {
       this.routingMap[routingKey] = [];
     }
 
-    let i = this.routingMap[routingKey].findIndex((val) => {
-      let [cur_client, cur_channel] = val;
+    const i = this.routingMap[routingKey].findIndex((val) => {
+      const [cur_client, cur_channel] = val;
       if (cur_channel.id === channel.id && cur_client.id === client.id) {
         return true;
       }

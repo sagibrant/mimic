@@ -52,7 +52,7 @@ export class FrameInMAIN {
     const attrName = 'gogogo';
     this.updateState(false)
     this.send('updateState', [true]);
-    var attrValue = window.document.documentElement.getAttribute(attrName);
+    const attrValue = window.document.documentElement.getAttribute(attrName);
     window.document.documentElement.removeAttribute(attrName);
     if (!attrValue) return false;
     try {
@@ -106,7 +106,7 @@ export class FrameInMAIN {
   }
 
   private async onEvent(event: any) {
-    var msg = event.detail;
+    const msg = event.detail;
     if (typeof (msg) !== "object") {
       return;
     }

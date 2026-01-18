@@ -144,7 +144,7 @@ export class EventSimulator {
     * @param {string} type The type of event to dispatch.
     * @param {Object} eventInitObj An object containing properties to initialize the event with.
     */
-  static dispatchEvent(node: Node, type: string, eventInitObj?: Object) {
+  static dispatchEvent(node: Node, type: string, eventInitObj?: object) {
     let event;
     const eventInit: any = { bubbles: true, cancelable: true, composed: true, ...eventInitObj };
     switch (EventSimulator.eventTypes.get(type)) {
@@ -979,7 +979,7 @@ export class EventSimulator {
     text: string,
     options?: TextInputOptions
   ): Promise<void> {
-    let { delayBetweenDownUp = 0, delayBetweenChar = 0 } = options || {};
+    const { delayBetweenDownUp = 0, delayBetweenChar = 0 } = options || {};
 
     // pure fill (no click, clear old value, just input value, no commit)
     if (delayBetweenDownUp === 0 && delayBetweenChar === 0) {
@@ -1049,7 +1049,7 @@ export class EventSimulator {
     text: string,
     options?: TextInputOptions
   ): Promise<void> {
-    let { delayBetweenDownUp = 0, delayBetweenChar = 0 } = options || {};
+    const { delayBetweenDownUp = 0, delayBetweenChar = 0 } = options || {};
     // simulate flow:
     // focus,
     // performInputCycle: [ {keydown , keypress , textInput (Deprecated TextEvent) , input , keyup }], 
@@ -1109,7 +1109,7 @@ export class EventSimulator {
   }
 
   static async simulatePressKeys(target: Element, keys: string | string[], options?: { delayBetweenDownUp?: number; }) {
-    let { delayBetweenDownUp = 0 } = options || {};
+    const { delayBetweenDownUp = 0 } = options || {};
     const modifiers = new Set<KeyboardModifier>;
     EventSimulator.simulateFocus(target);
     const tokens = Array.isArray(keys) ? keys : [keys];

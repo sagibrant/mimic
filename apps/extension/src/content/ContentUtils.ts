@@ -236,7 +236,7 @@ export class ContentUtils {
       && (!mode || mode === 'closed')
       && (elem instanceof HTMLElement && typeof chrome !== 'undefined'
         && !Utils.isNullOrUndefined(chrome?.dom) && Utils.isFunction(chrome.dom.openOrClosedShadowRoot))) {
-      let closedShadowRoot = chrome.dom.openOrClosedShadowRoot(elem);
+      const closedShadowRoot = chrome.dom.openOrClosedShadowRoot(elem);
       return closedShadowRoot?.mode === 'closed' ? closedShadowRoot : null;
     }
     return null;
@@ -377,7 +377,7 @@ export class ContentUtils {
         const combinations = Utils.getCombinations(mandatorySelectors, i);
         for (const combo of combinations) {
           aoDesc.queryInfo.mandatory = combo;
-          let matched = await matchAO(aoDesc);
+          const matched = await matchAO(aoDesc);
           if (matched) {
             return aoDesc;
           }
@@ -389,7 +389,7 @@ export class ContentUtils {
     // last try with tagName only
     if (desc.tagName) {
       aoDesc.queryInfo.mandatory = [{ name: 'tagName', value: desc.tagName, type: 'property', match: 'exact' }];
-      let matched = await matchAO(aoDesc);
+      const matched = await matchAO(aoDesc);
       if (matched) {
         return aoDesc;
       }
@@ -397,7 +397,7 @@ export class ContentUtils {
 
     if (mandatorySelectors.length > 0) {
       aoDesc.queryInfo.assistive = mandatorySelectors;
-      let matched = await matchAO(aoDesc, false);
+      const matched = await matchAO(aoDesc, false);
       if (matched) {
         return aoDesc;
       }
@@ -430,7 +430,7 @@ export class ContentUtils {
    * @returns 
    */
   static async generateElementScript(aoDesc: AODesc): Promise<string> {
-    let scripts: string[] = [];
+    const scripts: string[] = [];
     if (aoDesc.queryInfo && aoDesc.queryInfo.primary && aoDesc.queryInfo.primary.length === 1) {
       const primary = aoDesc.queryInfo.primary[0];
       if (primary.name === '#css') {
@@ -503,7 +503,7 @@ export class ContentUtils {
     client_rect.width = elem.clientWidth;
     client_rect.height = elem.clientHeight;
     // padding offset
-    var style = window.getComputedStyle(elem);
+    const style = window.getComputedStyle(elem);
     elemRect.left = elemRect.left + client_rect.left + parseInt(style.paddingLeft, 10);
     elemRect.top = elemRect.top + client_rect.top + parseInt(style.paddingTop, 10);
     elemRect.right = elemRect.left + client_rect.width;
@@ -563,11 +563,11 @@ export class ContentUtils {
     // handle style with clip
     if (style.position === 'absolute' || style.position === 'fixed') {
       let rect: RectInfo | undefined = undefined;
-      let clip = style.clip;
+      const clip = style.clip;
       if (clip && clip !== 'auto' && clip !== 'inherit') {
-        let match = clip.match(/rect\(([^)]+)\)/);
+        const match = clip.match(/rect\(([^)]+)\)/);
         if (match) {
-          let values = match[1].split(',').map(value => parseInt(value.trim(), 10));
+          const values = match[1].split(',').map(value => parseInt(value.trim(), 10));
           if (values.length === 4) {
             const tmp = {
               top: values[0],
@@ -584,11 +584,11 @@ export class ContentUtils {
       }
       rect = undefined
       // Check for 'clip-path' property (inset format)
-      let clipPath = style.clipPath;
+      const clipPath = style.clipPath;
       if (clipPath && clipPath.startsWith('inset')) {
-        let match = clipPath.match(/inset\(([^)]+)\)/);
+        const match = clipPath.match(/inset\(([^)]+)\)/);
         if (match) {
-          let values = match[1].split(' ').map(value => parseInt(value.trim(), 10));
+          const values = match[1].split(' ').map(value => parseInt(value.trim(), 10));
           if (values.length === 4) {
             const tmp = {
               top: values[0],
@@ -605,7 +605,7 @@ export class ContentUtils {
       }
     }
 
-    let rect = elem.getBoundingClientRect();
+    const rect = elem.getBoundingClientRect();
     if (!ContentUtils.isRectangleVisible(rect) && !style.overflow.includes('visible')) {
       return false;
     }
@@ -903,7 +903,7 @@ export class ContentUtils {
     // color = {r:240, g:125, b:10, a:0.4};
     const outlineColor = { r: 255, g: 210, b: 88, a: 0 };
     const color = { r: 255, g: 210, b: 88, a: 0.4 };
-    let rect_elem = document.createElement('canvas');
+    const rect_elem = document.createElement('canvas');
     rect_elem.style.backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
     rect_elem.style.border = `4px solid rgba(${outlineColor.r}, ${outlineColor.g}, ${outlineColor.b}, ${outlineColor.a})`;
     rect_elem.style.boxSizing = 'content-box';

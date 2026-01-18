@@ -168,7 +168,7 @@ export class CoordinateUtils {
     }
     const scales = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4];
     const paddings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-    let padding = CoordinateUtils.calculateBound(scale, scales, paddings);
+    const padding = CoordinateUtils.calculateBound(scale, scales, paddings);
     return padding;
   };
 
@@ -178,7 +178,7 @@ export class CoordinateUtils {
     }
     const scales = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4];
     const borders = [4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 21, 22, 23];
-    let border = CoordinateUtils.calculateBound(scale, scales, borders);
+    const border = CoordinateUtils.calculateBound(scale, scales, borders);
     return border;
   }
 
