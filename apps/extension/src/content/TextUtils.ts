@@ -553,7 +553,7 @@ export class TextUtils {
         // check if all the properties are matched
         if (Array.isArray(filter.properties) && filter.properties.length > 0) {
             filter.properties.forEach((nameValuePair) => {
-                const valueMatched = (nameValuePair.value === '*') || ((node as any)[nameValuePair.name] === nameValuePair.value);
+                const valueMatched = (nameValuePair.value === '*') || ((node as unknown as Record<string, unknown>)[nameValuePair.name] === nameValuePair.value);
                 if (valueMatched === true && matched !== false) {
                     matched = true;
                 } else if (valueMatched === false) {

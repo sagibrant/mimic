@@ -1432,14 +1432,22 @@ export default function App() {
     init();
 
     // Set up event listeners
-    const onStepRecorded = async ({ step }: any) => {
+    const onStepRecorded = async ({ step }: { step: unknown }) => {
+      const s = step as {
+        browserScript?: string;
+        pageScript?: string;
+        frameScript?: string;
+        elementScript?: string;
+        actionScript?: string;
+        await?: boolean;
+      };
       const scripts: string[] = [];
-      if (step.browserScript) scripts.push(step.browserScript);
-      if (step.pageScript) scripts.push(step.pageScript);
-      if (step.frameScript) scripts.push(step.frameScript);
-      if (step.elementScript) scripts.push(step.elementScript);
-      if (step.actionScript) scripts.push(step.actionScript);
-      const stepScript = (step.await ? 'await ' : '') + scripts.join('.') + ';';
+      if (s.browserScript) scripts.push(s.browserScript);
+      if (s.pageScript) scripts.push(s.pageScript);
+      if (s.frameScript) scripts.push(s.frameScript);
+      if (s.elementScript) scripts.push(s.elementScript);
+      if (s.actionScript) scripts.push(s.actionScript);
+      const stepScript = (s.await ? 'await ' : '') + scripts.join('.') + ';';
       if (stepScriptEditorRef.current) {
         stepScriptEditorRef.current.addStepScript(stepScript);
       }

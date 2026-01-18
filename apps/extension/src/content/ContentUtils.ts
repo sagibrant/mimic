@@ -787,7 +787,7 @@ export class ContentUtils {
       url = (elem as HTMLObjectElement).data;
     }
     if (Utils.isEmpty(url) && 'url' in elem) {
-      url = (elem as any)['url'];
+      url = (elem as unknown as Record<string, unknown>)['url'] as string;
     }
     return url;
   }

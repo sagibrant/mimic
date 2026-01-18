@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message, Utils } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@gogogo/shared";
 
 /**
  * The channel based on the window.postMessage
@@ -29,7 +29,7 @@ export class PostMessageChannel extends ChannelBase {
   /**
    * the listenerWrapper for message events
    */
-  private _listener?: (ev: MessageEvent<any>) => void;
+  private _listener?: (ev: MessageEvent<unknown>) => void;
   /**
    * the window for communication
    */
@@ -92,13 +92,13 @@ export class PostMessageChannel extends ChannelBase {
     this._status = ChannelStatus.DISCONNECTED;
   }
 
-  private onMessage(ev: MessageEvent<any>): void {
+  private onMessage(ev: MessageEvent<unknown>): void {
     this.logger.debug('onMessage: >>>> ev=', ev);
 
     if (ev.source !== this._window) {
       return;
     }
-    if (['event', 'request', 'response'].includes(ev.data.type)) {
+    if (MsgUtils.isMessage(ev.data) && ['event', 'request', 'response'].includes(ev.data.type)) {
       const msg = ev.data as Message;
       this.emit('message', {
         msg: msg,

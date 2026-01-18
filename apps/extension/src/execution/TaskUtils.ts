@@ -189,151 +189,159 @@ await page.element('div.bm-menu').text('Logout').click();`
     return asset;
   }
 
-  static isTaskAsset(asset: any): asset is TaskAsset {
+  static isTaskAsset(asset: unknown): asset is TaskAsset {
 
     if (asset === null || typeof asset !== 'object') {
       return false;
     }
+    const a = asset as Record<string, unknown>;
 
     const basicChecks = [
-      typeof asset.id === 'string',
-      typeof asset.name === 'string',
-      typeof asset.type === 'string' && asset.type === 'asset',
-      typeof asset.url === 'string',
-      typeof asset.author === 'string',
-      typeof asset.description === 'string',
-      typeof asset.version === 'string',
-      Array.isArray(asset.tags) && asset.tags.every((tag: any) => typeof tag === 'string'),
-      typeof asset.creation_time === 'number',
-      typeof asset.last_modified_time === 'number'
+      typeof a.id === 'string',
+      typeof a.name === 'string',
+      typeof a.type === 'string' && a.type === 'asset',
+      typeof a.url === 'string',
+      typeof a.author === 'string',
+      typeof a.description === 'string',
+      typeof a.version === 'string',
+      Array.isArray(a.tags) && (a.tags as unknown[]).every((tag: unknown) => typeof tag === 'string'),
+      typeof a.creation_time === 'number',
+      typeof a.last_modified_time === 'number'
     ];
 
     if (basicChecks.some(check => !check)) {
       return false;
     }
 
-    if (!TaskUtils.isTaskNode(asset.root)) {
+    if (!TaskUtils.isTaskNode(a.root)) {
       return false;
     }
 
-    if (!Array.isArray(asset.results)) {
+    if (!Array.isArray(a.results)) {
       return false;
     }
-    if (!asset.results.every((result: any) => TaskUtils.isTaskResult(result))) {
+    if (!(a.results as unknown[]).every((result: unknown) => TaskUtils.isTaskResult(result))) {
       return false;
     }
 
     return true;
   }
 
-  private static isTaskResult(result: any): result is TaskResult {
+  private static isTaskResult(result: unknown): result is TaskResult {
     if (result === null || typeof result !== 'object') {
       return false;
     }
+    const r = result as Record<string, unknown>;
 
     const requiredChecks = [
-      typeof result.task_id === 'string',
-      typeof result.task_start_time === 'number',
-      typeof result.task_end_time === 'number',
-      Array.isArray(result.steps) && result.steps.every((step: any) => TaskUtils.isStepResult(step))
+      typeof r.task_id === 'string',
+      typeof r.task_start_time === 'number',
+      typeof r.task_end_time === 'number',
+      Array.isArray(r.steps) && (r.steps as unknown[]).every((step: unknown) => TaskUtils.isStepResult(step))
     ];
 
     if (requiredChecks.some(check => !check)) {
       return false;
     }
 
-    const optionalStatus = result.status === undefined ||
-      ['passed', 'failed'].includes(result.status);
-    const optionalError = result.last_error === undefined || typeof result.last_error === 'string';
+    const optionalStatus = r.status === undefined ||
+      ['passed', 'failed'].includes(r.status as string);
+    const optionalError = r.last_error === undefined || typeof r.last_error === 'string';
 
     return optionalStatus && optionalError;
   }
 
-  private static isStepResult(step: any): step is StepResult {
+  private static isStepResult(step: unknown): step is StepResult {
     if (step === null || typeof step !== 'object') {
       return false;
     }
+    const s = step as Record<string, unknown>;
 
     const requiredChecks = [
-      typeof step.step_uid === 'string',
-      typeof step.step_description === 'string',
-      typeof step.step_start_time === 'number',
-      typeof step.step_end_time === 'number'
+      typeof s.step_uid === 'string',
+      typeof s.step_description === 'string',
+      typeof s.step_start_time === 'number',
+      typeof s.step_end_time === 'number'
     ];
 
     if (requiredChecks.some(check => !check)) {
       return false;
     }
 
-    const optionalStatus = step.status === undefined ||
-      ['passed', 'failed'].includes(step.status);
-    const optionalError = step.error === undefined || typeof step.error === 'string';
-    const optionalScreenshot = step.screenshot === undefined || typeof step.screenshot === 'string';
+    const optionalStatus = s.status === undefined ||
+      ['passed', 'failed'].includes(s.status as string);
+    const optionalError = s.error === undefined || typeof s.error === 'string';
+    const optionalScreenshot = s.screenshot === undefined || typeof s.screenshot === 'string';
 
     return optionalStatus && optionalError && optionalScreenshot;
   }
 
-  private static isTaskNode(root: any): root is TaskGroup | Task {
+  private static isTaskNode(root: unknown): root is TaskGroup | Task {
     if (root === null || typeof root !== 'object') {
       return false;
     }
+    const r = root as Record<string, unknown>;
 
     if (
-      typeof root.id !== 'string' ||
-      typeof root.name !== 'string' ||
-      typeof root.type !== 'string'
+      typeof r.id !== 'string' ||
+      typeof r.name !== 'string' ||
+      typeof r.type !== 'string'
     ) {
       return false;
     }
 
-    if (root.type === 'group') {
+    if (r.type === 'group') {
       return (
-        Array.isArray(root.children) &&
-        root.children.every((child: any) => TaskUtils.isTaskNode(child))
+        Array.isArray(r.children) &&
+        (r.children as unknown[]).every((child: unknown) => TaskUtils.isTaskNode(child))
       );
-    } else if (root.type === 'task') {
-      if (!Array.isArray(root.steps)) {
+    } else if (r.type === 'task') {
+      if (!Array.isArray(r.steps)) {
         return false;
       }
 
-      return root.steps.every((step: any) =>
-        typeof step === 'object' &&
-        step !== null &&
-        typeof step.uid === 'string' &&
-        step.type === 'script_step' &&
-        typeof step.description === 'string' &&
-        typeof step.script === 'string' &&
-        (step.objects === undefined ||
-          (Array.isArray(step.objects) &&
-            step.objects.every(TaskUtils.isObjectDescription)))
-      );
+      return (r.steps as unknown[]).every((step: unknown) => {
+        if (typeof step !== 'object' || step === null) return false;
+        const s = step as Record<string, unknown>;
+        return (
+          typeof s.uid === 'string' &&
+          s.type === 'script_step' &&
+          typeof s.description === 'string' &&
+          typeof s.script === 'string' &&
+          (s.objects === undefined ||
+            (Array.isArray(s.objects) &&
+              (s.objects as unknown[]).every(TaskUtils.isObjectDescription)))
+        );
+      });
     }
 
     return false;
   }
 
-  private static isObjectDescription(obj: any): obj is ObjectDescription {
+  private static isObjectDescription(obj: unknown): obj is ObjectDescription {
     if (obj === null || typeof obj !== 'object') {
       return false;
     }
-    if ('title' in obj && 'url' in obj && 'index' in obj) {
+    const o = obj as Record<string, unknown>;
+
+    if ('title' in o && 'url' in o && 'index' in o) {
       return (
-        typeof obj.title === 'string' &&
-        typeof obj.url === 'string' &&
-        typeof obj.index === 'number'
+        typeof o.title === 'string' &&
+        typeof o.url === 'string' &&
+        typeof o.index === 'number'
       );
     }
 
-    if ('tagName' in obj) {
-      const baseCheck = typeof obj.tagName === 'string';
+    if ('tagName' in o) {
+      const baseCheck = typeof o.tagName === 'string';
 
-      const parentCheck = obj.parent === undefined || TaskUtils.isObjectDescription(obj.parent);
-      const valueCheck = obj.value === undefined || typeof obj.value === 'string';
-      const textContentCheck = obj.textContent === undefined || typeof obj.textContent === 'string';
-      const attributesCheck = obj.attributes === undefined ||
-        (typeof obj.attributes === 'object' &&
-          obj.attributes !== null &&
-          !Array.isArray(obj.attributes));
+      const parentCheck = o.parent === undefined || TaskUtils.isObjectDescription(o.parent);
+      const valueCheck = o.value === undefined || typeof o.value === 'string';
+      const textContentCheck = o.textContent === undefined || typeof o.textContent === 'string';
+      const attributesCheck = o.attributes === undefined ||
+        (typeof o.attributes === 'object' &&
+          o.attributes !== null &&
+          !Array.isArray(o.attributes));
 
       return baseCheck && parentCheck && valueCheck && textContentCheck && attributesCheck;
     }

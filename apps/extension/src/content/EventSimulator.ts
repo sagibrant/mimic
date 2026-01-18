@@ -23,6 +23,19 @@
 
 import { BrowserUtils, Utils, KeyboardModifier, KeyDefinitionUtils, ClickOptions, Point, TextInputOptions } from "@gogogo/shared";
 
+interface LegacyDocument extends Document {
+  createTouch(view: Window, target: EventTarget, identifier: number, pageX: number, pageY: number, screenX: number, screenY: number, radiusX: number, radiusY: number, rotationAngle: number, force: number): Touch;
+  createTouchList(...touches: Touch[]): TouchList;
+}
+
+interface LegacyDeviceOrientationEvent extends DeviceOrientationEvent {
+  initDeviceOrientationEvent(type: string, bubbles: boolean, cancelable: boolean, alpha: number | null, beta: number | null, gamma: number | null, absolute: boolean): void;
+}
+
+interface LegacyDeviceMotionEvent extends DeviceMotionEvent {
+  initDeviceMotionEvent(type: string, bubbles: boolean, cancelable: boolean, acceleration: DeviceMotionEventAcceleration | null, accelerationIncludingGravity: DeviceMotionEventAcceleration | null, rotationRate: DeviceMotionEventRotationRate | null, interval: number | null): void;
+}
+
 /**
  * Enum for mouse button identifiers (matches W3C standards)
  */
@@ -146,70 +159,71 @@ export class EventSimulator {
     */
   static dispatchEvent(node: Node, type: string, eventInitObj?: object) {
     let event;
-    const eventInit: any = { bubbles: true, cancelable: true, composed: true, ...eventInitObj };
+    const eventInit: Record<string, unknown> = { bubbles: true, cancelable: true, composed: true, ...eventInitObj };
     switch (EventSimulator.eventTypes.get(type)) {
-      case 'mouse': event = new MouseEvent(type, eventInit); break;
-      case 'keyboard': event = new KeyboardEvent(type, eventInit); break;
+      case 'mouse': event = new MouseEvent(type, eventInit as MouseEventInit); break;
+      case 'keyboard': event = new KeyboardEvent(type, eventInit as KeyboardEventInit); break;
       case 'touch': {
         // WebKit does not support Touch constructor, but has deprecated createTouch and createTouchList methods.
         if (typeof 'Touch' === 'undefined'
           && 'createTouch' in document
           && 'createTouchList' in document
         ) {
-          const createTouch = (t: any) => {
+          const createTouch = (t: Record<string, unknown> | Touch) => {
             if (t instanceof Touch)
               return t;
             // createTouch does not accept clientX/clientY, so we have to use pageX/pageY.
-            let pageX = t.pageX;
-            if (pageX === undefined && t.clientX !== undefined)
-              pageX = t.clientX + (document.scrollingElement?.scrollLeft || 0);
-            let pageY = t.pageY;
-            if (pageY === undefined && t.clientY !== undefined)
-              pageY = t.clientY + (document.scrollingElement?.scrollTop || 0);
-            return (document as any).createTouch(window, t.target ?? node, t.identifier, pageX, pageY, t.screenX, t.screenY, t.radiusX, t.radiusY, t.rotationAngle, t.force);
+            const tObj = t as { pageX?: number, clientX?: number, pageY?: number, clientY?: number, target?: EventTarget, identifier: number, screenX: number, screenY: number, radiusX: number, radiusY: number, rotationAngle: number, force: number };
+            let pageX = tObj.pageX;
+            if (pageX === undefined && tObj.clientX !== undefined)
+              pageX = tObj.clientX + (document.scrollingElement?.scrollLeft || 0);
+            let pageY = tObj.pageY;
+            if (pageY === undefined && tObj.clientY !== undefined)
+              pageY = tObj.clientY + (document.scrollingElement?.scrollTop || 0);
+            return (document as unknown as LegacyDocument).createTouch(window, tObj.target ?? node, tObj.identifier, pageX!, pageY!, tObj.screenX, tObj.screenY, tObj.radiusX, tObj.radiusY, tObj.rotationAngle, tObj.force);
           };
-          const createTouchList = (touches: any) => {
+          const createTouchList = (touches: unknown) => {
             if (touches instanceof TouchList || !touches)
-              return touches;
-            return (document as any).createTouchList(...touches.map(createTouch));
+              return touches as TouchList;
+            return (document as unknown as LegacyDocument).createTouchList(...(touches as unknown[]).map((t) => createTouch(t as Record<string, unknown> | Touch)));
           };
           eventInit.target ??= node;
           eventInit.touches = createTouchList(eventInit.touches);
           eventInit.targetTouches = createTouchList(eventInit.targetTouches);
           eventInit.changedTouches = createTouchList(eventInit.changedTouches);
-          event = new TouchEvent(type, eventInit);
+          event = new TouchEvent(type, eventInit as TouchEventInit);
         } else {
           eventInit.target ??= node;
-          eventInit.touches = eventInit.touches?.map((t: any) => t instanceof Touch ? t : new Touch({ ...t, target: t.target ?? node }));
-          eventInit.targetTouches = eventInit.targetTouches?.map((t: any) => t instanceof Touch ? t : new Touch({ ...t, target: t.target ?? node }));
-          eventInit.changedTouches = eventInit.changedTouches?.map((t: any) => t instanceof Touch ? t : new Touch({ ...t, target: t.target ?? node }));
-          event = new TouchEvent(type, eventInit);
+          if (eventInit.touches) eventInit.touches = (eventInit.touches as unknown[]).map((t: unknown) => t instanceof Touch ? t : new Touch({ ...(t as TouchInit), target: (t as Touch).target ?? node }));
+          if (eventInit.targetTouches) eventInit.targetTouches = (eventInit.targetTouches as unknown[]).map((t: unknown) => t instanceof Touch ? t : new Touch({ ...(t as TouchInit), target: (t as Touch).target ?? node }));
+          if (eventInit.changedTouches) eventInit.changedTouches = (eventInit.changedTouches as unknown[]).map((t: unknown) => t instanceof Touch ? t : new Touch({ ...(t as TouchInit), target: (t as Touch).target ?? node }));
+          event = new TouchEvent(type, eventInit as TouchEventInit);
         }
         break;
       }
-      case 'pointer': event = new PointerEvent(type, eventInit); break;
-      case 'focus': event = new FocusEvent(type, eventInit); break;
-      case 'drag': event = new DragEvent(type, eventInit); break;
-      case 'wheel': event = new WheelEvent(type, eventInit); break;
+      case 'pointer': event = new PointerEvent(type, eventInit as PointerEventInit); break;
+      case 'focus': event = new FocusEvent(type, eventInit as FocusEventInit); break;
+      case 'drag': event = new DragEvent(type, eventInit as DragEventInit); break;
+      case 'wheel': event = new WheelEvent(type, eventInit as WheelEventInit); break;
       case 'deviceorientation':
         try {
-          event = new DeviceOrientationEvent(type, eventInit);
+          event = new DeviceOrientationEvent(type, eventInit as DeviceOrientationEventInit);
         } catch {
-          const { bubbles, cancelable, alpha, beta, gamma, absolute } = eventInit as { bubbles: boolean, cancelable: boolean, alpha: number, beta: number, gamma: number, absolute: boolean };
-          event = document.createEvent('DeviceOrientationEvent');// as WebKitLegacyDeviceOrientationEvent;
-          (event as any).initDeviceOrientationEvent(type, bubbles, cancelable, alpha, beta, gamma, absolute);
+          const { bubbles, cancelable, alpha, beta, gamma, absolute } = eventInit as unknown as { bubbles: boolean, cancelable: boolean, alpha: number, beta: number, gamma: number, absolute: boolean };
+          event = document.createEvent('DeviceOrientationEvent');
+          (event as unknown as LegacyDeviceOrientationEvent).initDeviceOrientationEvent(type, bubbles, cancelable, alpha, beta, gamma, absolute);
         }
         break;
       case 'devicemotion':
         try {
-          event = new DeviceMotionEvent(type, eventInit);
+          event = new DeviceMotionEvent(type, eventInit as DeviceMotionEventInit);
         } catch {
-          const { bubbles, cancelable, acceleration, accelerationIncludingGravity, rotationRate, interval } = eventInit as { bubbles: boolean, cancelable: boolean, acceleration: DeviceMotionEventAcceleration, accelerationIncludingGravity: DeviceMotionEventAcceleration, rotationRate: DeviceMotionEventRotationRate, interval: number };
-          event = document.createEvent('DeviceMotionEvent');// as WebKitLegacyDeviceMotionEvent;
-          (event as any).initDeviceMotionEvent(type, bubbles, cancelable, acceleration, accelerationIncludingGravity, rotationRate, interval);
+          const { bubbles, cancelable, acceleration, accelerationIncludingGravity, rotationRate, interval } = eventInit as unknown as { bubbles: boolean, cancelable: boolean, acceleration: DeviceMotionEventAcceleration, accelerationIncludingGravity: DeviceMotionEventAcceleration, rotationRate: DeviceMotionEventRotationRate, interval: number };
+          event = document.createEvent('DeviceMotionEvent');
+          (event as unknown as LegacyDeviceMotionEvent).initDeviceMotionEvent(type, bubbles, cancelable, acceleration, accelerationIncludingGravity, rotationRate, interval);
         }
         break;
-      default: event = new Event(type, eventInit); break;
+      default: event = new Event(type, eventInit as EventInit); break;
     }
     node.dispatchEvent(event);
   }

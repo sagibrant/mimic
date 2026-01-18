@@ -33,7 +33,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
   /**
    * the listenerWrapper for message events
    */
-  private _listener?: (...args: any[]) => boolean;
+  private _listener?: (msg: unknown, sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => boolean;
   private _listenRuntime: boolean = false;
   private _listenExternal: boolean = false;
 
@@ -50,10 +50,10 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     this._listener = this.onMessage.bind(this);
     this._listenRuntime = listenRuntime;
     this._listenExternal = listenExternal;
-    if (this._listenRuntime) {
+    if (this._listenRuntime && this._listener) {
       chrome.runtime.onMessage.addListener(this._listener);
     }
-    if (this._listenExternal) {
+    if (this._listenExternal && this._listener) {
       chrome.runtime.onMessageExternal.addListener(this._listener);
     }
   }
@@ -115,7 +115,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
       throw new Error('The message type is not request');
     }
     this.logger.debug('sendRequest: >>>>>> msg=', msg);
-    let response: any = undefined;
+    let response: unknown = undefined;
     try {
       const dest = msg.data.dest;
       if (dest.external === 'sidebar') {
@@ -151,7 +151,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     this._status = ChannelStatus.DISCONNECTED;
   }
 
-  private onMessage(msg: Message, sender?: chrome.runtime.MessageSender, sendResponse?: (response?: any) => void): boolean {
+  private onMessage(msg: unknown, sender?: chrome.runtime.MessageSender, sendResponse?: (response?: unknown) => void): boolean {
     this.logger.debug('onMessage: ==>> msg=', msg, ' sender:', sender, ' sendResponse', sendResponse);
     if (typeof msg === 'string' && msg === 'PING') {
       if (sendResponse) {
@@ -161,7 +161,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     }
 
     this.emit('message', {
-      msg: msg,
+      msg: msg as Message,
       sender: sender,
       responseCallback: !sendResponse ? undefined : (response) => {
         sendResponse(response);

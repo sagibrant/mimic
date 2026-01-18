@@ -25,7 +25,7 @@ import { EventSimulator } from "./EventSimulator";
 
 export class FrameInMAIN {
 
-  private readonly _callbacks: Record<string, (result: any) => void> = {};
+  private readonly _callbacks: Record<string, (result: unknown) => void> = {};
   private readonly _source: 'content' | 'MAIN';
   private readonly _onEventHandler = this.onEvent.bind(this);
   constructor() {
@@ -85,7 +85,7 @@ export class FrameInMAIN {
     this.send('clickRuntimeElement', [gogogo_testid, options], undefined, undefined, elem);
   }
 
-  send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: any) => void), target?: EventTarget) {
+  send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: unknown) => void), target?: EventTarget) {
     target = target ?? window;
     const msg = { source: this._source, funcName: funcName, params: params, callbackId: '', result: result };
     if (callback && typeof callback === 'function') {
@@ -105,7 +105,7 @@ export class FrameInMAIN {
     }
   }
 
-  private async onEvent(event: any) {
+  private async onEvent(event: CustomEvent) {
     const msg = event.detail;
     if (typeof (msg) !== "object") {
       return;
@@ -118,19 +118,19 @@ export class FrameInMAIN {
     }
 
     const funcName = msg.funcName as string;
-    const params = msg.params as any[] || [];
+    const params = msg.params as unknown[] || [];
     const callbackId = msg.callbackId as string || undefined;
-    const result = msg.result as any || undefined;
+    const result = msg.result as unknown || undefined;
     // callback
     if (callbackId && callbackId in this._callbacks) {
       this._callbacks[callbackId](result);
       return;
     }
     // invoke function
-    if (funcName && funcName in this && typeof (this as any)[funcName] === 'function') {
+    if (funcName && funcName in this && typeof (this as unknown as Record<string, unknown>)[funcName] === 'function') {
       // adjust the params for some functions
       if (['updateRuntimeElement', 'clickRuntimeElement'].includes(funcName)) {
-        let target = event.target;
+        let target = event.target as Node | EventTarget | null;
         if (event.composedPath) {
           const path = event.composedPath();
           if (path && path.length > 0) {
@@ -175,7 +175,7 @@ export class FrameInMAIN {
         params.push(target);
       }
 
-      const func = (this as any)[funcName] as Function;
+      const func = (this as unknown as Record<string, unknown>)[funcName] as Function;
       const result = await func.apply(this, params);
       if (callbackId) {
         this.send(funcName, params, result, callbackId);
@@ -198,10 +198,10 @@ export class FrameInMAIN {
   protected updateRuntimeElement(elem?: Element) {
     if (elem) {
       window.gogogo = window.gogogo ?? {};
-      (window.gogogo as any).runtimeElement = elem;
+      (window.gogogo as { runtimeElement?: Element }).runtimeElement = elem;
     }
     else if (window.gogogo) {
-      delete (window as any).gogogo;
+      Reflect.deleteProperty(window, 'gogogo');
     }
   }
 

@@ -49,7 +49,7 @@ export class ContentDispatcher extends Dispatcher {
         this.logger.error('Invalid message format: msg:', msg, ' sender:', sender);
         return;
       }
-      const { id, origin, url } = sender as any;
+      const { id, origin, url } = sender as chrome.runtime.MessageSender;
       if (id !== extensionId || (origin !== extensionOrigin && url !== backgroundUrl)) {
         this.logger.error('Invalid message sender: msg:', msg, ' sender:', sender);
         return;
@@ -102,8 +102,8 @@ export class ContentDispatcher extends Dispatcher {
 
   async init() {
     this._frameSenderInfo = await this.getConfig(RtidUtils.getAgentRtid(), 'sender');
-    const frameId = (this._frameSenderInfo as any).frameId as number;
-    const tabId = ((this._frameSenderInfo as any).tab as any).id as number;
+    const frameId = (this._frameSenderInfo as { frameId: number }).frameId;
+    const tabId = (this._frameSenderInfo as { tab: { id: number } }).tab.id;
     await ContentUtils.frame.init(tabId, frameId);
     this._contentToBackgroundChannel.startListening(true, false);
     await ContentUtils.frame.installFrameInMAIN();
@@ -115,11 +115,11 @@ export class ContentDispatcher extends Dispatcher {
     this.logger.debug("init: ==== frame sender:", this._frameSenderInfo, "frameRtid", ContentUtils.frame.rtid);
   }
 
-  async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<any> {
+  async getConfig(rtid: Rtid, propName: string, timeout?: number): Promise<unknown> {
     const reqMsgData = MsgUtils.createMessageData('config', rtid, { name: 'get', params: { name: propName } });
     const resMsgData = await this.sendRequest(reqMsgData, timeout);
     if (resMsgData.status === 'OK') {
-      const propValue = Utils.getItem(propName, resMsgData.result as any);
+      const propValue = Utils.getItem(propName, resMsgData.result as Record<string, unknown>);
       return propValue;
     }
     else {

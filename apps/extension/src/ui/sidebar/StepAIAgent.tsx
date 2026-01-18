@@ -9,7 +9,7 @@ import { Ellipsis, Send } from 'lucide-react';
 import { CryptoUtil, SettingUtils } from '@gogogo/shared';
 
 interface StepAIAgentProps {
-  runScript: (script: string, newStep: boolean) => Promise<any>;
+  runScript: (script: string, newStep: boolean) => Promise<unknown>;
 }
 
 export default function StepAIAgent({ runScript }: StepAIAgentProps) {
@@ -116,8 +116,8 @@ export default function StepAIAgent({ runScript }: StepAIAgentProps) {
               <p className="whitespace-pre-wrap">
                 {typeof message.content === 'string'
                   ? message.content
-                  : (message.content as any[])
-                      .map(block => (block.type === 'text' ? block.text : JSON.stringify(block)))
+                  : (message.content as Array<Record<string, unknown>>)
+                      .map(block => (block['type'] === 'text' ? block['text'] as string : JSON.stringify(block)))
                       .join('\n')}
               </p>
             </div>

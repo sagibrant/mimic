@@ -72,7 +72,7 @@ export interface Step {
   last_error?: string;
 }
 
-export type ObjectDescription = Record<string, any>;
+export type ObjectDescription = Record<string, unknown>;
 
 /**
  * Interface representing the result of executing a task
@@ -94,7 +94,7 @@ export interface StepResult {
   step_description: string;
   step_start_time: number;
   step_end_time: number;
-  result?: string | Record<string, any>;
+  result?: string | Record<string, unknown>;
   status?: 'passed' | 'failed';
   error?: string;
   screenshot?: string;

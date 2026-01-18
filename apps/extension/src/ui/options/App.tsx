@@ -223,7 +223,7 @@ export default function App() {
             <div className="select-container">
               <Select
                 value={settings.logLevel}
-                onValueChange={value => setSettings(prev => ({ ...prev, logLevel: value as any }))}
+                onValueChange={value => setSettings(prev => ({ ...prev, logLevel: value as Settings['logLevel'] }))}
               >
                 <SelectTrigger className="w-full" id="logLevel">
                   <SelectValue placeholder="Select log level" />
