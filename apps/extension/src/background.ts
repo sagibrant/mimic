@@ -89,7 +89,7 @@ declare global {
     };
   }
 }
-// 关键：通过类型断言明确 self 的类型
+// Key: Explicitly declare the type of self using type assertion
 const swSelf = self as unknown as ServiceWorkerGlobalScope & typeof globalThis;
 // add globalData to self as Service Worker's global object
 swSelf.gogogo = {

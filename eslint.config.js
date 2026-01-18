@@ -4,11 +4,18 @@ import * as tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import pluginVue from 'eslint-plugin-vue';
 import tailwind from "eslint-plugin-tailwindcss";
-// 注意：在ESLint扁平配置（eslint.config.js）中，不需要明确设置root:true
-// 这是因为扁平配置系统默认会按照从内到外的顺序应用配置，最近的配置会覆盖外部配置
-// 可以通过files和ignores选项精确控制配置的应用范围
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// 导出扁平配置数组
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Note: In ESLint flat config (eslint.config.js), explicit root:true is not needed.
+// This is because the flat config system applies configurations from the inside out by default,
+// where the closest configuration overrides external ones.
+// You can precisely control the scope of configuration application via files and ignores options.
+
+// Export flat configuration array
 export default [
   {
     ignores: ['node_modules/', 'dist/', 'tests/', 'build/'],
@@ -37,6 +44,20 @@ export default [
     files: [
       'apps/extension/src/**/*.{tsx,jsx,vue,html}',
     ],
+    settings: {
+      tailwindcss: {
+        config: {
+          theme: {
+            extend: {},
+          },
+          plugins: [],
+        }
+      }
+    },
+    rules: {
+      ...cfg.rules,
+      'tailwindcss/no-custom-classname': 'off'
+    }
   })),
   eslintConfigPrettier,
 
