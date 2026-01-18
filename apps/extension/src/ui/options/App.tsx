@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { toast, Toaster } from 'sonner';
 
 export default function App() {
-  console.log('options ==>');
   // Settings state
   const [settings, setSettings] = useState<Settings>(SettingUtils.getSettings());
 
