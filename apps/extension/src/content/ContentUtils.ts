@@ -948,7 +948,7 @@ export class ContentUtils {
   static set dispatcher(dispatcher: Dispatcher) {
     ContentUtils._dispatcher = dispatcher;
   }
-  static get dispatcher() {
+  static get dispatcher(): Dispatcher {
     if (Utils.isNullOrUndefined(ContentUtils._dispatcher)) {
       throw new Error('The dispatcher is not ready');
     }
@@ -958,7 +958,7 @@ export class ContentUtils {
   static set repo(repo: ObjectRepository) {
     ContentUtils._repo = repo;
   }
-  static get repo() {
+  static get repo(): ObjectRepository {
     if (Utils.isNullOrUndefined(ContentUtils._repo)) {
       throw new Error('The repo is not ready');
     }
@@ -968,7 +968,7 @@ export class ContentUtils {
   static set frame(frame: FrameHandler) {
     ContentUtils._frame = frame;
   }
-  static get frame() {
+  static get frame(): FrameHandler {
     if (Utils.isNullOrUndefined(ContentUtils._frame)) {
       throw new Error('The frame is not ready');
     }

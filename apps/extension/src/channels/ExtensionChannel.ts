@@ -84,8 +84,9 @@ export class ExtensionPortChannel extends ChannelBase {
     }
     finally {
       let error = '';
-      if ('error' in this._port && 'message' in (this._port as any).error) {
-        error = (this._port as any).error.message;
+      const port = this._port as unknown as { error?: { message?: string } };
+      if ('error' in this._port && port.error && 'message' in port.error) {
+        error = port.error.message || '';
       }
       else if (chrome.runtime.lastError?.message) {
         error = chrome.runtime.lastError.message;
@@ -130,8 +131,9 @@ export class ExtensionPortChannel extends ChannelBase {
   private onDisconnect(port: chrome.runtime.Port): void {
     this._status = ChannelStatus.DISCONNECTED;
     let reason = 'disconnected';
-    if ('error' in port && 'message' in (port as any).error) {
-      reason = (port as any).error.message;
+    const p = port as unknown as { error?: { message?: string } };
+    if ('error' in port && p.error && 'message' in p.error) {
+      reason = p.error.message || '';
     }
     else if (chrome.runtime.lastError?.message) {
       reason = chrome.runtime.lastError.message;
@@ -191,7 +193,7 @@ export class ExtensionChannelClient extends ChannelClient {
     if (Utils.isFunction(chrome.runtime?.connect)) {
       this.logger.debug('use chrome.runtime for messaging');
       this._messagingService = chrome?.runtime;
-    } else if ('connect' in chrome.extension && Utils.isFunction((chrome.extension as any).connect)) {
+    } else if ('connect' in chrome.extension && Utils.isFunction((chrome.extension as unknown as Record<string, unknown>).connect)) {
       this.logger.debug('use chrome.extension for messaging');
       this._messagingService = chrome?.extension;
     } else {
@@ -281,8 +283,9 @@ export class ExtensionChannelClient extends ChannelClient {
 
         // if exist error message, connection is failed
         let errorMessage = '';
-        if (this._port && 'error' in this._port && 'message' in (this._port as any).error) {
-          errorMessage = (this._port as any).error.message;
+        const port = this._port as unknown as { error?: { message?: string } };
+        if (this._port && 'error' in this._port && port.error && 'message' in port.error) {
+          errorMessage = port.error.message || '';
         }
         else if (chrome.runtime.lastError?.message) {
           errorMessage = chrome.runtime.lastError.message;
@@ -437,7 +440,7 @@ export class ExtensionChannelHost extends ChannelHost {
     if (Utils.isFunction(chrome.runtime?.connect)) {
       this.logger.debug('use chrome.runtime for messaging');
       this._messagingService = chrome?.runtime;
-    } else if ('connect' in chrome.extension && Utils.isFunction((chrome.extension as any).connect)) {
+    } else if ('connect' in chrome.extension && Utils.isFunction((chrome.extension as unknown as Record<string, unknown>).connect)) {
       this.logger.debug('use chrome.extension for messaging');
       this._messagingService = chrome?.extension;
     } else {

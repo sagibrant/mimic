@@ -37,7 +37,7 @@ export class FrameInMAIN {
     }
   }
 
-  init() {
+  init(): void {
     window.removeEventListener("_MAIN_To_Content_EVENT_", this._onEventHandler as EventListener, true);
     window.removeEventListener("_Content_To_MAIN_EVENT_", this._onEventHandler as EventListener, true);
     if (this._source === 'content') {
@@ -67,7 +67,7 @@ export class FrameInMAIN {
     }
   }
 
-  setElement(elem: Element | null) {
+  setElement(elem: Element | null): void {
     if (elem) {
       const gogogo_testid = this.generateUUID();
       elem.setAttribute('gogogo-testid', gogogo_testid);
@@ -78,14 +78,14 @@ export class FrameInMAIN {
     }
   }
 
-  clickElement(elem: Element, options?: ClickOptions) {
+  clickElement(elem: Element, options?: ClickOptions): void {
     if (!elem) return;
     const gogogo_testid = this.generateUUID();
     elem.setAttribute('gogogo-testid', gogogo_testid);
     this.send('clickRuntimeElement', [gogogo_testid, options], undefined, undefined, elem);
   }
 
-  send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: unknown) => void), target?: EventTarget) {
+  send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: unknown) => void), target?: EventTarget): void {
     target = target ?? window;
     const msg = { source: this._source, funcName: funcName, params: params, callbackId: '', result: result };
     if (callback && typeof callback === 'function') {
@@ -105,7 +105,7 @@ export class FrameInMAIN {
     }
   }
 
-  private async onEvent(event: Event) {
+  private async onEvent(event: Event): Promise<void> {
     const msg = (event as CustomEvent).detail;
     if (typeof (msg) !== "object") {
       return;
@@ -191,11 +191,11 @@ export class FrameInMAIN {
     return `uid-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
   }
 
-  protected updateState(state: boolean = true) {
+  protected updateState(state: boolean = true): void {
     window.document.documentElement.setAttribute('gogogo', JSON.stringify({ state: state }));
   }
 
-  protected updateRuntimeElement(elem?: Element) {
+  protected updateRuntimeElement(elem?: Element): void {
     if (elem) {
       window.gogogo = window.gogogo ?? {};
       (window.gogogo as { runtimeElement?: Element }).runtimeElement = elem;
@@ -211,7 +211,7 @@ export class FrameInMAIN {
     }
   }
 
-  protected async inspectNodeRequested(node: Node) {
+  protected async inspectNodeRequested(node: Node): Promise<void> {
     if (this._source === 'content' && typeof window.gogogo === 'object' && window.gogogo.frame && window.gogogo.frame.inspectNode) {
       await window.gogogo.frame.inspectNode(node);
     }

@@ -108,7 +108,7 @@ export interface NodeTextItem {
     text: TextItem;
 }
 export class TextFilterUtils {
-    static getDefaultTextFilter() {
+    static getDefaultTextFilter(): TextFilter {
         const filter: TextFilter = {
             visibilityLevel: 'char',
             includes: [],
@@ -134,7 +134,7 @@ export class TextFilterUtils {
         return filter;
     }
 
-    static getDefaultTextFilterWithElements() {
+    static getDefaultTextFilterWithElements(): TextFilter {
         const filter: TextFilter = {
             visibilityLevel: 'char',
             includes: [],

@@ -47,7 +47,7 @@ export class CoordinateUtils {
         }
       }
     };
-    CoordinateUtils.onResizeListener = (_ev: UIEvent) => {
+    CoordinateUtils.onResizeListener = (_ev: UIEvent): void => {
       if (window.parent !== window) {
         return; // check if in page
       }
@@ -57,7 +57,7 @@ export class CoordinateUtils {
     window.addEventListener("mouseover", CoordinateUtils.onMouseOverListener, true);
     window.addEventListener("resize", CoordinateUtils.onResizeListener, true);
   }
-  static turnOffUserInteractiveMode() {
+  static turnOffUserInteractiveMode(): void {
     if (CoordinateUtils.onMouseOverListener) {
       window.removeEventListener('mouseover', CoordinateUtils.onMouseOverListener);
     }

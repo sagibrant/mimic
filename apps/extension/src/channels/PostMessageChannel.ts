@@ -56,7 +56,7 @@ export class PostMessageChannel extends ChannelBase {
     window.addEventListener('message', this._listener);
   }
 
-  stopListening() {
+  stopListening(): void {
     if (Utils.isNullOrUndefined(this._listener)) {
       return;
     }

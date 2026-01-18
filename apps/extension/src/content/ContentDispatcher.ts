@@ -100,7 +100,7 @@ export class ContentDispatcher extends Dispatcher {
     });
   }
 
-  async init() {
+  async init(): Promise<void> {
     this._frameSenderInfo = await this.getConfig(RtidUtils.getAgentRtid(), 'sender');
     const frameId = (this._frameSenderInfo as { frameId: number }).frameId;
     const tabId = (this._frameSenderInfo as { tab: { id: number } }).tab.id;

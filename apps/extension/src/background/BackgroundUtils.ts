@@ -29,7 +29,7 @@ export class BackgroundUtils {
   static async dispatchEvent(event: 'windowCreated' | 'windowRemoved' |
     'pageCreated' | 'pageDOMContentLoaded' | 'pageRemoved' |
     'dialogOpened' | 'dialogClosed' |
-    'nodeInspected' | 'stepRecorded', data: any): Promise<void> {
+    'nodeInspected' | 'stepRecorded', data: unknown): Promise<void> {
     const rtid = RtidUtils.getAgentRtid();
     rtid.context = 'external';
     rtid.external = 'sidebar';

@@ -157,7 +157,7 @@ export class EventSimulator {
     * @param {string} type The type of event to dispatch.
     * @param {Object} eventInitObj An object containing properties to initialize the event with.
     */
-  static dispatchEvent(node: Node, type: string, eventInitObj?: object) {
+  static dispatchEvent(node: Node, type: string, eventInitObj?: object): void {
     let event;
     const eventInit: Record<string, unknown> = { bubbles: true, cancelable: true, composed: true, ...eventInitObj };
     switch (EventSimulator.eventTypes.get(type)) {
@@ -892,7 +892,7 @@ export class EventSimulator {
     const buttonsDown = 1 << button; // Button pressed state
     const buttonsUp = 0; // Button released state
     // Core click phase: simulates pressing and releasing the button
-    const performClickCycle = async () => {
+    const performClickCycle = async (): Promise<void> => {
       // 1) Press the button down
       this.dispatchPointerEvent('pointerdown', target, { x: clientX, y: clientY, button: button, buttons: buttonsDown });
       this.dispatchMouseEvent('mousedown', target, { x: clientX, y: clientY, button: button, buttons: buttonsDown });
@@ -1122,7 +1122,7 @@ export class EventSimulator {
     // }
   }
 
-  static async simulatePressKeys(target: Element, keys: string | string[], options?: { delayBetweenDownUp?: number; }) {
+  static async simulatePressKeys(target: Element, keys: string | string[], options?: { delayBetweenDownUp?: number; }): Promise<void> {
     const { delayBetweenDownUp = 0 } = options || {};
     const modifiers = new Set<KeyboardModifier>;
     EventSimulator.simulateFocus(target);

@@ -79,7 +79,7 @@ export class ExtensionFrameChannel extends ChannelBase {
     this._status = ChannelStatus.DISCONNECTED;
   }
 
-  private async ping(tabId: number, frameId: number, msg: Message) {
+  private async ping(tabId: number, frameId: number, msg: Message): Promise<void> {
     // ping 3 times
     for (let i = 1; i <= 3; i++) {
       try {

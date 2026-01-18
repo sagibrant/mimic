@@ -43,7 +43,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     this._status = ChannelStatus.CONNECTED;
   }
 
-  startListening(listenRuntime: boolean = true, listenExternal: boolean = false) {
+  startListening(listenRuntime: boolean = true, listenExternal: boolean = false): void {
     if (this._listener) {
       return;
     }
@@ -58,7 +58,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     }
   }
 
-  stopListening() {
+  stopListening(): void {
     if (Utils.isNullOrUndefined(this._listener)) {
       return;
     }
@@ -163,7 +163,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     this.emit('message', {
       msg: msg as Message,
       sender: sender,
-      responseCallback: !sendResponse ? undefined : (response) => {
+      responseCallback: !sendResponse ? undefined : (response): void => {
         sendResponse(response);
         this.logger.debug('onMessage: <<<< msg=', msg, ' sender:', sender, ' response:', response);
       }
@@ -176,7 +176,7 @@ export class ExtensionRuntimeChannel extends ChannelBase {
     }
   }
 
-  private async ping(msg: Message) {
+  private async ping(msg: Message): Promise<void> {
     // ping 3 times
     for (let i = 1; i <= 3; i++) {
       try {

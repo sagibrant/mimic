@@ -59,7 +59,7 @@ export class BackgroundDispatcher extends Dispatcher {
     this._backgroundListeningChannel.startListening(true, true);
   }
 
-  override onMessage(msg: Message, sender?: any, responseCallback?: (response: Message) => void): void {
+  override onMessage(msg: Message, sender?: unknown, responseCallback?: (response: Message) => void): void {
     // handle the frame register message
     // const reqMsgData = MsgUtils.createMessageData('config', RtidUtils.getAgentRtid(), { name: 'get', params: { name: 'sender' } });
     if (msg.type === 'request' && RtidUtils.isRtidEqual(RtidUtils.getAgentRtid(), msg.data.dest) && responseCallback
