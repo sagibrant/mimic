@@ -58,7 +58,6 @@ import { Separator } from '../components/ui/separator';
 import { ThemeProvider } from '../components/theme-provider';
 
 export default function App() {
-  console.log('sidebar ==> App');
   // Stable Util methods
   /**
    * Localization helper

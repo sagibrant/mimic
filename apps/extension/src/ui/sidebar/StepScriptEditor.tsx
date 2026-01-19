@@ -101,7 +101,6 @@ export default function StepScriptEditor({
 
   // Initialize CodeMirror editor
   useEffect(() => {
-    console.log('Initialize CodeMirror editor ==> useEffect');
     if (!editorRef.current) return;
 
     // Code linter
