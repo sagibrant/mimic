@@ -149,8 +149,8 @@ export class StepScriptEditorHelper {
         { name: "path", type: "string", optional: true },
         { name: "expires", type: "number", optional: true },
         { name: "httpOnly", type: "boolean", optional: true },
-        { name: "secure", type: "string", optional: true },
-        { name: "session", type: "string", optional: true },
+        { name: "secure", type: "boolean", optional: true },
+        { name: "session", type: "boolean", optional: true },
         { name: "sameSite", type: "'Strict' | 'Lax' | 'None'", optional: true },
         { name: "partitionKey", type: "string", optional: true },
       ]
@@ -158,6 +158,9 @@ export class StepScriptEditorHelper {
 
     // core types - with methods
     Expect: {
+      properties: [
+        { name: "not", type: "Expect", optional: false }
+      ],
       methods: [
         { name: "toBe", params: ["expected: unknown"], returnType: "void" },
         { name: "toEqual", params: ["expected: unknown"], returnType: "void" },
@@ -224,7 +227,8 @@ export class StepScriptEditorHelper {
 
     BrowserEvents: {
       methods: [
-        { name: "on", params: ["event: 'window' | 'page'", "listener: (...args: any[]) => any"], returnType: "Browser" }
+        { name: "on", params: ["event: 'window'", "listener: (window: Window) => (unknown | Promise<unknown>)"], returnType: "Browser" },
+        { name: "on", params: ["event: 'page'", "listener: (page: Page) => (unknown | Promise<unknown>)"], returnType: "Browser" }
       ]
     },
 
@@ -266,13 +270,14 @@ export class StepScriptEditorHelper {
         { name: "minimize", params: [], returnType: "Promise<void>" },
         { name: "maximize", params: [], returnType: "Promise<void>" },
         { name: "restore", params: [], returnType: "Promise<void>" },
-        { name: "fullscreen", params: ["toggle: boolean"], returnType: "Promise<void>" }
+        { name: "fullscreen", params: ["toggle?: boolean"], returnType: "Promise<void>" }
       ]
     },
 
     WindowEvents: {
       methods: [
-        { name: "on", params: ["event: 'page' | 'close'", "listener: (...args: any[]) => any"], returnType: "Window" }
+        { name: "on", params: ["event: 'page'", "listener: (page: Page) => (unknown | Promise<unknown>)"], returnType: "Window" },
+        { name: "on", params: ["event: 'close'", "listener: (window: Window) => (unknown | Promise<unknown>)"], returnType: "Window" }
       ]
     },
 
@@ -313,7 +318,7 @@ export class StepScriptEditorHelper {
       methods: [
         { name: "activate", params: [], returnType: "Promise<void>" },
         { name: "bringToFront", params: [], returnType: "Promise<void>" },
-        { name: "sync", params: ["timeout: number"], returnType: "Promise<void>" },
+        { name: "sync", params: ["timeout?: number"], returnType: "Promise<void>" },
         { name: "openNewPage", params: ["url?: string"], returnType: "Promise<Page>" },
         { name: "navigate", params: ["url?: string"], returnType: "Promise<void>" },
         { name: "refresh", params: ["bypassCache?: boolean"], returnType: "Promise<void>" },
@@ -324,13 +329,14 @@ export class StepScriptEditorHelper {
         { name: "moveToWindow", params: ["window: Window", "index?: number"], returnType: "Promise<void>" },
         { name: "captureScreenshot", params: [], returnType: "Promise<string>" },
         { name: "querySelectorAll", params: ["selector: string"], returnType: "Promise<Element[]>" },
-        { name: "executeScript", params: ["func: (...args: Args) => Result", "args: Args"], returnType: "Promise<Result>" }
+        { name: "executeScript", params: ["func: (...args: Args) => Result", "args?: Args"], returnType: "Promise<Result>" }
       ]
     },
 
     PageEvents: {
       methods: [
-        { name: "on", params: ["event: 'dialog' | 'domcontentloaded' | 'close'", "listener: (...args: any[]) => any"], returnType: "Page" }
+        { name: "on", params: ["event: 'dialog'", "listener: (dialog: Dialog) => (unknown | Promise<unknown>)"], returnType: "Page" },
+        { name: "on", params: ["event: 'domcontentloaded' | 'close'", "listener: (page: Page) => (unknown | Promise<unknown>)"], returnType: "Page" }
       ]
     },
 
@@ -369,9 +375,9 @@ export class StepScriptEditorHelper {
 
     FrameMethods: {
       methods: [
-        { name: "sync", params: ["timeout: number"], returnType: "Promise<void>" },
+        { name: "sync", params: ["timeout?: number"], returnType: "Promise<void>" },
         { name: "querySelectorAll", params: ["selector: string"], returnType: "Promise<Element[]>" },
-        { name: "executeScript", params: ["func: (...args: Args) => Result", "args: Args"], returnType: "Promise<Result>" }
+        { name: "executeScript", params: ["func: (...args: Args) => Result", "args?: Args"], returnType: "Promise<Result>" }
       ]
     },
 
@@ -399,8 +405,8 @@ export class StepScriptEditorHelper {
     NodeMethods: {
       methods: [
         { name: "highlight", params: [], returnType: "Promise<void>" },
-        { name: "getProperty", params: ["name: string"], returnType: "Promise<any>" },
-        { name: "setProperty", params: ["name: string", "value: any"], returnType: "Promise<void>" },
+        { name: "getProperty", params: ["name: string"], returnType: "Promise<unknown>" },
+        { name: "setProperty", params: ["name: string", "value: unknown"], returnType: "Promise<void>" },
         { name: "getBoundingClientRect", params: [], returnType: "Promise<RectInfo>" },
         { name: "dispatchEvent", params: ["type: string", "options?: object"], returnType: "Promise<void>" },
         { name: "sendCDPCommand", params: ["method: string", "commandParams?: { [key: string]: unknown }"], returnType: "Promise<void>" }
@@ -514,10 +520,7 @@ export class StepScriptEditorHelper {
       extends: ["NodeProperties", "NodeMethods", "MouseActions", "TouchActions"],
       methods: [
         { name: "ownerFrame", params: [], returnType: "Promise<Frame>" },
-        { name: "ownerElement", params: [], returnType: "Promise<Element | null>" },
-        { name: "text", params: [], returnType: "Promise<string>" },
-        { name: "getBoundingClientRect", params: [], returnType: "Promise<RectInfo>" },
-        { name: "boundingBox", params: [], returnType: "Promise<RectInfo | null>" }
+        { name: "ownerElement", params: [], returnType: "Promise<Element | null>" }
       ]
     },
 
@@ -605,6 +608,23 @@ export class StepScriptEditorHelper {
     return methods;
   }
 
+  static getTypeProperties(typeName: string): Array<PropertyDefinition> {
+    if (!StepScriptEditorHelper.TypeDefinitions[typeName]) return [];
+
+    const type = Utils.deepClone(StepScriptEditorHelper.TypeDefinitions[typeName]);
+    let properties = [...(type.properties || [])];
+
+    if (type.extends) {
+      for (const baseType of type.extends) {
+        const baseTypeName = baseType.split('<')[0];
+        const extendedProperties = Utils.deepClone(StepScriptEditorHelper.getTypeProperties(baseTypeName));
+        properties = [...properties, ...extendedProperties];
+      }
+    }
+
+    return properties;
+  }
+
   static getGlobalVariableType(expr: string, variableTypes: Map<string, string>): string | null {
     if (variableTypes.has(expr)) {
       return variableTypes.get(expr) || null;
@@ -638,9 +658,17 @@ export class StepScriptEditorHelper {
         const methods = StepScriptEditorHelper.getTypeMethods(currentType);
         const method = methods.find(m => m.name === methodName);
 
-        if (!method) return null;
+        let returnType: string;
+        if (method) {
+          returnType = method.returnType;
+        }
+        else {
+          const properties = StepScriptEditorHelper.getTypeProperties(currentType);
+          const property = properties.find(p => p.name === methodName);
+          if (!property) return null;
+          returnType = property.type;
+        }
 
-        let returnType = method.returnType;
         // handle promise e.g. from Promise<Page> -> Page, from Promise<Locator<Page>> -> Locator<Page>
         if (returnType.startsWith('Promise<')) {
           returnType = returnType.replace(/^Promise<(.+)>$/, '$1');
@@ -729,4 +757,3 @@ export class StepScriptEditorHelper {
     return parts;
   }
 }
-

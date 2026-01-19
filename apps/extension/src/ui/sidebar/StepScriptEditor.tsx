@@ -168,8 +168,9 @@ ${codeContent}
       if (!typeName || !StepScriptEditorHelper.TypeDefinitions[typeName]) return [];
 
       const methods = StepScriptEditorHelper.getTypeMethods(typeName);
+      const properties = StepScriptEditorHelper.getTypeProperties(typeName);
 
-      return methods.map((method: MethodDefinition) => {
+      const methodCompletions = methods.map((method: MethodDefinition) => {
         const paramsStr = method.params.join(', ');
         const label = `${method.name}(${paramsStr})`;
         const info = `${method.name}(${paramsStr}): ${method.returnType}`;
@@ -196,6 +197,23 @@ ${codeContent}
           }
         };
       });
+
+      const propertyCompletions = properties.map((prop) => {
+        const info = `${prop.name}${prop.optional ? "?" : ""}: ${prop.type}`;
+        return {
+          label: prop.name,
+          type: "property",
+          info,
+          apply: (view: EditorView, _completion: Completion, from: number, to: number) => {
+            view.dispatch({
+              changes: { from, to, insert: prop.name },
+              selection: { anchor: from + prop.name.length }
+            });
+          }
+        };
+      });
+
+      return [...propertyCompletions, ...methodCompletions];
     };
 
     // Create completion source

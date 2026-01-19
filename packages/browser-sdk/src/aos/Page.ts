@@ -103,7 +103,7 @@ export class Page extends AutomationObject implements api.Page {
     }
   }
 
-  async mainFrame(): Promise<api.Frame> {
+  async mainFrame(): Promise<api.Frame | null> {
     const rtid = RtidUtils.getFrameRtid(0, this._rtid.tab, -1, this._rtid.browser);
     const frame = this.repo.getFrame(rtid);
     return frame;
@@ -260,6 +260,9 @@ export class Page extends AutomationObject implements api.Page {
 
   async querySelectorAll(selector: string): Promise<api.Element[]> {
     const mainFrame = await this.mainFrame();
+    if (!mainFrame) {
+      throw new Error('Main frame not found');
+    }
     return await mainFrame.querySelectorAll(selector);
   }
 
@@ -268,7 +271,7 @@ export class Page extends AutomationObject implements api.Page {
   /** ==================================================================================================================== */
   on(event: 'domcontentloaded' | 'close', listener: (page: api.Page) => (unknown | Promise<unknown>)): this;
   on(event: 'dialog', listener: (dialog: api.Dialog) => (unknown | Promise<unknown>)): this;
-  on(event: string, listener: ((page: api.Page) => (unknown | Promise<unknown>)) | ((dialog: api.Dialog) => (unknown | Promise<unknown>))): this {
+  on(event: 'dialog' | 'domcontentloaded' | 'close', listener: ((page: api.Page) => (unknown | Promise<unknown>)) | ((dialog: api.Dialog) => (unknown | Promise<unknown>))): this {
     return super.on(event, listener as (arg: unknown) => (unknown | Promise<unknown>));
   }
   emit(event: 'close' | 'dialog' | 'domcontentloaded', _data?: unknown): void {

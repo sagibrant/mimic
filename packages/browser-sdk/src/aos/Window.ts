@@ -145,7 +145,7 @@ export class Window extends AutomationObject implements api.Window {
   /** ==================================================================================================================== */
   on(event: 'page', listener: (page: api.Page) => (unknown | Promise<unknown>)): this;
   on(event: 'close', listener: (window: api.Window) => (unknown | Promise<unknown>)): this;
-  on(event: string, listener: ((page: api.Page) => (unknown | Promise<unknown>)) | ((window: api.Window) => (unknown | Promise<unknown>))): this {
+  on(event: 'page' | 'close', listener: ((page: api.Page) => (unknown | Promise<unknown>)) | ((window: api.Window) => (unknown | Promise<unknown>))): this {
     return super.on(event, listener as (arg: unknown) => (unknown | Promise<unknown>));
   }
   emit(event: 'page' | 'close', data?: unknown): void {

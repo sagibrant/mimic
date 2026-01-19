@@ -189,7 +189,7 @@ export class Browser extends AutomationObject implements api.Browser {
   /** ==================================================================================================================== */
   on(event: 'window', listener: (window: api.Window) => (unknown | Promise<unknown>)): this;
   on(event: 'page', listener: (page: api.Page) => (unknown | Promise<unknown>)): this;
-  on(event: string, listener: ((window: api.Window) => (unknown | Promise<unknown>)) | ((page: api.Page) => (unknown | Promise<unknown>))): this {
+  on(event: 'window' | 'page', listener: ((window: api.Window) => (unknown | Promise<unknown>)) | ((page: api.Page) => (unknown | Promise<unknown>))): this {
     return super.on(event, listener as (arg: unknown) => (unknown | Promise<unknown>));
   }
   emit(event: 'window' | 'page', data?: unknown): void {

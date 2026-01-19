@@ -109,7 +109,7 @@ export class PageLocator extends Locator<Page> implements api.PageLocator {
     return await page.window();
   }
 
-  async mainFrame(): Promise<api.Frame> {
+  async mainFrame(): Promise<api.Frame | null> {
     const page = await this.get();
     return await page.mainFrame();
   }
