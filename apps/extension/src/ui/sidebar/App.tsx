@@ -498,7 +498,7 @@ export default function App() {
       return;
     }
     try {
-      const docURL = 'https://sagibrant.github.io/gogogo/';
+      const docURL = 'https://qagogogo.github.io/gogogo/';
       await chrome.tabs.create({ url: docURL });
     } catch (error) {
       console.error(error);
