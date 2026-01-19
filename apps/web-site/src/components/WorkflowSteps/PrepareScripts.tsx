@@ -259,7 +259,7 @@ ${codeContent}
       <div className="step-content">
         <div className="editor-container" ref={editorRef}></div>
         <p className="step-description">
-          Write your automation script using the CodeMirror editor.
+          Write your automation script using the editor.
         </p>
       </div>
     </div>
