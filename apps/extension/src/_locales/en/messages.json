@@ -74,8 +74,7 @@
     "sidebar_dialog_ok": { "message": "OK" },
     "sidebar_dialog_cancel": { "message": "Cancel" },
 
-    "sidebar_btn_action_load_demo_confirm_header": { "message": "Load Demo Task" },
-    "sidebar_btn_action_load_demo_confirm_text": { "message": "Load Demo Task will clean up all the existing tasks. Are you sure to to continue?" },
+    "sidebar_btn_action_demo_error_failedToOpenDemoWebSite": { "message": "Failed to open the demo website" },
     "sidebar_btn_action_load_error_invalid_file": { "message": "The selected file is not a valid task file." },
     "sidebar_btn_action_load_error": { "message": "Fail to load the task file." },
     "sidebar_btn_action_save_notification": { "message": "Tasks are saved." },

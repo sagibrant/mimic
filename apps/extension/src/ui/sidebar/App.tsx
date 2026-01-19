@@ -364,31 +364,18 @@ export default function App() {
   /** ==================================================== menu btns ===================================================== */
   /** ==================================================================================================================== */
   // Handle demo task
-  const handleDemoTask = useCallback(() => {
+  const handleDemoTask = useCallback(async () => {
     if (!isIdle) {
       return;
     }
-
-    const task = findTaskNode(n => n.type === 'task', taskTree);
-
-    const loadDemoTask = () => {
-      const asset = TaskUtils.createDemoTaskAsset();
-      setTaskAsset(asset);
-      setTaskTree(asset.root);
-      setTaskResults(asset.results);
-      refreshActiveTaskStep(asset.root);
-    };
-
-    if (task) {
-      showConfirmDialog(
-        t('sidebar_btn_action_load_demo_confirm_header'),
-        t('sidebar_btn_action_load_demo_confirm_text'),
-        loadDemoTask
-      );
-    } else {
-      loadDemoTask();
+    try {
+      const docURL = 'https://www.youtube.com/playlist?list=PLvU_JUL1nukuMO1qCllN19VDgO2t9pd9x';
+      await chrome.tabs.create({ url: docURL });
+    } catch (error) {
+      console.error(error);
+      showNotificationMessage(t('sidebar_btn_action_demo_error_failedToOpenDemoWebSite'), 3000, 'error');
     }
-  }, [isIdle, taskTree, refreshActiveTaskStep, showConfirmDialog, t, findTaskNode]);
+  }, [isIdle, showNotificationMessage, t]);
 
   // Handle load task
   const handleLoadTask = useCallback(() => {

@@ -74,8 +74,7 @@
     "sidebar_dialog_ok": { "message": "确认" },
     "sidebar_dialog_cancel": { "message": "取消" },
 
-    "sidebar_btn_action_load_demo_confirm_header": { "message": "加载演示任务" },
-    "sidebar_btn_action_load_demo_confirm_text": { "message": "加载演示任务将清空当前所有任务，请确认是否继续？" },
+    "sidebar_btn_action_demo_error_failedToOpenDemoWebSite": { "message": "打开演示页面失败" },
     "sidebar_btn_action_load_error_invalid_file": { "message": "该文件不是有效的任务文件。" },
     "sidebar_btn_action_load_error": { "message": "无法加载任务文件。" },
     "sidebar_btn_action_save_notification": { "message": "所有任务已保存。" },
