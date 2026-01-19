@@ -7,6 +7,7 @@ type Props = {
 
 const NavBar: React.FC<Props> = ({ path, onNavigate }) => {
   const isActive = (to: string) => path.startsWith(to) || (to === '/' && path === '/');
+  const baseUrl = import.meta.env.BASE_URL;
   return (
     <header className="nav modern-nav">
       <button
@@ -14,7 +15,7 @@ const NavBar: React.FC<Props> = ({ path, onNavigate }) => {
         aria-label="Gogogo Home"
         onClick={() => onNavigate('/')}
       >
-        <img src="/icons/icon_32x32.png" alt="Gogogo" className="brand-icon" />
+        <img src={`${baseUrl}icons/icon_32x32.png`} alt="Gogogo" className="brand-icon" />
         <span className="brand-name">Gogogo</span>
       </button>
       <nav className="menu">
