@@ -3,6 +3,10 @@ import { expect, BrowserLocator, RuntimeUtils, AIClient } from "@gogogo/browser-
 export class GogogoUtils {
   static async isExtensionInstalled(): Promise<boolean> {
     try {
+      const wait = async (timeout: number): Promise<void> => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+      };
+      await wait(300);
       const browserLocator = new BrowserLocator();
       const browser = await browserLocator.get();
       await browser.lastActivePage();

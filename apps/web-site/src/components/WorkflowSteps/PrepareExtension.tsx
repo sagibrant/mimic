@@ -6,22 +6,29 @@ interface PrepareExtensionProps {
 }
 
 const PrepareExtension: React.FC<PrepareExtensionProps> = ({ stepNumber }) => {
-  const [isInstalled, setIsInstalled] = React.useState<boolean | null>(null);
+  const [isInstalled, setIsInstalled] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    let cancelled = false;
-
     const checkIsInstalled = async () => {
       const installed = await GogogoUtils.isExtensionInstalled();
-      if (!cancelled) {
-        setIsInstalled(installed);
+      setIsInstalled(installed);
+    };
+
+    const onReadyStateChange = () => {
+      if (document.readyState === 'complete') {
+        document.removeEventListener('readystatechange', onReadyStateChange);
+        void checkIsInstalled();
       }
     };
 
-    void checkIsInstalled();
+    if (document.readyState === 'complete') {
+      void checkIsInstalled();
+    } else {
+      document.addEventListener('readystatechange', onReadyStateChange);
+    }
 
     return () => {
-      cancelled = true;
+      document.removeEventListener('readystatechange', onReadyStateChange);
     };
   }, []);
 
