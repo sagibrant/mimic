@@ -215,7 +215,7 @@ export default function App() {
   }, []);
 
   // State management
-  const [uiMode, setUiMode] = useState<'idle' | 'record' | 'replay' | 'replayFromStep'>('idle');
+  const [uiMode, setUiMode] = useState<'idle' | 'record' | 'replay'>('idle');
   const [isTreeCollapsed, setIsTreeCollapsed] = useState(true);
   const [isBottomExpanded, setIsBottomExpanded] = useState(false);
 
@@ -1000,7 +1000,7 @@ export default function App() {
       return;
     }
 
-    setUiMode('replayFromStep');
+    setUiMode('replay');
     setIsTreeCollapsed(true);
 
     const stepIds = steps.map(s => s.uid);
@@ -1276,7 +1276,8 @@ export default function App() {
       return;
     }
 
-    setUiMode('replayFromStep');
+    setUiMode('replay');
+    setIsTreeCollapsed(true);
 
     const stepIds = steps.map(s => s.uid);
 
