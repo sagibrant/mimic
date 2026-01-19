@@ -17,7 +17,7 @@ export default function LocatorBaseDoc() {
       <Paragraph>Base class for locators with filtering and ordinal selection.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/locators/Locator.ts">Locator.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/locators/Locator.ts">Locator.ts</a>
       </Paragraph>
     </Section>
   );

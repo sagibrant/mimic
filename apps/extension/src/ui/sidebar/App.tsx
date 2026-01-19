@@ -58,7 +58,6 @@ import { Separator } from '../components/ui/separator';
 import { ThemeProvider } from '../components/theme-provider';
 
 export default function App() {
-  console.log('sidebar ==> App');
   // Stable Util methods
   /**
    * Localization helper
@@ -498,7 +497,7 @@ export default function App() {
       return;
     }
     try {
-      const docURL = 'https://sagibrant.github.io/gogogo/';
+      const docURL = 'https://qagogogo.github.io/gogogo/';
       await chrome.tabs.create({ url: docURL });
     } catch (error) {
       console.error(error);

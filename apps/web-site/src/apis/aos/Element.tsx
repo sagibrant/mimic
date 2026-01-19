@@ -76,7 +76,7 @@ export default function ElementDoc() {
       <Paragraph>DOM element automation with rich properties and actions. Includes Node base members.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/aos/Element.ts">Element.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Element.ts">Element.ts</a>
       </Paragraph>
     </Section>
   );

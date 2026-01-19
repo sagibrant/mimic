@@ -40,7 +40,7 @@ export default function PageDoc() {
       <Paragraph>Represents a tab/page with full navigation and interaction.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/aos/Page.ts">Page.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Page.ts">Page.ts</a>
       </Paragraph>
     </Section>
   );

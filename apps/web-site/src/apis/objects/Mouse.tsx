@@ -14,7 +14,7 @@ export default function MouseDoc() {
       <Paragraph>Mouse automation bound to a page.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/aos/Mouse.ts">Mouse.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Mouse.ts">Mouse.ts</a>
       </Paragraph>
     </Section>
   );

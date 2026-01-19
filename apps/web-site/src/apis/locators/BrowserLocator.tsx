@@ -15,7 +15,7 @@ export default function BrowserLocatorDoc() {
         <a href="/apis/automation/browser" style={{ marginLeft: 6 }}>Browser</a>.
       </Paragraph>
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/locators/BrowserLocator.ts">BrowserLocator.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/locators/BrowserLocator.ts">BrowserLocator.ts</a>
       </Paragraph>
     </Section>
   );

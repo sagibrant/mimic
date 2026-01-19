@@ -22,7 +22,7 @@ export default function FrameDoc() {
       <Paragraph>Represents a document frame.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/sagibrant/gogogo/blob/main/packages/browser-sdk/src/aos/Frame.ts">Frame.ts</a>
+        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Frame.ts">Frame.ts</a>
       </Paragraph>
     </Section>
   );

@@ -25,15 +25,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sagibrant/gogogo.git"
+    "url": "git+https://github.com/qagogogo/gogogo.git"
   },
   "keywords": [],
   "author": "Sagi",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/sagibrant/gogogo/issues"
+    "url": "https://github.com/qagogogo/gogogo/issues"
   },
-  "homepage": "https://github.com/sagibrant/gogogo#readme",
+  "homepage": "https://github.com/qagogogo/gogogo#readme",
   "packageManager": "pnpm@10.26.2",
   "engines": {
     "node": ">=23.11.0",

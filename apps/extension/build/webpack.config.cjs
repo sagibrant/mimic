@@ -102,7 +102,7 @@ const getKeyPath = (keyType, browser, tempDir) => {
 
 // Generate default version: year.month.day.0
 const now = new Date();
-const defaultVersion = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}.${String(now.getHours()).padStart(2, '0')}`;
+const defaultVersion = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}.${now.getHours()}`;
 
 module.exports = (env) => {
   console.log(`${timestamp()} webpack.config.cjs:: ==>`);
@@ -125,7 +125,7 @@ module.exports = (env) => {
   console.log(`${timestamp()} webpack.config.cjs:: configuring - browser: ${browser}, manifestVersion: ${manifestVersion}, target: ${target}, version: ${version}, outputPath: ${outputPath}, tempDir: ${tempDir}`);
 
   const publicKeyPath = browser !== 'firefox' ? getKeyPath('publicKey', browser, tempDir) : null;
-  const privateKeyPath = browser !== 'firefox' ? getKeyPath('privateKey', browser, tempDir) : null;
+  const privateKeyPath = (browser !== 'firefox' && browser !== 'edge') ? getKeyPath('privateKey', browser, tempDir) : null;
   console.log(`${timestamp()} webpack.config.cjs:: key paths - publicKeyPath: ${publicKeyPath || 'none'}, privateKeyPath: ${privateKeyPath || 'none'}`);
 
   const config = {
