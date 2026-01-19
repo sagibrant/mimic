@@ -29,5 +29,5 @@ SettingUtils.getSettings().logLevel = 'WARN';
 const dispatcher = new SandboxDispatcher();
 const handler = new SandboxHandler();
 dispatcher.addHandler(handler);
-RuntimeUtils.dispatcher = dispatcher;
+(RuntimeUtils as { dispatcher: unknown }).dispatcher = dispatcher;
 await dispatcher.init();
