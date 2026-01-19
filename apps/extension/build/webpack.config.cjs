@@ -125,7 +125,7 @@ module.exports = (env) => {
   console.log(`${timestamp()} webpack.config.cjs:: configuring - browser: ${browser}, manifestVersion: ${manifestVersion}, target: ${target}, version: ${version}, outputPath: ${outputPath}, tempDir: ${tempDir}`);
 
   const publicKeyPath = browser !== 'firefox' ? getKeyPath('publicKey', browser, tempDir) : null;
-  const privateKeyPath = browser !== 'firefox' ? getKeyPath('privateKey', browser, tempDir) : null;
+  const privateKeyPath = (browser !== 'firefox' && browser !== 'edge') ? getKeyPath('privateKey', browser, tempDir) : null;
   console.log(`${timestamp()} webpack.config.cjs:: key paths - publicKeyPath: ${publicKeyPath || 'none'}, privateKeyPath: ${privateKeyPath || 'none'}`);
 
   const config = {
