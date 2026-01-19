@@ -125,6 +125,31 @@ html, body {
   background: #2a3649;
 }
 
+@media (prefers-color-scheme: light) {
+  .home-hero {
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 70%, #ffffff 100%);
+    color: #0f172a;
+  }
+
+  .home-hero .em {
+    color: #2563eb;
+  }
+
+  .home-hero p {
+    color: #475569;
+  }
+
+  .home-hero .cta button {
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  .home-hero .cta button:hover {
+    background: #f1f5f9;
+  }
+}
+
 /* Workflow container */
 .workflow-container {
   width: 100%;
