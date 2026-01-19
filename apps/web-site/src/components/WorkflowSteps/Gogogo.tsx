@@ -64,19 +64,19 @@ const Gogogo: React.FC<GogogoProps> = ({
       console.log('AI agent is processing your request...');
       console.log('URL:', url);
       console.log('Prompt:', promptContent);
-      showToast(
-        ToastTypes.Info,
-        'AI Automation Started',
-        'Our AI agent is now executing your automation request.'
-      );
-      // Simulate some processing time
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // showToast(
+      //   ToastTypes.Info,
+      //   'AI Automation Started',
+      //   'Our AI agent is now executing your automation request.'
+      // );
+      // // Simulate some processing time
+      // await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Mock success response
       showToast(
-        ToastTypes.Success,
-        'AI Automation Completed',
-        'Our AI agent has completed your automation request.'
+        ToastTypes.Info,
+        'AI Coming Soon',
+        "Thanks for trying Gogogo AI — it's still in development and will be available soon."
       );
     } catch (error) {
       console.error('Error running AI agent:', error);
