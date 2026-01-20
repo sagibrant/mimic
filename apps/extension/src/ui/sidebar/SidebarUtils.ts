@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file SidebarUtils.ts
  * @description 
- * Shared utility classes and functions for Sidebar
+ * Utility classes and functions for Sidebar
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

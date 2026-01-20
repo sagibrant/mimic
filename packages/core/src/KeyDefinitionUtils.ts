@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file KeyDefinitionUtils.ts
  * @description 
- * Shared utility classes for KeyDefinitions
+ * Utility classes for KeyDefinitions
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

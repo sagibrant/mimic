@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file RtidUtils.ts
  * @description 
- * Shared utility classes and functions
+ * Utility classes and functions
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

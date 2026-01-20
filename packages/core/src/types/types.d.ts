@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file types.d.ts
  * @description 
- * Shared types which observable to end users
+ * Core types which observable to end users
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

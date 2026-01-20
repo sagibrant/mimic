@@ -14,13 +14,13 @@
     "lint:prettier": "prettier --write \"**/*.{js, ts, mjs, cjs, json, tsx, css, less, scss, vue, html, md}\"",
     "lint:eslint": "eslint",
     "lint:spellcheck": "cspell lint \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,css,less,scss,vue,html,md}\"",
-    "build:shared": "pnpm --prefix packages/shared build",
+    "build:core": "pnpm --prefix packages/core build",
     "build:browser-sdk": "pnpm --prefix packages/browser-sdk build",
     "build:extension:dev": "pnpm --prefix apps/extension build:dev --",
     "build:extension:prod": "pnpm --prefix apps/extension build:prod --",
     "build:test": "pnpm --prefix tests/extension build",
-    "build:dev": "pnpm build:test && pnpm build:shared && pnpm build:browser-sdk && pnpm build:extension:dev",
-    "build:prod": "pnpm build:test && pnpm build:shared && pnpm build:browser-sdk && pnpm build:extension:prod",
+    "build:dev": "pnpm build:test && pnpm build:core && pnpm build:browser-sdk && pnpm build:extension:dev",
+    "build:prod": "pnpm build:test && pnpm build:core && pnpm build:browser-sdk && pnpm build:extension:prod",
     "build": "pnpm build:prod"
   },
   "repository": {

@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file Settings.ts
  * @description 
- * Shared utility classes for settings
+ * Utility classes for settings
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

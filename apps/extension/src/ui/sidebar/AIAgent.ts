@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file AIAgentUtils.ts
  * @description 
- * Shared AI utility classes and functions
+ * AI utility classes and functions
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

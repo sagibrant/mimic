@@ -1,10 +1,10 @@
 # @mimic-sdk/core
 
-Shared utilities for the mimic project that work across web, node, and extension environments.
+Core utilities for the mimic project that work across web, node, and extension environments.
 
 ## Overview
 
-This package contains shared utilities that can be used across different environments:
+This package contains core utilities that can be used across different environments:
 - Chrome Extensions
 - Web Applications
 - Node.js Applications

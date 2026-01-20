@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file CryptoUtil.ts
  * @description 
- * Shared utility classes and functions for encrypt & decrypt
+ * Utility classes and functions for encrypt & decrypt
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

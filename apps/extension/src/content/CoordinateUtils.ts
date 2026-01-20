@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file ChromeContentUtils.ts
  * @description 
- * Shared utility classes and functions for content in chrome
+ * Utility classes and functions for content in chrome
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

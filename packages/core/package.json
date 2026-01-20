@@ -2,7 +2,7 @@
   "name": "@mimic-sdk/core",
   "private": true,
   "version": "0.1.0",
-  "description": "Shared utilities for mimic project",
+  "description": "Core utilities for mimic project",
   "repository": "https://github.com/sagibrant/mimic",
   "homepage": "https://sagibrant.github.io/mimic/",
   "type": "module",
@@ -31,7 +31,7 @@
     "type-check": "tsc --noEmit"
   },
   "keywords": [
-    "shared",
+    "core",
     "utils",
     "typescript",
     "chrome-extension",

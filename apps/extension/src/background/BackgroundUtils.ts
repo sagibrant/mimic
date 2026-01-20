@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file BackgroundUtils.ts
  * @description 
- * Shared utility classes and functions for background
+ * Utility classes and functions for background
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

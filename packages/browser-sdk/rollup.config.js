@@ -22,7 +22,7 @@ const config = [
     plugins: [
       alias({
         entries: [
-          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../shared/dist/es/index.mjs') }
+          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../core/dist/es/index.mjs') }
         ]
       }),
       nodeResolve({
@@ -51,7 +51,7 @@ const config = [
     plugins: [
       alias({
         entries: [
-          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../shared/dist/cjs/index.js') }
+          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../core/dist/cjs/index.js') }
         ]
       }),
 
@@ -85,7 +85,7 @@ const config = [
     plugins: [
       alias({
         entries: [
-          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../shared/dist/browser/index.js') }
+          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../core/dist/browser/index.js') }
         ]
       }),
 
@@ -111,7 +111,7 @@ const config = [
     plugins: [
       alias({
         entries: [
-          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../shared/dist/types/index.d.ts') }
+          { find: '@mimic-sdk/core', replacement: path.resolve(__dirname, '../core/dist/types/index.d.ts') }
         ]
       }),
       dts()

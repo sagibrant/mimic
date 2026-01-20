@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file ContentUtils.ts
  * @description 
- * Shared utility classes and functions for content
+ * Utility classes and functions for content
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

@@ -9,8 +9,8 @@
     "outDir": "./dist",                                 // Output directory for compiled files
     "rootDir": ".",                                     // Root directory of source files
     "paths": {                                          // Path alias for source files
-      "@shared": ["./packages/shared/src/*"], 
-      "@browser-sdk": ["./packages/browser-sdk/src/*"], 
+      "@mimic-sdk/core": ["./packages/core/src/*"], 
+      "mimic-sdk": ["./packages/browser-sdk/src/*"], 
     },                       
 
     // Type checking

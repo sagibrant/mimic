@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file Common.ts
  * @description 
- * Shared utility types
+ * Utility types
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

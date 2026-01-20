@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file DOMPathUtils.ts
  * @description 
- * Shared DOMPath utility classes and functions
+ * DOMPath utility classes and functions
  * Reference https://source.chromium.org/chromium/chromium/src/+/main:third_party/devtools-frontend/src/front_end/panels/elements/DOMPath.ts
  * 
  * 

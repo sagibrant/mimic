@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file StorageUtils.ts
  * @description 
- * Shared utility functions for storage
+ * Utility functions for storage
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
