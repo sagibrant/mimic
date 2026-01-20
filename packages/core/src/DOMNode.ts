@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file DOMNode.ts
  * @description 
- * Shared DOMNode & Step types
+ * DOMNode & Step types
  * Reference https://source.chromium.org/chromium/chromium/src/+/main:third_party/devtools-frontend/src/front_end/panels/elements/DOMPath.ts
  * 
  * 

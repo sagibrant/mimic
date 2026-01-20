@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import * as api from "@gogogo/shared";
-import { Rtid, RtidUtils, Utils, SettingUtils } from "@gogogo/shared";
+import * as api from "@mimic-sdk/core";
+import { Rtid, RtidUtils, Utils, SettingUtils } from "@mimic-sdk/core";
 import { Frame } from "./Frame";
 import { ElementLocator } from "../locators/ElementLocator";
 import { TextLocator } from "../locators/TextLocator";

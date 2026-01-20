@@ -26,7 +26,7 @@ export default function WindowDoc() {
       <Paragraph>Represents a browser window.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Window.ts">Window.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/aos/Window.ts">Window.ts</a>
       </Paragraph>
     </Section>
   );

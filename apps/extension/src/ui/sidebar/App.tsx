@@ -27,7 +27,7 @@ import StepScriptEditor, { StepScriptEditorRef } from './StepScriptEditor';
 import StepAIAgent from './StepAIAgent';
 import { TaskAsset, TaskGroup, Task, Step, TaskResult, StepResult } from '../../execution/Task';
 import * as TaskUtils from '../../execution/TaskUtils';
-import { BrowserUtils, SettingUtils, Utils } from '@gogogo/shared';
+import { BrowserUtils, SettingUtils, Utils } from '@mimic-sdk/core';
 import { SidebarUtils } from './SidebarUtils';
 import { toast, Toaster } from 'sonner';
 import {
@@ -406,7 +406,7 @@ export default function App() {
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '.gogogo';
+    fileInput.accept = '.mimic';
     fileInput.addEventListener('change', async event => {
       const target = event.target as HTMLInputElement;
       const file = target.files?.[0];
@@ -479,7 +479,7 @@ export default function App() {
       const blob = new Blob([jsonContent], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.download = 'tasks.gogogo';
+      a.download = 'tasks.mimic';
       a.href = url;
       document.body.appendChild(a);
       a.click();
@@ -497,7 +497,7 @@ export default function App() {
       return;
     }
     try {
-      const docURL = 'https://qagogogo.github.io/gogogo/';
+      const docURL = 'https://sagibrant.github.io/mimic/';
       await chrome.tabs.create({ url: docURL });
     } catch (error) {
       console.error(error);

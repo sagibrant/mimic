@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@mimic-sdk/core";
 
 /**
  * The channel based on the chrome.runtime apis

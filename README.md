@@ -1,10 +1,10 @@
-# Gogogo
+# Mimic
 
-Gogogo enables reliable end-to-end automation on your machine, with a focus on browser automation through a lightweight extension.
+Mimic enables reliable end-to-end automation on your machine, with a focus on browser automation through a lightweight extension.
 
-## Gogogo - extension
+## Mimic - extension
 
-Gogogo extension is a standalone solution for browser automation.
+Mimic extension is a standalone solution for browser automation.
 It is a modern web extension available on Chrome, Edge, Firefox and Safari. 
 It is small, safe, fast, reliable and user friendly with AI assistance.
 It helps you to generate, execute the automation steps on your browser directly without installing any heavy local tools.
@@ -23,8 +23,8 @@ It helps you to generate, execute the automation steps on your browser directly 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/gogogo.git
-   cd gogogo
+   git clone https://github.com/sagibrant/mimic.git
+   cd mimic
    ```
 
 2. **Install dependencies**
@@ -62,7 +62,7 @@ It helps you to generate, execute the automation steps on your browser directly 
 
 ### API Documentation
 
-The Gogogo extension provides a comprehensive API for browser automation. Key global variables and methods include:
+The Mimic extension provides a comprehensive API for browser automation. Key global variables and methods include:
 
 - `ai`: AIClient for AI-powered automation assistance
 - `browser`: Browser interface for browser-level operations
@@ -74,7 +74,7 @@ For detailed API documentation, see [docs/README.md](docs/README.md).
 
 ### Key Management
 
-Secure management of extension signing keys is crucial. Gogogo uses environment variables for key management with the following format:
+Secure management of extension signing keys is crucial. Mimic uses environment variables for key management with the following format:
 
 ```
 EXTENSION_{BROWSER}_{KEYTYPE}

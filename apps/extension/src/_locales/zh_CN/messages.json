@@ -1,5 +1,5 @@
 {
-    "gogogo": { "message": "Gogogo" },
+    "mimic": { "message": "Mimic" },
     
     "action_btn_label_store": { "message": "商店" },
     "action_btn_label_sidebar": { "message": "侧边栏" },
@@ -13,7 +13,7 @@
     "action_error_failedToOpenOptions": { "message": "打开设置失败" },
     "action_error_failedToToggleRecording": { "message": "切换录制状态失败" },
     "action_error_recordingNotSupported": { "message": "暂不支持录制功能" },
-    "action_notification": { "message": "Gogogo" },
+    "action_notification": { "message": "Mimic" },
     "action_notification_recordingStarted": { "message": "录制已开始" },
     "action_notification_recordingStopped": { "message": "录制已停止" },
 

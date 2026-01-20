@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, Rtid, Logger, SettingUtils, ElementInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, Rtid, Logger, SettingUtils, ElementInfo } from "@mimic-sdk/core";
 import { SidebarDispatcher } from "./SidebarDispatcher";
 
 export class StepEngine {

@@ -91,7 +91,7 @@ export default function TypesDoc() {
 
   return (
     <Section title="Types">
-      <Paragraph>Core types used across Gogogo. Reference for method parameters and return values.</Paragraph>
+      <Paragraph>Core types used across Mimic. Reference for method parameters and return values.</Paragraph>
       <h2 style={{ fontSize: '1.5rem', margin: '1.25rem 0 0.5rem' }}>LocatorOptions</h2>
       <Paragraph>Union of all locator option types.</Paragraph>
       <List items={[{ name: 'LocatorOptions', kind: 'property', returns: 'BrowserLocatorOptions | WindowLocatorOptions | PageLocatorOptions | FrameLocatorOptions | ElementLocatorOptions | TextLocatorOptions', desc: 'Primary selector options type union.' }]} />

@@ -95,12 +95,12 @@ importers:
       '@codemirror/view':
         specifier: ^6.39.6
         version: 6.39.11
-      '@gogogo/browser-sdk':
+      'mimic-sdk':
         specifier: workspace:*
         version: link:../../packages/browser-sdk
-      '@gogogo/shared':
+      '@mimic-sdk/core':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/core
       '@langchain/core':
         specifier: ^1.1.8
         version: 1.1.15(openai@6.16.0(zod@4.3.5))
@@ -294,12 +294,12 @@ importers:
       '@codemirror/view':
         specifier: ^6.39.8
         version: 6.39.11
-      '@gogogo/browser-sdk':
+      'mimic-sdk':
         specifier: workspace:*
         version: link:../../packages/browser-sdk
-      '@gogogo/shared':
+      '@mimic-sdk/core':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/core
       jshint:
         specifier: ^2.13.6
         version: 2.13.6
@@ -361,9 +361,9 @@ importers:
 
   packages/browser-sdk:
     dependencies:
-      '@gogogo/shared':
+      '@mimic-sdk/core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../core
       openai:
         specifier: ^6.4.0
         version: 6.16.0(zod@4.3.5)
@@ -372,7 +372,7 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(rollup@4.55.1)
 
-  packages/shared: {}
+  packages/core: {}
 
   tests/extension:
     devDependencies:

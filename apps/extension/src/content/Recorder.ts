@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, Logger, DOMPathUtils, RecordedStep } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, Logger, DOMPathUtils, RecordedStep } from "@mimic-sdk/core";
 import { ContentUtils } from "./ContentUtils";
 
 export class Recorder {

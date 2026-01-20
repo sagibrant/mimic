@@ -1,9 +1,9 @@
 import React from 'react';
-import { GogogoUtils } from '../../utils/GogogoUtils';
+import { MimicUtils } from '../../utils/MimicUtils';
 import { ToastTypes } from '../../utils/shared';
 import type { ToastType } from '../../utils/shared';
 
-interface GogogoProps {
+interface MimicProps {
   isAIMode: boolean;
   scriptContent: string;
   promptContent: string;
@@ -12,7 +12,7 @@ interface GogogoProps {
   showToast: (type: ToastType, message: string, description?: string) => void;
 }
 
-const Gogogo: React.FC<GogogoProps> = ({
+const Mimic: React.FC<MimicProps> = ({
   isAIMode,
   scriptContent,
   promptContent,
@@ -30,7 +30,7 @@ const Gogogo: React.FC<GogogoProps> = ({
         'Script Executed started',
         'Your automation script is being executed.'
       );
-      const result = await GogogoUtils.runScript(scriptContent, url);
+      const result = await MimicUtils.runScript(scriptContent, url);
       if (result) {
         console.log('Script result:', result);
         showToast(
@@ -76,7 +76,7 @@ const Gogogo: React.FC<GogogoProps> = ({
       showToast(
         ToastTypes.Info,
         'AI Coming Soon',
-        "Thanks for trying Gogogo AI — it's still in development and will be available soon."
+        "Thanks for trying Mimic AI — it's still in development and will be available soon."
       );
     } catch (error) {
       console.error('Error running AI agent:', error);
@@ -92,7 +92,7 @@ const Gogogo: React.FC<GogogoProps> = ({
     <div className="workflow-step">
       <div className="step-header">
         <div className="step-number">{stepNumber}</div>
-        <h2 className="step-title">{'Gogogo'}</h2>
+        <h2 className="step-title">{'Mimic'}</h2>
       </div>
       <div className="step-content">
         <button
@@ -112,4 +112,4 @@ const Gogogo: React.FC<GogogoProps> = ({
   );
 };
 
-export default Gogogo;
+export default Mimic;

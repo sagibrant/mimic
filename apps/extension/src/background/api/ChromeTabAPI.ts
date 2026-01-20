@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { EventEmitter } from "@gogogo/shared";
+import { EventEmitter } from "@mimic-sdk/core";
 
 /**
  * Aggregates all non-deprecated events from the chrome.tabs API into a TypeScript interface, 

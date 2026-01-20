@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils } from "@gogogo/shared";
+import { Utils } from "@mimic-sdk/core";
 import { ChromeDevToolsProtocol } from "./ChromeDevToolsProtocol";
 import { DebuggerSession } from "./CDPTypes";
 

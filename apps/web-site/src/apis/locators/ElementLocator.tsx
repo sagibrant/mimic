@@ -15,7 +15,7 @@ export default function ElementLocatorDoc() {
         <a href="/apis/automation/element" style={{ marginLeft: 6 }}>Element</a>.
       </Paragraph>
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/locators/ElementLocator.ts">ElementLocator.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/locators/ElementLocator.ts">ElementLocator.ts</a>
       </Paragraph>
     </Section>
   );

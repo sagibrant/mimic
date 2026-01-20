@@ -59,7 +59,7 @@ await clean();
 console.log('window locator =>');
 
 console.log('current page', page);
-const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
+const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
 await page.navigate(url_mouse);
 await page.sync();
 const status = await page.status();
@@ -83,7 +83,7 @@ for (const window of windows) {
 }
 
 // open new window
-const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
 const newWindow = await browser.openNewWindow(url_keyboard);
 console.log('await browser.openNewWindow(url_keyboard)', newWindow);
 expect(newWindow).not.toBeNullOrUndefined();

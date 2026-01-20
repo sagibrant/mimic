@@ -32,7 +32,7 @@ import { JSHINT, LintError, LintOptions } from 'jshint';
 import { ayuLight, coolGlow } from 'thememirror';
 import { MethodDefinition, StepScriptEditorHelper } from './StepScriptEditorHelper';
 import { SidebarUtils } from './SidebarUtils';
-import { ElementInfo } from '@gogogo/shared';
+import { ElementInfo } from '@mimic-sdk/core';
 import { Button } from '@/ui/components/ui/button';
 import { Label } from '@/ui/components/ui/label';
 

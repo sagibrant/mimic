@@ -190,7 +190,7 @@ console.log('browser', browser);
   console.log('await browser.windows()', windows);
   expect(windows).not.toBeNullOrUndefined();
   // open new window
-  const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+  const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
   const newWindow = await browser.openNewWindow(url_keyboard);
   console.log('await browser.openNewWindow(url_keyboard)', newWindow);
   expect(newWindow).not.toBeNullOrUndefined();
@@ -208,7 +208,7 @@ console.log('browser', browser);
   console.log('await browser.pages()', pages);
   expect(pages).not.toBeNullOrUndefined();
   // open new page
-  const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
+  const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
   const newPage = await browser.openNewPage(url_mouse);
   console.log('await browser.openNewPage(url_mouse)', newPage);
   expect(newPage).not.toBeNullOrUndefined();

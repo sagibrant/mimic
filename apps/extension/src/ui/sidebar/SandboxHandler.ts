@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, MsgDataHandlerBase, Settings, SettingUtils } from "@gogogo/shared";
-import { expect, BrowserLocator, RuntimeUtils, AIClient } from "@gogogo/browser-sdk";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, MsgDataHandlerBase, Settings, SettingUtils } from "@mimic-sdk/core";
+import { expect, BrowserLocator, RuntimeUtils, AIClient } from "mimic-sdk";
 
 export class SandboxHandler extends MsgDataHandlerBase {
 
@@ -60,8 +60,8 @@ export class SandboxHandler extends MsgDataHandlerBase {
           return new Promise(resolve => setTimeout(resolve, timeout));
         }
       };
-      (globalThis as any).gogogo = {
-        ...(globalThis as any).gogogo,
+      (globalThis as any).mimic = {
+        ...(globalThis as any).mimic,
         wait: wait
       };
       // reset the page in case the tab is switched before the script execution

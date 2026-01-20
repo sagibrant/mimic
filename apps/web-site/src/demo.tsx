@@ -5,15 +5,15 @@ import PrepareExtension from './components/WorkflowSteps/PrepareExtension';
 import PrepareURL from './components/WorkflowSteps/PrepareURL';
 import PrepareScripts from './components/WorkflowSteps/PrepareScripts';
 import PreparePrompt from './components/WorkflowSteps/PreparePrompt';
-import Gogogo from './components/WorkflowSteps/Gogogo';
+import Mimic from './components/WorkflowSteps/Mimic';
 import ModeToggle from './components/ModeToggle';
 import { ToastTypes } from './utils/shared';
 import type { ToastType } from './utils/shared';
-import { GogogoUtils } from './utils/GogogoUtils';
+import { MimicUtils } from './utils/MimicUtils';
 
 function Demo() {
-  const [url, setUrl] = useState(GogogoUtils.getDemoScriptWebSite());
-  const [scriptContent, setScriptContent] = useState(GogogoUtils.getDemoScript());
+  const [url, setUrl] = useState(MimicUtils.getDemoScriptWebSite());
+  const [scriptContent, setScriptContent] = useState(MimicUtils.getDemoScript());
   const [promptContent, setPromptContent] = useState('');
   const [isAIMode, setIsAIMode] = useState(false);
   const [isDark, setIsDark] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -69,7 +69,7 @@ function Demo() {
             stepNumber={3}
           />
         )}
-        <Gogogo
+        <Mimic
           isAIMode={isAIMode}
           scriptContent={scriptContent}
           promptContent={promptContent}

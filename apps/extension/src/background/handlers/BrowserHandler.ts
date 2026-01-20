@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { BrowserInfo, BrowserUtils, RtidUtils, Utils, SettingUtils, AODesc, AutomationObject, QueryInfo, RecordedStep, RegExpSpec, Selector, LocatorUtils, MsgDataHandlerBase, Cookie } from "@gogogo/shared";
+import { BrowserInfo, BrowserUtils, RtidUtils, Utils, SettingUtils, AODesc, AutomationObject, QueryInfo, RecordedStep, RegExpSpec, Selector, LocatorUtils, MsgDataHandlerBase, Cookie } from "@mimic-sdk/core";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { TabInfo, WindowInfo } from '../api/BrowserWrapperTypes'
 import { WindowHandler } from "./WindowHandler";

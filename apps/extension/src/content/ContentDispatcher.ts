@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, IChannel, Dispatcher, Message, Rtid, MessageData, SettingUtils } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, IChannel, Dispatcher, Message, Rtid, MessageData, SettingUtils } from "@mimic-sdk/core";
 import { ExtensionRuntimeChannel } from "../channels/ExtensionRuntimeChannel";
 import { ContentUtils } from "./ContentUtils";
 import { CustomEventChannel } from "../channels/CustomEventChannel";

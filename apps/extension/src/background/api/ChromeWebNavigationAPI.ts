@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { Utils, EventEmitter } from "@gogogo/shared";
+import { Utils, EventEmitter } from "@mimic-sdk/core";
 
 /**
  * Wrapper for WebNavigationEvent in chrome.webNavigation

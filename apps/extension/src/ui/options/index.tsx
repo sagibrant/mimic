@@ -25,7 +25,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import '../../assets/css/global.css';
 import './App.css';
-import { SettingUtils } from '@gogogo/shared';
+import { SettingUtils } from '@mimic-sdk/core';
 
 await SettingUtils.init();
 

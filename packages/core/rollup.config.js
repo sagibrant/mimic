@@ -59,7 +59,7 @@ const config = [
     output: {
       file: 'dist/browser/index.js',
       format: 'umd',
-      name: 'GogogoShared',
+      name: 'MimicSDKCore',
       sourcemap: true,
       globals: {
         // Define global variables for external dependencies if any

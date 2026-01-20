@@ -1,6 +1,6 @@
-import { expect, BrowserLocator, RuntimeUtils, AIClient } from "@gogogo/browser-sdk";
+import { expect, BrowserLocator, RuntimeUtils, AIClient } from "mimic-sdk";
 
-export class GogogoUtils {
+export class MimicUtils {
   static async isExtensionInstalled(): Promise<boolean> {
     try {
       const wait = async (timeout: number): Promise<void> => {

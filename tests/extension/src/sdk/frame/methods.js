@@ -58,7 +58,7 @@ await clean();
 
 console.log('frame => ');
 console.log('current page', page);
-const url_frame = 'https://qagogogo.github.io/gogogo/aut/index.html';
+const url_frame = 'https://sagibrant.github.io/mimic/aut/index.html';
 
 await page.navigate(url_frame);
 await page.sync();

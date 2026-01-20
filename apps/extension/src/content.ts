@@ -21,7 +21,7 @@
  */
 
 
-import { SettingUtils } from "@gogogo/shared";
+import { SettingUtils } from "@mimic-sdk/core";
 import { FrameHandler } from "./content/handlers/FrameHandler";
 import { ContentDispatcher } from "./content/ContentDispatcher";
 import { ObjectRepository } from "./content/ObjectRepository";
@@ -41,14 +41,14 @@ ContentUtils.repo = repo;
 
 declare global {
   interface Window {
-    gogogo: {
+    mimic: {
       frame: FrameHandler;
       dispatcher: ContentDispatcher;
       repo: ObjectRepository;
     };
   }
 }
-window.gogogo = {
+window.mimic = {
   frame: frame,
   dispatcher: dispatcher,
   repo: repo

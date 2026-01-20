@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import * as api from "@gogogo/shared";
-import { BrowserUtils, Rtid, RtidUtils, Utils } from "@gogogo/shared";
+import * as api from "@mimic-sdk/core";
+import { BrowserUtils, Rtid, RtidUtils, Utils } from "@mimic-sdk/core";
 import { TabInfo } from "./Page";
 import { WindowLocator } from "../locators/WindowLocator";
 import { PageLocator } from "../locators/PageLocator";

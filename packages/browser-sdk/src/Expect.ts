@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import * as api from "@gogogo/shared";
-import { RtidUtils } from "@gogogo/shared";
+import * as api from "@mimic-sdk/core";
+import { RtidUtils } from "@mimic-sdk/core";
 import { ChannelBase } from "./Channel";
 import { Browser } from "./aos/Browser";
 import { Window } from "./aos/Window";

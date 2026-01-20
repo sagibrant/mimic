@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file index.ts
  * @description 
- * Shared package public entry point
+ * Core package public entry point
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-// Export all shared utilities
+// Export all core utilities
 export * as Utils from './Utils';
 export * as RtidUtils from './RtidUtils';
 export * as MsgUtils from './MsgUtils';
@@ -32,7 +32,7 @@ export * as LocatorUtils from './LocatorUtils';
 export * as DOMPathUtils from './DOMPathUtils';
 export * as KeyDefinitionUtils from './KeyDefinitionUtils';
 export type { KeyboardModifier } from './KeyDefinitionUtils';
-// Export all shared class utilities
+// Export all class utilities
 export * from './Logger';
 export * from './DOMNode';
 export * from './EventEmitter';

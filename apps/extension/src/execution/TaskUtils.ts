@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils } from "@gogogo/shared";
+import { Utils } from "@mimic-sdk/core";
 import { ObjectDescription, Step, StepResult, Task, TaskAsset, TaskGroup, TaskResult } from "./Task";
 
 export function createNewTaskAsset(): TaskAsset {

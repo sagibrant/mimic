@@ -1,8 +1,8 @@
 {
-  "name": "gogogo-internal",
+  "name": "mimic-internal",
   "private": true,
   "version": "0.1.0",
-  "description": "Gogogo enables reliable end-to-end automation on your browser.",
+  "description": "Mimic enables reliable end-to-end automation on your browser.",
   "type": "module",
   "directories": {
     "doc": "docs",
@@ -14,26 +14,26 @@
     "lint:prettier": "prettier --write \"**/*.{js, ts, mjs, cjs, json, tsx, css, less, scss, vue, html, md}\"",
     "lint:eslint": "eslint",
     "lint:spellcheck": "cspell lint \"(packages|apps)/**/*.{js,ts,mjs,cjs,json,css,less,scss,vue,html,md}\"",
-    "build:shared": "pnpm --prefix packages/shared build",
+    "build:core": "pnpm --prefix packages/core build",
     "build:browser-sdk": "pnpm --prefix packages/browser-sdk build",
     "build:extension:dev": "pnpm --prefix apps/extension build:dev --",
     "build:extension:prod": "pnpm --prefix apps/extension build:prod --",
     "build:test": "pnpm --prefix tests/extension build",
-    "build:dev": "pnpm build:test && pnpm build:shared && pnpm build:browser-sdk && pnpm build:extension:dev",
-    "build:prod": "pnpm build:test && pnpm build:shared && pnpm build:browser-sdk && pnpm build:extension:prod",
+    "build:dev": "pnpm build:test && pnpm build:core && pnpm build:browser-sdk && pnpm build:extension:dev",
+    "build:prod": "pnpm build:test && pnpm build:core && pnpm build:browser-sdk && pnpm build:extension:prod",
     "build": "pnpm build:prod"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/qagogogo/gogogo.git"
+    "url": "git+https://github.com/sagibrant/mimic.git"
   },
   "keywords": [],
   "author": "Sagi",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/qagogogo/gogogo/issues"
+    "url": "https://github.com/sagibrant/mimic/issues"
   },
-  "homepage": "https://github.com/qagogogo/gogogo#readme",
+  "homepage": "https://github.com/sagibrant/mimic#readme",
   "packageManager": "pnpm@10.26.2",
   "engines": {
     "node": ">=23.11.0",

@@ -29,7 +29,7 @@ export default function TextDoc() {
       <Paragraph>Text node automation and interactions via owner element. Includes Node base members.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Text.ts">Text.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/aos/Text.ts">Text.ts</a>
       </Paragraph>
     </Section>
   );

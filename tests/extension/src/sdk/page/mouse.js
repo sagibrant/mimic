@@ -58,7 +58,7 @@ await clean();
 
 console.log('mouse =>');
 console.log('current page', page);
-const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
+const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
 
 await page.navigate(url_mouse);
 console.log('await page.navigate(url_mouse)', url_mouse);

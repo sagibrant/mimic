@@ -4,7 +4,7 @@ export default function QuickStart() {
   return (
     <Section title="Quick Start">
       <Paragraph>
-        Open the Gogogo extension sidebar. From the sidebar you can record task steps, replay them, and generate runnable scripts.
+        Open the Mimic extension sidebar. From the sidebar you can record task steps, replay them, and generate runnable scripts.
       </Paragraph>
       <Paragraph>
         For a guided walkthrough, watch the playlist:{' '}

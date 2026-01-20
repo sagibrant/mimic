@@ -61,7 +61,7 @@ console.log('current page', page);
 const inputModes = ['default', 'event', 'cdp'];
 for (const inputMode of inputModes) {
   console.log(`inputMode ${inputMode} ======>`);
-  const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+  const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
   await page.navigate(url_keyboard);
   await page.sync();
 

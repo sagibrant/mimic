@@ -58,7 +58,7 @@ await clean();
 
 console.log('frame locator =>');
 console.log('current page', page);
-const url_frame = 'https://qagogogo.github.io/gogogo/aut/index.html';
+const url_frame = 'https://sagibrant.github.io/mimic/aut/index.html';
 
 await page.navigate(url_frame);
 await page.sync();
@@ -171,10 +171,10 @@ if (page) {
     );
     expect(url).toEqual(url_frame1_mozilla);
   }
-  // frame1_shadowclosed 'https://qagogogo.github.io/gogogo/aut/shadowclosed.html'
+  // frame1_shadowclosed 'https://sagibrant.github.io/mimic/aut/shadowclosed.html'
   {
     const url_frame1_shadowclosed =
-      'https://qagogogo.github.io/gogogo/aut/shadowclosed.html';
+      'https://sagibrant.github.io/mimic/aut/shadowclosed.html';
     count = await page
       .frame({ url: /shadowclosed\.html$/ })
       .filter({ name: 'id', value: 'frame1' })
@@ -239,7 +239,7 @@ if (page) {
   }
   // frame2 shadowopen.html
   {
-    const url_frame2_shadowopen = 'https://qagogogo.github.io/gogogo/aut/shadowopen.html';
+    const url_frame2_shadowopen = 'https://sagibrant.github.io/mimic/aut/shadowopen.html';
     count = await page
       .frame({ selector: '#frame2' })
       .filter({ name: 'id', value: 'frame2' })

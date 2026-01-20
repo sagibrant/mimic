@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, QueryInfo, RecordedStep, Rtid, ClickOptions, Point, RectInfo, TextInputOptions, LocatorUtils, MsgDataHandlerBase, KeyDefinitionUtils, ElementInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, InvokeAction, QueryInfo, RecordedStep, Rtid, ClickOptions, Point, RectInfo, TextInputOptions, LocatorUtils, MsgDataHandlerBase, KeyDefinitionUtils, ElementInfo } from "@mimic-sdk/core";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { FrameInfo, TabInfo, WindowInfo } from "../api/BrowserWrapperTypes";
 import { WebNavigationEventDetails } from "../api/ChromeWebNavigationAPI";

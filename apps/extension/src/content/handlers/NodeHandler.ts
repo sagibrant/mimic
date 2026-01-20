@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Rtid, Selector, LocatorUtils, MsgDataHandlerBase, ClickOptions, Point, RectInfo, TextInputOptions } from "@gogogo/shared";
+import { RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Rtid, Selector, LocatorUtils, MsgDataHandlerBase, ClickOptions, Point, RectInfo, TextInputOptions } from "@mimic-sdk/core";
 import { ContentUtils } from "../ContentUtils";
 import { FrameHandler } from "./FrameHandler";
 import * as EventSimulator from "../EventSimulator";

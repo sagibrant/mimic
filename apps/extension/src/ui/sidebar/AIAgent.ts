@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file AIAgentUtils.ts
  * @description 
- * Shared AI utility classes and functions
+ * AI utility classes and functions
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 import { Jimp } from "jimp";
-import { Logger, Utils } from "@gogogo/shared";
+import { Logger, Utils } from "@mimic-sdk/core";
 import { BaseMessage, AIMessage, ToolMessage, summarizationMiddleware, ReactAgent, HumanMessage } from "langchain";
 import { ChatOpenAI } from '@langchain/openai';
 import { createAgent, createMiddleware, tool } from "langchain";
@@ -172,20 +172,20 @@ Fields:
   }
 
   private async loadChatSystemPrompt() {
-    const api_doc = await this.loadGogogoAPIDefinition();
+    const api_doc = await this.loadMimicAPIDefinition();
     const systemPrompt = `## Role:
 You are a versatile professional in web testing and automation. Your outstanding contributions will impact the user experience of billions of users.
 
 ## Objective:
 * Analyze the user's request and plan actions.
 * Decide when to use screenshot analysis versus DOM interaction.
-* Write and run Gogogo JavaScript to achieve the user's goal.
+* Write and run Mimic JavaScript to achieve the user's goal.
 
 ## Important
-* Use Gogogo extension tools only; automation must be via Gogogo APIs.
-* Review APIs with get_gogogo_api_definition and get_gogogo_api_document when unsure.
+* Use Mimic extension tools only; automation must be via Mimic APIs.
+* Review APIs with get_mimic_api_definition and get_mimic_api_document when unsure.
 * For Q&A, prefer analyze_page_with_vision to read from the screenshot.
-* For interaction, use analyze_page_with_vision → get_element_from_point → run_gogogo_script.
+* For interaction, use analyze_page_with_vision → get_element_from_point → run_mimic_script.
 * Respond using the user's language.
 
 ## Tool Selection Heuristics:
@@ -193,17 +193,17 @@ You are a versatile professional in web testing and automation. Your outstanding
 * If the request is informational (Q&A about page content), call analyze_page_with_vision with a direct question and return the answer.
 * If the request is interactive (click, fill, select, etc.):
   1) Call analyze_page_with_vision with a concise element description.
-  2) Choose the best element and pass it to get_element_from_point to obtain its Gogogo locator script.
-  3) Compose a minimal Gogogo JavaScript using that locator and call run_gogogo_script.
+  2) Choose the best element and pass it to get_element_from_point to obtain its Mimic locator script.
+  3) Compose a minimal Mimic JavaScript using that locator and call run_mimic_script.
 * After navigation or tab changes, re-check context via get_page_info and page.sync before further actions.
 * If a script fails, review the definitions/documents via tools, fix the script, and retry (max 2 retries). If repeated failure, fall back to analyze_page_with_vision Q&A when appropriate.
 
-## Gogogo API Guidelines:
-* Use Gogogo API to interact with the page and browser, make sure write safe and correct javascript code
-* Use PURE JavaScript script. Although TypeScript definitions of Gogogo API are provided (defined in types.d.ts), DO NOT use TypeScript-specific syntax (type annotations, interfaces, type aliases, enums)
+## Mimic API Guidelines:
+* Use Mimic API to interact with the page and browser, make sure write safe and correct javascript code
+* Use PURE JavaScript script. Although TypeScript definitions of Mimic API are provided (defined in types.d.ts), DO NOT use TypeScript-specific syntax (type annotations, interfaces, type aliases, enums)
 * Use async/await for all asynchronous operations
 * Test scripts in your mind before running them
-* If scripts have errors, try to review the Gogogo api definitions using tool get_gogogo_api_definition and the Gogogo api document with examples using tool get_gogogo_api_document and fix the errors
+* If scripts have errors, try to review the Mimic api definitions using tool get_mimic_api_definition and the Mimic api document with examples using tool get_mimic_api_document and fix the errors
 * Global variables:
   (1) ai: Corresponds to the AIClient interface in types.d.ts, representing the AIClient object (use methods defined in types.d.ts), e.g., const response = await ai.init().setModel('gpt-4o').chat('hello');
   (2) browser: Corresponds to the Browser interface in types.d.ts, representing the current browser (use methods defined in types.d.ts), e.g., await browser.page().first().bringToFront();
@@ -231,10 +231,10 @@ You are a versatile professional in web testing and automation. Your outstanding
 * Tool Call Justification: One short sentence explaining why this tool is appropriate now.
 * Action: Call the appropriate tool with precise inputs.
 * Observation: Summarize only key results from the tool; avoid verbose output unless necessary.
-* Action: If interactive, generate a minimal Gogogo script and run it via run_gogogo_script.
+* Action: If interactive, generate a minimal Mimic script and run it via run_mimic_script.
 * Final: Report the outcome in user's language. If applicable, include concise JSON results.
 
-## Gogogo API Reference (types.d.ts):
+## Mimic API Reference (types.d.ts):
 \`\`\`typescript
 ${api_doc}
 \`\`\`
@@ -246,7 +246,7 @@ ${api_doc}
   /** ==================================================================================================================== */
   /** ================================================= Define the tools ================================================= */
   /** ==================================================================================================================== */
-  private async loadGogogoAPIDocument() {
+  private async loadMimicAPIDocument() {
     try {
       const docURL = chrome.runtime.getURL('assets/docs/README.md');
       const response = await fetch(docURL);
@@ -261,7 +261,7 @@ ${api_doc}
     }
   }
 
-  private async loadGogogoAPIDefinition() {
+  private async loadMimicAPIDefinition() {
     try {
       const apiURL = chrome.runtime.getURL('assets/types/types.d.ts');
       const response = await fetch(apiURL);
@@ -347,29 +347,29 @@ Return the results in the specified JSON schema format, limiting to the 20 most 
     }
   }
 
-  private getGogogoAPIDocument = tool(
+  private getMimicAPIDocument = tool(
     async () => {
-      const doc = await this.loadGogogoAPIDocument() || '';
+      const doc = await this.loadMimicAPIDocument() || '';
       return doc;
     },
     {
-      name: "get_gogogo_api_document",
-      description: "Get the API documentation for Gogogo extension"
+      name: "get_mimic_api_document",
+      description: "Get the API documentation for Mimic extension"
     }
   );
 
-  private getGogogoAPIDefinition = tool(
+  private getMimicAPIDefinition = tool(
     async () => {
-      const doc = await this.loadGogogoAPIDefinition() || '';
+      const doc = await this.loadMimicAPIDefinition() || '';
       return doc;
     },
     {
-      name: "get_gogogo_api_definition",
-      description: "Get the TypeScript API definitions for Gogogo extension"
+      name: "get_mimic_api_definition",
+      description: "Get the TypeScript API definitions for Mimic extension"
     }
   );
 
-  private runGogogoScript = tool(
+  private runMimicScript = tool(
     async ({ script }) => {
       try {
         const result = await this.runScript(script, true);
@@ -385,13 +385,13 @@ ${JSON.stringify(result)}
       return [content, result];
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        const content = `Script failed: ${msg}\nPlease use Gogogo API only and avoid third-party automation libraries or browser-native DOM/Network APIs.`;
+        const content = `Script failed: ${msg}\nPlease use Mimic API only and avoid third-party automation libraries or browser-native DOM/Network APIs.`;
         return [content, null];
       }
     },
     {
-      name: "run_gogogo_script",
-      description: "Run the script in Gogogo extension",
+      name: "run_mimic_script",
+      description: "Run the script in Mimic extension",
       responseFormat: 'content_and_artifact',
       schema: z.object({
         script: z.string().describe("The script to run")
@@ -488,8 +488,8 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
         const toolName = request.toolCall.name;
         const errMsg = error instanceof Error ? (error.stack || error.message) : String(error);
         let guidance = "Tool error occurred. ";
-        if (toolName === "run_gogogo_script") {
-          guidance += "Use Gogogo API only. Review API definition and document. Simplify the script or consider analyze_page_with_vision for Q&A.";
+        if (toolName === "run_mimic_script") {
+          guidance += "Use Mimic API only. Review API definition and document. Simplify the script or consider analyze_page_with_vision for Q&A.";
         } else if (toolName === "get_element_from_point") {
           guidance += "Verify bbox coordinates in normalized 0-1000 space and consider alternative candidate elements.";
         } else if (toolName === "analyze_page_with_vision") {
@@ -542,7 +542,7 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
     const systemPrompt = await this.loadChatSystemPrompt();
     const agent = createAgent({
       model: model,
-      tools: [this.getPageInfo, this.analyzePageWithVision, this.getElementFromPoint, this.getGogogoAPIDocument, this.getGogogoAPIDefinition, this.runGogogoScript],
+      tools: [this.getPageInfo, this.analyzePageWithVision, this.getElementFromPoint, this.getMimicAPIDocument, this.getMimicAPIDefinition, this.runMimicScript],
       middleware: [this.handleToolErrors, summarizationMiddleware({
         model: model,
         trigger: { tokens: 10240 }, // Updated from maxTokensBeforeSummary
@@ -583,15 +583,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
           for (const toolCall of toolCalls) {
             let toolCallMsg = '';
             switch (toolCall.name) {
-              case 'get_gogogo_api_document': {
-                toolCallMsg = 'Loading Gogogo API documentation…';
+              case 'get_mimic_api_document': {
+                toolCallMsg = 'Loading Mimic API documentation…';
                 break;
               }
-              case 'get_gogogo_api_definition': {
-                toolCallMsg = 'Loading Gogogo API definitions…';
+              case 'get_mimic_api_definition': {
+                toolCallMsg = 'Loading Mimic API definitions…';
                 break;
               }
-              case 'run_gogogo_script': {
+              case 'run_mimic_script': {
                 if (toolCall.args?.script) {
                   toolCallMsg = `Executing script:
 \`\`\`javascript
@@ -642,15 +642,15 @@ await ${locatorScript}.fill('abcde', {mode: 'cdp'});
         const toolMessage = lastMessage as ToolMessage;
         let toolCallResultMsg = '';
         switch (toolMessage.name) {
-          case 'get_gogogo_api_document': {
+          case 'get_mimic_api_document': {
             toolCallResultMsg = 'API documentation loaded';
             break;
           }
-          case 'get_gogogo_api_definition': {
+          case 'get_mimic_api_definition': {
             toolCallResultMsg = 'API definitions loaded';
             break;
           }
-          case 'run_gogogo_script': {
+          case 'run_mimic_script': {
             if (toolMessage.artifact) {
               const jsonArtifact = JSON.stringify(toolMessage.artifact, null, 2);
               if (jsonArtifact) {
@@ -791,8 +791,8 @@ ${jsonArtifact}
     // test
     // 1. get api docs
     {
-      console.log("loadGogogoAPIDocument", await this.loadGogogoAPIDocument());
-      console.log("loadGogogoAPIDefinition", await this.loadGogogoAPIDefinition());
+      console.log("loadMimicAPIDocument", await this.loadMimicAPIDocument());
+      console.log("loadMimicAPIDefinition", await this.loadMimicAPIDefinition());
     }
     {
       const url = await SidebarUtils.engine.getPageUrl();

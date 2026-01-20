@@ -58,7 +58,7 @@ await clean();
 
 console.log('element locator ==>');
 console.log('current page', page);
-const url_frame = 'https://qagogogo.github.io/gogogo/aut/index.html';
+const url_frame = 'https://sagibrant.github.io/mimic/aut/index.html';
 
 await page.navigate(url_frame);
 await page.sync();
@@ -66,11 +66,11 @@ await page.sync();
 console.log('element locator in page =======>');
 // page locator in browser
 if (page) {
-  // #css - #frame1 - 'https://qagogogo.github.io/gogogo/aut/shadowclosed.html'
+  // #css - #frame1 - 'https://sagibrant.github.io/mimic/aut/shadowclosed.html'
   console.log('element <---> frame ======>');
   {
     const url_frame1_shadowclosed =
-      'https://qagogogo.github.io/gogogo/aut/shadowclosed.html';
+      'https://sagibrant.github.io/mimic/aut/shadowclosed.html';
     const elem_frame1 = await page.element('#frame1').first().get();
     console.log("await page.element('#frame1').first().get()", elem_frame1);
     expect(elem_frame1).not.toBeNullOrUndefined();
@@ -204,7 +204,7 @@ if (page) {
 }
 console.log('element locator in page <=======');
 
-// frame1_shadowclosed 'https://qagogogo.github.io/gogogo/aut/shadowclosed.html'
+// frame1_shadowclosed 'https://sagibrant.github.io/mimic/aut/shadowclosed.html'
 console.log('element locator in frame1_shadowclosed =======>');
 {
   // this aaa button is hidden inside a closed shadowdom, cannot find it
@@ -326,7 +326,7 @@ console.log('element locator in frame1_shadowclosed =======>');
 }
 console.log('element locator in frame1_shadowclosed <==');
 
-// frame2_shadowopen 'https://qagogogo.github.io/gogogo/aut/shadowopen.html'
+// frame2_shadowopen 'https://sagibrant.github.io/mimic/aut/shadowopen.html'
 console.log('element locator in frame2_shadowopen =======>');
 {
   // btn1 outside the shadowdom

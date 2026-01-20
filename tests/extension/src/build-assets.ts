@@ -5,7 +5,7 @@ import { Step, Task, TaskAsset, TaskGroup } from './Task';
 // Configuration - Output to the SAME directory as build-asset.ts
 const FLAG = '/** script flag **/';
 const ROOT_DIR = new URL('.', import.meta.url).pathname;  // Directory of build-asset.ts (/test/sdk/)
-const OUTPUT_FILE = 'asset.gogogo';  // Output directly here: /test/sdk/asset.gogogo
+const OUTPUT_FILE = 'asset.mimic';  // Output directly here: /test/sdk/asset.mimic
 const IGNORE_DIRS = ['dist', 'node_modules'];
 
 // Get all subdirectories in the current directory

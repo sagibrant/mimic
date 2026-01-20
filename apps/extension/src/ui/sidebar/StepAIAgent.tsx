@@ -28,7 +28,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Ellipsis, Send } from 'lucide-react';
-import { CryptoUtil, SettingUtils } from '@gogogo/shared';
+import { CryptoUtil, SettingUtils } from '@mimic-sdk/core';
 
 interface StepAIAgentProps {
   runScript: (script: string, newStep: boolean) => Promise<unknown>;

@@ -22,7 +22,7 @@
  * limitations under the License.
  */
 
-import { Utils, MsgUtils, RtidUtils, ChannelBase, ChannelClient, ChannelHost, ChannelStatus, ClientChannel, ClientInfo, Message } from "@gogogo/shared";
+import { Utils, MsgUtils, RtidUtils, ChannelBase, ChannelClient, ChannelHost, ChannelStatus, ClientChannel, ClientInfo, Message } from "@mimic-sdk/core";
 
 interface PortListenerWrapper {
   onMessage: (msg: Message, port: chrome.runtime.Port) => void;

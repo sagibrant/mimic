@@ -58,8 +58,8 @@ await clean();
 
 console.log('page =>');
 console.log('current page', page);
-const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
-const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
+const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
 const url_cn_bing = 'https://cn.bing.com/';
 
 const checkPageUrl = async url => {

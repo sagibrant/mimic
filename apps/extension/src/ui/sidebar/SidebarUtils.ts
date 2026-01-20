@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file SidebarUtils.ts
  * @description 
- * Shared utility classes and functions for Sidebar
+ * Utility classes and functions for Sidebar
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, Dispatcher } from "@gogogo/shared";
+import { Utils, Dispatcher } from "@mimic-sdk/core";
 import { StepEngine } from "./StepEngine";
 import { SidebarHandler } from "./SidebarHandler";
 

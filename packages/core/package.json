@@ -1,10 +1,10 @@
 {
-  "name": "@gogogo/shared",
+  "name": "@mimic-sdk/core",
   "private": true,
   "version": "0.1.0",
-  "description": "Shared utilities for gogogo project",
-  "repository": "https://github.com/qagogogo/gogogo",
-  "homepage": "https://qagogogo.github.io/gogogo/",
+  "description": "Core utilities for mimic project",
+  "repository": "https://github.com/sagibrant/mimic",
+  "homepage": "https://sagibrant.github.io/mimic/",
   "type": "module",
   "types": "./dist/types/index.d.ts",
   "main": "./dist/cjs/index.js",
@@ -31,7 +31,7 @@
     "type-check": "tsc --noEmit"
   },
   "keywords": [
-    "shared",
+    "core",
     "utils",
     "typescript",
     "chrome-extension",

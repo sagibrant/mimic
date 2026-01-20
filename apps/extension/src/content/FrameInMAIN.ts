@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { ClickOptions } from "@gogogo/shared";
+import { ClickOptions } from "@mimic-sdk/core";
 import * as EventSimulator from "./EventSimulator";
 
 export class FrameInMAIN {
@@ -49,7 +49,7 @@ export class FrameInMAIN {
   }
 
   isReady(): boolean {
-    const attrName = 'gogogo';
+    const attrName = 'mimic';
     this.updateState(false)
     this.send('updateState', [true]);
     const attrValue = window.document.documentElement.getAttribute(attrName);
@@ -70,9 +70,9 @@ export class FrameInMAIN {
 
   setElement(elem: Element | null): void {
     if (elem) {
-      const gogogo_testid = this.generateUUID();
-      elem.setAttribute('gogogo-testid', gogogo_testid);
-      this.send('updateRuntimeElement', [gogogo_testid], undefined, undefined, elem ?? undefined);
+      const mimic_testid = this.generateUUID();
+      elem.setAttribute('mimic-testid', mimic_testid);
+      this.send('updateRuntimeElement', [mimic_testid], undefined, undefined, elem ?? undefined);
     }
     else {
       this.send('updateRuntimeElement', []);
@@ -81,9 +81,9 @@ export class FrameInMAIN {
 
   clickElement(elem: Element, options?: ClickOptions): void {
     if (!elem) return;
-    const gogogo_testid = this.generateUUID();
-    elem.setAttribute('gogogo-testid', gogogo_testid);
-    this.send('clickRuntimeElement', [gogogo_testid, options], undefined, undefined, elem);
+    const mimic_testid = this.generateUUID();
+    elem.setAttribute('mimic-testid', mimic_testid);
+    this.send('clickRuntimeElement', [mimic_testid, options], undefined, undefined, elem);
   }
 
   send(funcName: string, params: unknown[], result?: unknown, callback?: string | ((result: unknown) => void), target?: EventTarget): void {
@@ -145,16 +145,16 @@ export class FrameInMAIN {
         }
 
         const elem = target as Element;
-        const gogogo_testid = params && params.length >= 1 ? params[0] : undefined;
-        if (gogogo_testid) {
-          if (!elem.hasAttribute('gogogo-testid')) {
-            console.warn(`${funcName}: the gogogo-testid is missing`, elem);
+        const mimic_testid = params && params.length >= 1 ? params[0] : undefined;
+        if (mimic_testid) {
+          if (!elem.hasAttribute('mimic-testid')) {
+            console.warn(`${funcName}: the mimic-testid is missing`, elem);
             return;
           }
-          const testid = elem.getAttribute('gogogo-testid');
-          elem.removeAttribute('gogogo-testid');
-          if (testid !== gogogo_testid) {
-            console.warn(`${funcName}: the gogogo-testid is not matched`, elem);
+          const testid = elem.getAttribute('mimic-testid');
+          elem.removeAttribute('mimic-testid');
+          if (testid !== mimic_testid) {
+            console.warn(`${funcName}: the mimic-testid is not matched`, elem);
             return;
           }
           params.splice(0, 1);
@@ -194,16 +194,16 @@ export class FrameInMAIN {
   }
 
   protected updateState(state: boolean = true): void {
-    window.document.documentElement.setAttribute('gogogo', JSON.stringify({ state: state }));
+    window.document.documentElement.setAttribute('mimic', JSON.stringify({ state: state }));
   }
 
   protected updateRuntimeElement(elem?: Element): void {
     if (elem) {
-      window.gogogo = window.gogogo ?? {};
-      (window.gogogo as { runtimeElement?: Element }).runtimeElement = elem;
+      window.mimic = window.mimic ?? {};
+      (window.mimic as { runtimeElement?: Element }).runtimeElement = elem;
     }
-    else if (window.gogogo) {
-      Reflect.deleteProperty(window, 'gogogo');
+    else if (window.mimic) {
+      Reflect.deleteProperty(window, 'mimic');
     }
   }
 
@@ -214,8 +214,8 @@ export class FrameInMAIN {
   }
 
   protected async inspectNodeRequested(node: Node): Promise<void> {
-    if (this._source === 'content' && typeof window.gogogo === 'object' && window.gogogo.frame && window.gogogo.frame.inspectNode) {
-      await window.gogogo.frame.inspectNode(node);
+    if (this._source === 'content' && typeof window.mimic === 'object' && window.mimic.frame && window.mimic.frame.inspectNode) {
+      await window.mimic.frame.inspectNode(node);
     }
   }
 }

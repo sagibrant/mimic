@@ -29,7 +29,7 @@ export default function Browser() {
       <Paragraph>Top-level automation entry representing the current browser.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Browser.ts">Browser.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/aos/Browser.ts">Browser.ts</a>
       </Paragraph>
     </Section>
   );

@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file Utils.ts
  * @description 
- * Shared utility classes and functions
+ * Utility classes and functions
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -507,7 +507,7 @@ export function getCombinations<T>(arr: T[], k: number): T[][] {
   return result;
 }
 
-interface Gogogo {
+interface Mimic {
   wait: (ms: number) => Promise<void>
 };
 
@@ -517,9 +517,9 @@ interface Gogogo {
  * @returns 
  */
 export async function wait(ms: number): Promise<void> {
-  const gogogo = (typeof globalThis !== 'undefined' && 'gogogo' in globalThis) ? (globalThis as typeof globalThis & { gogogo: Gogogo }).gogogo : undefined;
-  if (gogogo && typeof gogogo.wait === 'function') {
-    return await gogogo.wait(ms);
+  const mimic = (typeof globalThis !== 'undefined' && 'mimic' in globalThis) ? (globalThis as typeof globalThis & { mimic: Mimic }).mimic : undefined;
+  if (mimic && typeof mimic.wait === 'function') {
+    return await mimic.wait(ms);
   }
   else {
     return new Promise(resolve => setTimeout(resolve, ms));

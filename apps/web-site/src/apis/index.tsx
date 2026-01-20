@@ -75,7 +75,7 @@ export default function APIs() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: 'calc(100vh - 64px)' }}>
       <aside style={{ borderRight: '1px solid #e2e8f0', padding: '1rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>Gogogo API Reference</h3>
+        <h3 style={{ marginBottom: '1rem' }}>Mimic API Reference</h3>
         <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>Automation Objects</div>
         {byCategory('AutomationObjects').map(d => (
           <div key={d.slug} style={{ marginBottom: '0.5rem' }}>
@@ -110,15 +110,15 @@ export default function APIs() {
       <div>
         {!active && (
           <>
-            <Section title="Gogogo APIs">
+            <Section title="Mimic APIs">
               <Paragraph>
-                Official API to work with the Gogogo Extension for automating browsers and web apps.
+                Official API to work with the Mimic Extension for automating browsers and web apps.
                 Browse Automation Objects, Other Objects, Locators, Assertions, and Types using the sidebar.
               </Paragraph>
               <Paragraph>Quick Start:</Paragraph>
               <pre style={{ background: '#0f172a', color: '#e2e8f0', padding: '16px', borderRadius: 8, overflowX: 'auto' }}>
-                <code>{`import { BrowserLocator } from '@gogogo/browser-sdk';
-import { AIClient } from '@gogogo/browser-sdk';
+                <code>{`import { BrowserLocator } from 'mimic-sdk';
+import { AIClient } from 'mimic-sdk';
 
 const browserLocator = new BrowserLocator();
 const browser = await browserLocator.get(); // get current browser

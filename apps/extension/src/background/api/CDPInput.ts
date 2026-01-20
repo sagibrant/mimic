@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, KeyboardModifier, KeyDefinitionUtils } from "@gogogo/shared";
+import { Utils, KeyboardModifier, KeyDefinitionUtils } from "@mimic-sdk/core";
 import { ChromeDevToolsProtocol } from "./ChromeDevToolsProtocol";
 
 /**

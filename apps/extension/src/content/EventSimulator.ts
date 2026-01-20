@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { BrowserUtils, Utils, KeyboardModifier, KeyDefinitionUtils, ClickOptions, Point, TextInputOptions } from "@gogogo/shared";
+import { BrowserUtils, Utils, KeyboardModifier, KeyDefinitionUtils, ClickOptions, Point, TextInputOptions } from "@mimic-sdk/core";
 
 interface LegacyDocument extends Document {
   createTouch(view: Window, target: EventTarget, identifier: number, pageX: number, pageY: number, screenX: number, screenY: number, radiusX: number, radiusY: number, rotationAngle: number, force: number): Touch;

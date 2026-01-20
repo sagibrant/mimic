@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, Rtid } from "@gogogo/shared";
+import { Utils, Rtid } from "@mimic-sdk/core";
 import { FrameHandler } from "./FrameHandler";
 import { NodeHandler } from "./NodeHandler";
 import { ContentUtils } from "../ContentUtils";

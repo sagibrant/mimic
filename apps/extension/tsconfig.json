@@ -19,7 +19,7 @@
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/**/*.tsx"],
   "references": [
     {
-      "path": "../../packages/shared"
+      "path": "../../packages/core"
     },
     {
       "path": "../../packages/browser-sdk"

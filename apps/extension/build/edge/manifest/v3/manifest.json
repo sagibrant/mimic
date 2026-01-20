@@ -1,5 +1,5 @@
 {
-	"name": "Gogogo",
+	"name": "Mimic",
 	"version": "2025.4.8.1",
 	"version_name": "0.1.0",
 	"description": "Automate your browser with AI assistance",
@@ -19,7 +19,7 @@
 			"48": "assets/icons/icon_48x48.png",
 			"128": "assets/icons/icon_128x128.png"
 		},
-		"default_title": "Gogogo",
+		"default_title": "Mimic",
 		"default_popup": "ui/action/index.html"
 	},
 	"options_ui": {

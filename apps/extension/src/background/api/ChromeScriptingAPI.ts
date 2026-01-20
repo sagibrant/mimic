@@ -21,7 +21,7 @@
  * limitations under the License.
  */
 
-import { Utils, Logger } from "@gogogo/shared";
+import { Utils, Logger } from "@mimic-sdk/core";
 
 /**
  * The chrome script api wrapper on chrome based browsers
@@ -78,7 +78,7 @@ export class ChromeScriptingAPI {
             try {
               const wrapperScript = `
                 try {
-                  window.gogogo_result = ${script};
+                  window.mimic_result = ${script};
                 } catch { }
               `;
               const node = document.getElementsByTagName("head")[0] || document.documentElement;
@@ -91,9 +91,9 @@ export class ChromeScriptingAPI {
               scriptNode.appendChild(textNode);
               node.appendChild(scriptNode);
               node.removeChild(scriptNode);
-              if ('gogogo_result' in window) {
-                result = await window.gogogo_result;
-                delete window.gogogo_result;
+              if ('mimic_result' in window) {
+                result = await window.mimic_result;
+                delete window.mimic_result;
               }
               return true;
             } catch {

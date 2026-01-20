@@ -21,7 +21,7 @@
  */
 
 import React, { useState } from 'react';
-import { Utils, Settings, SettingUtils, CryptoUtil } from '@gogogo/shared';
+import { Utils, Settings, SettingUtils, CryptoUtil } from '@mimic-sdk/core';
 import { ThemeProvider } from '../components/theme-provider';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';

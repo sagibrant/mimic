@@ -63,7 +63,7 @@ console.log('browser', browser);
 
 // browser events
 {
-  const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
+  const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
 
   let events_count = 0;
   const newWindowListener = async window => {

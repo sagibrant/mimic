@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Rtid, Selector, LocatorUtils, MsgDataHandlerBase, RectInfo, ElementInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Rtid, Selector, LocatorUtils, MsgDataHandlerBase, RectInfo, ElementInfo } from "@mimic-sdk/core";
 import { ContentUtils } from "../ContentUtils";
 import * as CoordinateUtils from "../CoordinateUtils";
 import { FrameInfo } from "../../background/api/BrowserWrapperTypes";

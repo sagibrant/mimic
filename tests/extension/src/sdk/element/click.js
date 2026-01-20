@@ -61,7 +61,7 @@ console.log('current page', page);
 const inputModes = ['default', 'event', 'cdp'];
 for (const inputMode of inputModes) {
   console.log(`inputMode ${inputMode} ======>`);
-  const url_mouse = 'https://qagogogo.github.io/gogogo/aut/mouse.html';
+  const url_mouse = 'https://sagibrant.github.io/mimic/aut/mouse.html';
   await page.navigate(url_mouse);
   await page.sync();
 

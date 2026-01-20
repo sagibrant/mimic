@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { IChannel, Dispatcher, Message } from "@gogogo/shared";
+import { IChannel, Dispatcher, Message } from "@mimic-sdk/core";
 import { PostMessageChannel } from "../../channels/PostMessageChannel";
 
 class SandboxToSidebarChannel extends PostMessageChannel { }

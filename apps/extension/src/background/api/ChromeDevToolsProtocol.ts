@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { EventEmitter, BrowserUtils, Utils } from "@gogogo/shared";
+import { EventEmitter, BrowserUtils, Utils } from "@mimic-sdk/core";
 import { Debuggee, DebuggerSession, CDPDebuggerSession, TargetInfo, CDPTargetInfo, CDPExecutionContextInfo, CDPFrameInfo, CDPJavascriptDialog, CDPTabInfo, CDPEmulationSettings, CDPFrameTree } from "./CDPTypes";
 
 interface CDPEvents extends Record<string, unknown> {
@@ -308,8 +308,8 @@ export class ChromeDevToolsProtocol extends EventEmitter<CDPEvents> {
       throw new Error(`Tab not found - ${tabId}`);
     }
     const script = `(function() {
-      if(window.gogogo && window.gogogo.runtimeElement) {
-        return window.gogogo.runtimeElement;
+      if(window.mimic && window.mimic.runtimeElement) {
+        return window.mimic.runtimeElement;
       }
       else {
         return undefined;

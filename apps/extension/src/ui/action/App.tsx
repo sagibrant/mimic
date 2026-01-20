@@ -21,7 +21,7 @@
  */
 
 import { useState } from 'react';
-import { BrowserUtils, SettingUtils } from '@gogogo/shared';
+import { BrowserUtils, SettingUtils } from '@mimic-sdk/core';
 import { ThemeProvider } from '../components/theme-provider';
 import { Command, CommandList, CommandItem } from '../components/ui/command';
 import { PanelRight, SquareCheck, Store } from 'lucide-react';

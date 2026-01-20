@@ -13,7 +13,7 @@ export default function KeyboardDoc() {
       <Paragraph>Keyboard automation bound to a page.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/aos/Keyboard.ts">Keyboard.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/aos/Keyboard.ts">Keyboard.ts</a>
       </Paragraph>
     </Section>
   );

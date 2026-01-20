@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, ChannelBase, ClientChannel, ClientInfo, IChannel, Dispatcher, ContextType, Message, MessageData } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, ChannelBase, ClientChannel, ClientInfo, IChannel, Dispatcher, ContextType, Message, MessageData } from "@mimic-sdk/core";
 import { ExtensionRuntimeChannel } from "../channels/ExtensionRuntimeChannel";
 import { ExtensionFrameChannel } from "../channels/ExtensionFrameChannel";
 

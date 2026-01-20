@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import * as api from "@gogogo/shared";
-import { Utils, SettingUtils, QueryInfo } from "@gogogo/shared";
+import * as api from "@mimic-sdk/core";
+import { Utils, SettingUtils, QueryInfo } from "@mimic-sdk/core";
 import { ChannelBase } from "../Channel";
 import { AutomationObject } from "../aos/AutomationObject";
 

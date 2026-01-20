@@ -58,7 +58,7 @@ await clean();
 
 console.log('events =>');
 console.log('current page', page);
-const url_index = 'https://qagogogo.github.io/gogogo/aut/index.html';
+const url_index = 'https://sagibrant.github.io/mimic/aut/index.html';
 
 await page.navigate(url_index);
 console.log('await page.navigate(url_index)', url_index);
@@ -519,7 +519,7 @@ try {
   console.log('page domcontentloaded & close events ====>');
   // page domcontentloaded & close
   {
-    const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+    const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
     const newPage = await page.openNewPage('about:blank');
     console.log("await page.openNewPage('about:blank')", newPage);
     await newPage.sync();

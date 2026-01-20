@@ -84,4 +84,4 @@ export type {
   Point,
   RectInfo,
   Cookie
-} from '@gogogo/shared';
+} from '@mimic-sdk/core';

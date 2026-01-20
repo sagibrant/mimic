@@ -24,7 +24,7 @@ export default function ExpectDoc() {
       <Paragraph>Assertion utilities for validations with concise error messages.</Paragraph>
       <List items={items} />
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/Expect.ts">Expect.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/Expect.ts">Expect.ts</a>
       </Paragraph>
     </Section>
   );

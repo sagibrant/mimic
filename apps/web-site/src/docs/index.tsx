@@ -13,10 +13,10 @@ type DocItem = {
 
 function Overview() {
   return (
-    <Section title="Gogogo">
+    <Section title="Mimic">
       <Paragraph>
-        Gogogo enables reliable end-to-end automation on your machine, with a focus on browser automation through a lightweight extension.
-        Record and replay task steps directly in your browser, and export scripts that use the Gogogo automation APIs.
+        Mimic enables reliable end-to-end automation on your machine, with a focus on browser automation through a lightweight extension.
+        Record and replay task steps directly in your browser, and export scripts that use the Mimic automation APIs.
       </Paragraph>
       <Paragraph>Use the left sidebar for Installation, Quick Start, and a complete example.</Paragraph>
     </Section>
@@ -60,7 +60,7 @@ export default function Docs() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: 'calc(100vh - 64px)' }}>
       <aside style={{ borderRight: '1px solid #e2e8f0', padding: '1rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>Gogogo Docs</h3>
+        <h3 style={{ marginBottom: '1rem' }}>Mimic Docs</h3>
         <div style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.75rem' }}>Getting Started</div>
         {docs.map(d => (
           <div key={d.slug || 'root'} style={{ marginBottom: '0.5rem' }}>

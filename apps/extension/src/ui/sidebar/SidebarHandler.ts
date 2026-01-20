@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, MsgDataHandlerBase, AODesc, AutomationObject, InvokeAction, RecordedStep, ElementInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, MsgDataHandlerBase, AODesc, AutomationObject, InvokeAction, RecordedStep, ElementInfo } from "@mimic-sdk/core";
 import { SidebarUtils } from "./SidebarUtils";
 
 interface SidebarEvents extends Record<string, unknown> {

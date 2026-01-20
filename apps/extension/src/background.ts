@@ -21,7 +21,7 @@
  */
 
 
-import { BrowserUtils, SettingUtils } from "@gogogo/shared";
+import { BrowserUtils, SettingUtils } from "@mimic-sdk/core";
 import { BackgroundDispatcher } from "./background/BackgroundDispatcher";
 import { AgentHandler } from "./background/handlers/AgentHandler";
 import { ChromeExtensionAPI } from "./background/api/ChromeExtensionAPI";
@@ -82,7 +82,7 @@ agent.on('browserCreated', ({ browser }) => {
 // extend self type for TypeScript requirements
 declare global {
   interface ServiceWorkerGlobalScope {
-    gogogo: {
+    mimic: {
       dispatcher: BackgroundDispatcher,
       browserAPI: BrowserAPI,
       agent: AgentHandler,
@@ -92,7 +92,7 @@ declare global {
 // Key: Explicitly declare the type of self using type assertion
 const swSelf = self as unknown as ServiceWorkerGlobalScope & typeof globalThis;
 // add globalData to self as Service Worker's global object
-swSelf.gogogo = {
+swSelf.mimic = {
   dispatcher: dispatcher,
   browserAPI: browserAPI,
   agent: agent

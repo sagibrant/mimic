@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, RectInfo } from "@gogogo/shared";
+import { Utils, RectInfo } from "@mimic-sdk/core";
 import { ContentUtils } from "./ContentUtils";
 
 /**

@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Rtid } from "@gogogo/shared";
+import { Rtid } from "@mimic-sdk/core";
 import { ChannelBase } from "../Channel";
 
 export type Listener = (arg: unknown) => (unknown | Promise<unknown>);

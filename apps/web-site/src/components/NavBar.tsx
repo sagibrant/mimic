@@ -12,11 +12,11 @@ const NavBar: React.FC<Props> = ({ path, onNavigate }) => {
     <header className="nav modern-nav">
       <button
         className="brand-btn"
-        aria-label="Gogogo Home"
+        aria-label="Mimic Home"
         onClick={() => onNavigate('/')}
       >
-        <img src={`${baseUrl}icons/icon_32x32.png`} alt="Gogogo" className="brand-icon" />
-        <span className="brand-name">Gogogo</span>
+        <img src={`${baseUrl}icons/icon_32x32.png`} alt="Mimic" className="brand-icon" />
+        <span className="brand-name">Mimic</span>
       </button>
       <nav className="menu">
         <a

@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import { SettingUtils } from "@gogogo/shared";
-import { RuntimeUtils } from "@gogogo/browser-sdk";
+import { SettingUtils } from "@mimic-sdk/core";
+import { RuntimeUtils } from "mimic-sdk";
 import { SandboxHandler } from "./SandboxHandler";
 import { SandboxDispatcher } from "./SandboxDispatcher";
 

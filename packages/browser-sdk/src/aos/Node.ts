@@ -20,8 +20,8 @@
  * limitations under the License.
  */
 
-import * as api from "@gogogo/shared";
-import { Rtid, RtidUtils, Utils, SettingUtils } from "@gogogo/shared";
+import * as api from "@mimic-sdk/core";
+import { Rtid, RtidUtils, Utils, SettingUtils } from "@mimic-sdk/core";
 import { AutomationObject } from "../aos/AutomationObject";
 
 export class Node extends AutomationObject implements api.MouseActions, api.KeyboardActions, api.TouchActions {

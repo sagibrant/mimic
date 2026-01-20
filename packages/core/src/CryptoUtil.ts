@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file CryptoUtil.ts
  * @description 
- * Shared utility classes and functions for encrypt & decrypt
+ * Utility classes and functions for encrypt & decrypt
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +77,7 @@ export async function decrypt(encrypted: string): Promise<string> {
 * Todo: change to user generated in future
 */
 async function _getSecretKey(): Promise<CryptoKey> {
-  let extensionId = 'gogogo_secret_key';
+  let extensionId = 'mimic_secret_key';
   // let extensionId = typeof chrome !== 'undefined' && chrome?.runtime?.id;
   // in sandbox, cannot access the chrome.runtime.id
   const browserInfo = BrowserUtils.getBrowserInfo();

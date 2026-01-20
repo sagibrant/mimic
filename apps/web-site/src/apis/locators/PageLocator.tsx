@@ -16,7 +16,7 @@ export default function PageLocatorDoc() {
         <a href="/apis/automation/page" style={{ marginLeft: 6 }}>Page</a>.
       </Paragraph>
       <Paragraph>
-        Source: <a href="https://github.com/qagogogo/gogogo/blob/main/packages/browser-sdk/src/locators/PageLocator.ts">PageLocator.ts</a>
+        Source: <a href="https://github.com/sagibrant/mimic/blob/main/packages/browser-sdk/src/locators/PageLocator.ts">PageLocator.ts</a>
       </Paragraph>
     </Section>
   );

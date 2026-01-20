@@ -1,13 +1,13 @@
-# @gogogo/browser-sdk
+# mimic-sdk
 
-Gogogo automation SDK for browser environments. This package targets front-end browser environments (including front-end bundlers like Vite/Webpack), and currently does not support Node.js server-side or SSR usage.
+Mimic automation SDK for browser environments. This package targets front-end browser environments (including front-end bundlers like Vite/Webpack), and currently does not support Node.js server-side or SSR usage.
 
 ## Installation
 
 ```bash
-npm install @gogogo/browser-sdk
+npm install mimic-sdk
 # or
-pnpm add @gogogo/browser-sdk
+pnpm add mimic-sdk
 ```
 
 ## Usage (Front-end Bundler, Recommended)
@@ -15,7 +15,7 @@ pnpm add @gogogo/browser-sdk
 Use with front-end bundlers in browser environments:
 
 ```javascript
-import { BrowserLocator, AIClient, expect, RuntimeUtils } from '@gogogo/browser-sdk';
+import { BrowserLocator, AIClient, expect, RuntimeUtils } from 'mimic-sdk';
 
 // Clear cache objects (optional)
 RuntimeUtils.repo.clear();
@@ -37,9 +37,9 @@ await ai.init({baseURL: 'xxx', apiKey: 'xxx'}).setModel('gpt-4o').chat('hello');
 No bundling required, directly import the UMD build in your page:
 
 ```html
-<script src="node_modules/@gogogo/browser-sdk/dist/browser/index.js"></script>
+<script src="node_modules/mimic-sdk/dist/browser/index.js"></script>
 <script>
-  const { BrowserLocator, AIClient, expect, RuntimeUtils } = GogogoWeb;
+  const { BrowserLocator, AIClient, expect, RuntimeUtils } = MimicSDK;
   (async () => {
     RuntimeUtils.repo.clear();
     const browser = await new BrowserLocator().get();

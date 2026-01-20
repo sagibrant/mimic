@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Selector, LocatorUtils, MsgDataHandlerBase } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, AODesc, AutomationObject, QueryInfo, Selector, LocatorUtils, MsgDataHandlerBase } from "@mimic-sdk/core";
 import { ChromeExtensionAPI } from "../api/ChromeExtensionAPI";
 import { TabInfo, WindowInfo } from "../api/BrowserWrapperTypes";
 import { BackgroundUtils } from "../BackgroundUtils";

@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, RtidUtils, Utils, Rtid, RectInfo } from "@gogogo/shared";
+import { MsgUtils, RtidUtils, Utils, Rtid, RectInfo } from "@mimic-sdk/core";
 import { FrameHandler } from "./FrameHandler";
 import * as EventSimulator from "../EventSimulator";
 import { NodeHandler } from "./NodeHandler";

@@ -1,10 +1,10 @@
-# @gogogo/shared
+# @mimic-sdk/core
 
-Shared utilities for the gogogo project that work across web, node, and extension environments.
+Core utilities for the mimic project that work across web, node, and extension environments.
 
 ## Overview
 
-This package contains shared utilities that can be used across different environments:
+This package contains core utilities that can be used across different environments:
 - Chrome Extensions
 - Web Applications
 - Node.js Applications
@@ -14,7 +14,7 @@ The package is built with multiple output formats to support different module sy
 ## Installation
 
 ```bash
-npm install @gogogo/shared
+npm install @mimic-sdk/core
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ npm install @gogogo/shared
 ### ES Modules (Recommended)
 
 ```javascript
-import { StorageUtils, SettingUtils } from '@gogogo/shared';
+import { StorageUtils, SettingUtils } from '@mimic-sdk/core';
 
 // Use the utilities
 const value = await StorageUtils.get('key');
@@ -34,7 +34,7 @@ const settings = SettingUtils.getSettings();
 ### CommonJS
 
 ```javascript
-const { StorageUtils, SettingUtils } = require('@gogogo/shared');
+const { StorageUtils, SettingUtils } = require('@mimic-sdk/core');
 
 // Use the utilities
 const value = await StorageUtils.get('key');
@@ -44,10 +44,10 @@ await StorageUtils.set('key', 'value');
 ### Browser (UMD)
 
 ```html
-<script src="node_modules/@gogogo/shared/dist/browser/index.js"></script>
+<script src="node_modules/@mimic-sdk/core/dist/browser/index.js"></script>
 <script>
-  // The library is available as GogogoShared
-  const { StorageUtils, SettingUtils } = GogogoShared;
+  // The library is available as MimicSDKCore
+  const { StorageUtils, SettingUtils } = MimicSDKCore;
   
   // Use the utilities
   const value = await StorageUtils.get('key');

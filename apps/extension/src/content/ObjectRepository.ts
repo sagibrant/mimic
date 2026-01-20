@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { RtidUtils, Utils, AutomationObject, Rtid, Logger } from "@gogogo/shared";
+import { RtidUtils, Utils, AutomationObject, Rtid, Logger } from "@mimic-sdk/core";
 import { ElementHandler } from "./handlers/ElementHandler";
 import { FrameHandler } from "./handlers/FrameHandler";
 import { ContentUtils } from "./ContentUtils";

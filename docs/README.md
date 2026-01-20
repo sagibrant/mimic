@@ -1,8 +1,8 @@
-# Gogogo API Documentation
+# Mimic API Documentation
 
 ## Introduction
 
-This page is the API documentation for Gogogo, a lightweight web testing and automation tool. Gogogo can be easily used by simply downloading the Chrome/Edge extension, without the need to install complex local software. It also integrates AI capabilities to help you easily complete web automation tasks.
+This page is the API documentation for Mimic, a lightweight web testing and automation tool. Mimic can be easily used by simply downloading the Chrome/Edge extension, without the need to install complex local software. It also integrates AI capabilities to help you easily complete web automation tasks.
 
 ## Global Variables and Methods
 

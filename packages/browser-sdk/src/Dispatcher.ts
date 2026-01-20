@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AODesc, AutomationObject, ChannelBase, ChannelStatus, Dispatcher, IChannel, Message, MessageData, MsgDataHandlerBase, MsgUtils, Rtid, RtidUtils, Settings, SettingUtils, Utils } from "@gogogo/shared";
+import { AODesc, AutomationObject, ChannelBase, ChannelStatus, Dispatcher, IChannel, Message, MessageData, MsgDataHandlerBase, MsgUtils, Rtid, RtidUtils, Settings, SettingUtils, Utils } from "@mimic-sdk/core";
 import { RuntimeUtils } from "./RuntimeUtils";
 
 interface ChromeObj {
@@ -56,10 +56,10 @@ class MainToContentChannel extends ChannelBase {
     }
     this._listener = this.onMessage.bind(this);
     if (this._source === 'content') {
-      window.addEventListener("_Gogogo_MAIN_To_Content_EVENT_", this._listener, true);
+      window.addEventListener("_Mimic_MAIN_To_Content_EVENT_", this._listener, true);
     }
     else {
-      window.addEventListener("_Gogogo_Content_To_MAIN_EVENT_", this._listener, true);
+      window.addEventListener("_Mimic_Content_To_MAIN_EVENT_", this._listener, true);
     }
   }
 
@@ -68,10 +68,10 @@ class MainToContentChannel extends ChannelBase {
       return;
     }
     if (this._source === 'content') {
-      window.removeEventListener("_Gogogo_MAIN_To_Content_EVENT_", this._listener, true);
+      window.removeEventListener("_Mimic_MAIN_To_Content_EVENT_", this._listener, true);
     }
     else {
-      window.removeEventListener("_Gogogo_Content_To_MAIN_EVENT_", this._listener, true);
+      window.removeEventListener("_Mimic_Content_To_MAIN_EVENT_", this._listener, true);
     }
     this._listener = undefined;
   }
@@ -82,7 +82,7 @@ class MainToContentChannel extends ChannelBase {
     }
     this.logger.debug('postMessage: >>>>>> msg=', msg);
 
-    const eventType = this._source === 'content' ? "_Gogogo_Content_To_MAIN_EVENT_" : "_Gogogo_MAIN_To_Content_EVENT_";
+    const eventType = this._source === 'content' ? "_Mimic_Content_To_MAIN_EVENT_" : "_Mimic_MAIN_To_Content_EVENT_";
     const event = new CustomEvent(eventType, { detail: msg });
     window.dispatchEvent(event);
 
@@ -124,7 +124,7 @@ class MainToContentChannel extends ChannelBase {
   }
 }
 
-class GogogoEventHandler extends MsgDataHandlerBase {
+class MimicEventHandler extends MsgDataHandlerBase {
 
   constructor() {
     const rtid = RtidUtils.getAgentRtid();
@@ -223,12 +223,12 @@ class GogogoEventHandler extends MsgDataHandlerBase {
 
 export class MainToContentDispatcher extends Dispatcher {
   private readonly _mainToContentChannel: MainToContentChannel;
-  private readonly _handler: GogogoEventHandler;
+  private readonly _handler: MimicEventHandler;
 
   constructor() {
     super('main-to-content-dispatcher');
 
-    this._handler = new GogogoEventHandler();
+    this._handler = new MimicEventHandler();
     this.addHandler(this._handler);
 
     this._mainToContentChannel = new MainToContentChannel();

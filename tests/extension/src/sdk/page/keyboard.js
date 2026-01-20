@@ -58,7 +58,7 @@ await clean();
 
 console.log('keyboard =>');
 console.log('current page', page);
-const url_keyboard = 'https://qagogogo.github.io/gogogo/aut/keyboard.html';
+const url_keyboard = 'https://sagibrant.github.io/mimic/aut/keyboard.html';
 
 await page.navigate(url_keyboard);
 console.log('await page.navigate(url_keyboard)', url_keyboard);

@@ -23,7 +23,7 @@
  * limitations under the License.
  */
 
-import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@gogogo/shared";
+import { ChannelBase, ChannelStatus, Message, MsgUtils, Utils } from "@mimic-sdk/core";
 
 export class CustomEventChannel extends ChannelBase {
   private readonly _source: 'content' | 'MAIN';
@@ -49,10 +49,10 @@ export class CustomEventChannel extends ChannelBase {
     }
     this._listener = this.onMessage.bind(this);
     if (this._source === 'content') {
-      window.addEventListener("_Gogogo_MAIN_To_Content_EVENT_", this._listener, true);
+      window.addEventListener("_Mimic_MAIN_To_Content_EVENT_", this._listener, true);
     }
     else {
-      window.addEventListener("_Gogogo_Content_To_MAIN_EVENT_", this._listener, true);
+      window.addEventListener("_Mimic_Content_To_MAIN_EVENT_", this._listener, true);
     }
   }
 
@@ -61,10 +61,10 @@ export class CustomEventChannel extends ChannelBase {
       return;
     }
     if (this._source === 'content') {
-      window.removeEventListener("_Gogogo_MAIN_To_Content_EVENT_", this._listener, true);
+      window.removeEventListener("_Mimic_MAIN_To_Content_EVENT_", this._listener, true);
     }
     else {
-      window.removeEventListener("_Gogogo_Content_To_MAIN_EVENT_", this._listener, true);
+      window.removeEventListener("_Mimic_Content_To_MAIN_EVENT_", this._listener, true);
     }
     this._listener = undefined;
   }
@@ -75,7 +75,7 @@ export class CustomEventChannel extends ChannelBase {
     }
     this.logger.debug('postMessage: >>>>>> msg=', msg);
 
-    const eventType = this._source === 'content' ? "_Gogogo_Content_To_MAIN_EVENT_" : "_Gogogo_MAIN_To_Content_EVENT_";
+    const eventType = this._source === 'content' ? "_Mimic_Content_To_MAIN_EVENT_" : "_Mimic_MAIN_To_Content_EVENT_";
     const event = new CustomEvent(eventType, { detail: msg });
     window.dispatchEvent(event);
 

@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Rtid, RtidUtils, Utils, Logger } from "@gogogo/shared";
+import { Rtid, RtidUtils, Utils, Logger } from "@mimic-sdk/core";
 import { Browser } from "./aos/Browser";
 import { Window } from "./aos/Window";
 import { Page } from "./aos/Page";

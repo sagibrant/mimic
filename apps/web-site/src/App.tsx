@@ -32,7 +32,7 @@ function App() {
       <NavBar path={path} onNavigate={navigate} />
       {Page === 'home' && (
         <main className="home-hero">
-          <h1><span className="em">Gogogo</span> enables reliable browser automation for modern web apps.</h1>
+          <h1><span className="em">Mimic</span> enables reliable browser automation for modern web apps.</h1>
           <p>Elegant, powerful automation with Locators and Objects. Click-run demos, accessible APIs, and fast developer experience.</p>
           <div className="cta">
             <button onClick={() => navigate('/docs')}>Explore Docs</button>

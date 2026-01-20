@@ -1,5 +1,5 @@
 import React from 'react';
-import { GogogoUtils } from '../../utils/GogogoUtils';
+import { MimicUtils } from '../../utils/MimicUtils';
 
 interface PrepareExtensionProps {
   stepNumber: number;
@@ -10,7 +10,7 @@ const PrepareExtension: React.FC<PrepareExtensionProps> = ({ stepNumber }) => {
 
   React.useEffect(() => {
     const checkIsInstalled = async () => {
-      const installed = await GogogoUtils.isExtensionInstalled();
+      const installed = await MimicUtils.isExtensionInstalled();
       setIsInstalled(installed);
     };
 
@@ -42,12 +42,12 @@ const PrepareExtension: React.FC<PrepareExtensionProps> = ({ stepNumber }) => {
     // Open extension installation interface based on browser
     let extensionUrl = '';
     if (isChrome) {
-      extensionUrl = 'https://chromewebstore.google.com/detail/gogogo/kpohfimcpcmbcihhpgnjcomihmcnfpna';
+      extensionUrl = 'https://chromewebstore.google.com/detail/mimic/kpohfimcpcmbcihhpgnjcomihmcnfpna';
     } else if (isEdge) {
-      extensionUrl = 'https://microsoftedge.microsoft.com/addons/detail/gogogo/ilcdijkgbkkllhojpgbiajmnbdiadppj';
+      extensionUrl = 'https://microsoftedge.microsoft.com/addons/detail/mimic/ilcdijkgbkkllhojpgbiajmnbdiadppj';
     } else {
       // Default to Chrome extension store for other browsers
-      extensionUrl = 'https://chromewebstore.google.com/detail/gogogo/kpohfimcpcmbcihhpgnjcomihmcnfpna';
+      extensionUrl = 'https://chromewebstore.google.com/detail/mimic/kpohfimcpcmbcihhpgnjcomihmcnfpna';
     }
 
     window.open(extensionUrl, '_blank');

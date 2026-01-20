@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file RuntimeUtils.ts
  * @description 
- * Shared utility classes and functions for runtime
+ * Utility classes and functions for runtime
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { Utils, Dispatcher } from "@gogogo/shared";
+import { Utils, Dispatcher } from "@mimic-sdk/core";
 import { ObjectRepository } from "./ObjectRepository";
 import { MainToContentDispatcher } from "./Dispatcher";
 

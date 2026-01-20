@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @file LocatorUtils.ts
  * @description 
- * Shared utility classes for locator
+ * Utility classes for locator
  * 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

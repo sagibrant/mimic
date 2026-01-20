@@ -316,7 +316,7 @@ module.exports = (env) => {
             noErrorOnMissing: true,
           },
           {
-            from: path.resolve(rootDir, '../../packages/shared/src/types/types.d.ts'),
+            from: path.resolve(rootDir, '../../packages/core/src/types/types.d.ts'),
             to: 'assets/types/',
             noErrorOnMissing: true,
           },

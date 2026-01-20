@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-import { MsgUtils, Utils, Logger, AODesc, AutomationObject, InvokeAction, Rtid, Dispatcher } from "@gogogo/shared";
+import { MsgUtils, Utils, Logger, AODesc, AutomationObject, InvokeAction, Rtid, Dispatcher } from "@mimic-sdk/core";
 import { RuntimeUtils } from "./RuntimeUtils";
 import { ObjectRepository } from './ObjectRepository'
 

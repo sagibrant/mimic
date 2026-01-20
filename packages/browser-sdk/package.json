@@ -1,9 +1,9 @@
 {
-  "name": "@gogogo/browser-sdk",
+  "name": "mimic-sdk",
   "version": "0.1.0",
-  "description": "Browser automation SDK for Gogogo project",
-  "repository": "https://github.com/qagogogo/gogogo",
-  "homepage": "https://qagogogo.github.io/gogogo/",
+  "description": "Browser automation SDK for Mimic project",
+  "repository": "https://github.com/sagibrant/mimic",
+  "homepage": "https://sagibrant.github.io/mimic/",
   "type": "module",
   "types": "./dist/types/index.d.ts",
   "main": "./dist/cjs/index.js",
@@ -31,7 +31,8 @@
   },
   "sideEffects": false,
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
     "web",
@@ -46,7 +47,7 @@
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.26.2",
   "dependencies": {
-    "@gogogo/shared": "workspace:*",
+    "@mimic-sdk/core": "workspace:*",
     "openai": "^6.4.0"
   },
   "devDependencies": {
