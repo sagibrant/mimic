@@ -37,7 +37,12 @@ class CrxPackPlugin {
       
       const crxOutput = path.join(packedDir, `Extension.crx`);
       console.log(`${timestamp()} CrxPackPlugin:: crx pack into - ${crxOutput}`);
-      execSync(`crx pack "${tempTaskDir}" -o "${crxOutput}" -p "${keyPath}"`, { stdio: 'inherit' });
+
+      const cmd = keyPath
+        ? `crx pack "${tempTaskDir}" -o "${crxOutput}" -p "${keyPath}"`
+        : `crx pack "${tempTaskDir}" -o "${crxOutput}"`;
+
+      execSync(cmd, { stdio: 'inherit' });
       
       console.log(`${timestamp()} CrxPackPlugin:: end`);
     });
