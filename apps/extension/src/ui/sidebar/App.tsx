@@ -1429,6 +1429,9 @@ export default function App() {
             console.warn('Failed to parse lastAsset:', error);
           }
         }
+        else {
+          refreshActiveTaskStep(taskAsset.root);
+        }
 
         // Check if debugger is attached
         const engine = SidebarUtils.engine;
