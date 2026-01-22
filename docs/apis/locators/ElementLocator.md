@@ -1,38 +1,74 @@
 # ElementLocator
 
-Locates elements and provides the full Element API plus scoped builder methods.
+Locator for elements.
 
-## Builders
+This type is both `Locator<Element>` and `Element`.
 
-- `element(selector?)`
-- `text(selector?)`
+## element
 
-## Shadow DOM Targeting (Important)
+`element(selector?: ElementLocatorOptions | string): ElementLocator`
 
-When elements live inside shadow DOM (including **closed** shadow roots), CSS selectors can be unreliable. Prefer this pattern:
+Creates a nested element locator scoped within the located element.
 
-- Start broad: `page.element()` or `frame.element()` or `element.element()`
-- Narrow with `filter(...)` (attribute/property/text/function)
-- Use `first()/nth()/get()` to pick a single target
-
-Example (attribute filtering works across shadow DOM):
+### Usage
 
 ```js
-const shadowButton = await page
+const list = await page.element('#list').get();
+await list.element('li').first().click();
+```
+
+### Arguments
+
+- `selector?` `<ElementLocatorOptions | string>`
+
+### Returns
+
+- `ElementLocator`
+
+## text
+
+`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
+
+Creates a text locator scoped within the located element.
+
+### Usage
+
+```js
+const card = await page.element('.card').first().get();
+await card.text(/details/i).first().highlight();
+```
+
+### Arguments
+
+- `selector?` `<TextLocatorOptions | string | RegExp>`
+
+### Returns
+
+- `TextLocator`
+
+## Shadow DOM Targeting
+
+`filter(...)` is the strongest way to identify elements across shadow DOM boundaries.
+
+### Usage
+
+```js
+const submit = await page
   .element()
   .filter({ type: 'attribute', name: 'data-test', value: 'shadow-submit' })
   .get();
 
-await shadowButton.click();
+await submit.click();
 ```
 
-Example (combine `filter` + `prefer` to avoid “Multiple Located”):
+### Arguments
 
-```js
-await page
-  .element('button')
-  .filter({ type: 'property', name: 'disabled', value: false })
-  .prefer({ type: 'attribute', name: 'aria-label', value: /submit/i, match: 'regex' })
-  .get()
-  .then(btn => btn.click());
-```
+- Use `filter(...)` with `type: 'attribute' | 'property' | 'function' | 'text'`.     
+- Use `prefer(...)` to break ties when multiple elements still match.    
+ 
+### Returns     
+- A narrowed `ElementLocator` (via `filter/prefer`) or a resolved `Element` (via `get()`)     
+## Locator Members     
+All locator methods are available. See [Locator](Locator.md) for details.     
+## Element Members     
+All `Element` members are available on `ElementLocator`. See [Element](../aos/Element.md) for full details.

@@ -1,20 +1,85 @@
 # Keyboard
 
-Keyboard controller for a page (type, down/up, press).
+Keyboard controller for a page.
 
-## Methods
+## type
 
-- `type(text, options?)`
-- `down(key)`, `up(key)`
-- `press(keys, options?)`
+`type(text: string, options?: TextInputOptions): Promise<void>`
 
-## Example
+Types text into the currently focused element.
+
+### Usage
 
 ```js
-await page.navigate('https://sagibrant.github.io/mimic/aut/keyboard.html');
-await page.sync();
-
-const keyboard = page.keyboard();
-await keyboard.type('Hello World', { delayBetweenChar: 50 });
-await keyboard.press(['Shift', 'KeyA'], { delayBetweenDownUp: 20 });
+await page.keyboard().type('Hello World', { delayBetweenChar: 50 });
 ```
+
+### Arguments
+
+- `text` `<string>`
+- `options?` `<TextInputOptions>`
+
+### Returns
+
+- `Promise<void>`
+
+## down
+
+`down(key: string): Promise<void>`
+
+Presses down a key.
+
+### Usage
+
+```js
+await page.keyboard().down('Shift');
+```
+
+### Arguments
+
+- `key` `<string>`
+
+### Returns
+
+- `Promise<void>`
+
+## up
+
+`up(key: string): Promise<void>`
+
+Releases a key.
+
+### Usage
+
+```js
+await page.keyboard().up('Shift');
+```
+
+### Arguments
+
+- `key` `<string>`
+
+### Returns
+
+- `Promise<void>`
+
+## press
+
+`press(keys: string | string[], options?: { delayBetweenDownUp?: number }): Promise<void>`
+
+Presses and releases a key or chord.
+
+### Usage
+
+```js
+await page.keyboard().press(['Shift', 'KeyA'], { delayBetweenDownUp: 20 });
+```
+
+### Arguments
+
+- `keys` `<string | string[]>`
+- `options?` `<{ delayBetweenDownUp?: number }>`
+
+### Returns
+
+- `Promise<void>`

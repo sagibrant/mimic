@@ -1,37 +1,66 @@
 # PageLocator
 
-Locates pages (tabs) and provides page methods and builders.
+Locator for pages.
 
-## Builders
+This type is both `Locator<Page>` and `Page`.
 
-- `frame(selector?)`
-- `element(selector?)`
-- `text(selector?)`
+## frame
 
-## Examples
+`frame(selector?: FrameLocatorOptions | string): FrameLocator`
 
-### Get Active Page (Last Focused Window)
-
-```js
-const page = await browser.page({ active: true, lastFocusedWindow: true }).get();
-await page.bringToFront();
-```
-
-### Locate an Element (CSS)
-
-```js
-await page.element('#submit-btn').click();
-```
-
-### Locate Text
-
-```js
-await page.text(/Welcome/i).first().highlight();
-```
-
-### Locate an Iframe Then Click Inside It
+### Usage
 
 ```js
 const frame = await page.frame({ url: /example-frame/ }).get();
 await frame.element('button').first().click();
 ```
+
+### Arguments
+
+- `selector?` `<FrameLocatorOptions | string>`
+
+### Returns
+
+- `FrameLocator`
+
+## element
+
+`element(selector?: ElementLocatorOptions | string): ElementLocator`
+
+### Usage
+
+```js
+await page.element('#submit-btn').click();
+```
+
+### Arguments
+
+- `selector?` `<ElementLocatorOptions | string>`
+
+### Returns
+
+- `ElementLocator`
+
+## text
+
+`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
+
+### Usage
+
+```js
+await page.text(/Welcome/i).first().highlight();
+```
+
+### Arguments
+
+- `selector?` `<TextLocatorOptions | string | RegExp>`
+
+### Returns
+
+- `TextLocator`
+
+## Locator Members
+
+All locator methods are available. See [Locator](Locator.md) for details.     
+## Page Members     
+All `Page` members are available on `PageLocator`. See [Page](../aos/Page.md) for full details.

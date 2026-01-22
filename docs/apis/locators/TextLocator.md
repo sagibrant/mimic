@@ -1,11 +1,29 @@
 # TextLocator
 
-Locates text nodes and provides Node/Text actions (click/hover/drag/etc) plus text input helpers.
+Locator for text nodes.
 
-## Examples
+This type is both `Locator<Text>` and `Text`.
+
+## Getting Started
+
+### Usage
 
 ```js
-const label = page.text(/sign in/i).first();
+const label = await page.text(/sign in/i).first().get();
 await label.highlight();
 await label.click();
 ```
+
+### Arguments
+
+- None
+
+### Returns
+
+- `Text` (via `TextLocator.get()`)
+
+## Locator Members
+
+All locator methods are available. See [Locator](Locator.md) for details.     
+## Text Members     
+All `Text` members are available on `TextLocator`. See [Text](../aos/Text.md) for full details.

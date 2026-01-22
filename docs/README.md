@@ -24,7 +24,7 @@ await page.navigate('https://sagibrant.github.io/mimic/aut/index.html');
 await page.sync();
 
 await page.element('#btn_click').click();
-await expect(await page.title()).toMatch(/test/i);
+expect(await page.title()).toMatch(/test/i);
 ```
 
 ## Quick Start (Browser SDK Usage)
@@ -76,4 +76,3 @@ await page.element('#submit-btn').first().click();
 ### Types
 
 - [Types](apis/types.md)
-

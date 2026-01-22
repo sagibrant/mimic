@@ -1,38 +1,39 @@
-# Locator (Base)
+# Locator
 
-The base locator type that supports narrowing matches (`filter`), tie-breaking (`prefer`), and ordinal selection (`first/last/nth`).
+Base interface for all locators.
 
-## Core Rules
+`get()` resolves **exactly one** match (otherwise it throws `No X Located` / `Multiple X Located`), so prefer to narrow with `filter()` and/or pick an ordinal with `first/last/nth`.
 
-- `get()` resolves **exactly one** match, otherwise it throws (`No X Located` / `Multiple X Located`).
-- `filter(...)` adds **mandatory** constraints (hard filters).
-- `prefer(...)` adds **assistive** constraints (optional tie-breakers when multiple matches exist).
+## filter
 
-## Methods
+`filter(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<T>`
 
-### filter(options?)
+Adds mandatory filters that must match.
 
-Adds mandatory filters that *must* match.
-
-Example (hard filter by attribute):
+### Usage
 
 ```js
-const loginButton = page
-  .element('button')
-  .filter({ type: 'attribute', name: 'data-test', value: 'login-button' })
+const username = await page
+  .element('input')
+  .filter({ type: 'attribute', name: 'name', value: 'user-name' })
   .get();
 ```
 
-### prefer(options?)
+### Arguments
 
-Adds assistive filters that are used to try to uniquely identify a single match when multiple matches exist.
+- `options?` `<LocatorFilterOption | LocatorFilterOption[]>`: mandatory filter(s).
 
-How `prefer()` behaves:
+### Returns
 
-- If multiple matches exist after `filter(...)`, Mimic tries combinations of `prefer(...)` rules to see if it can narrow to exactly one match.
-- If no combination yields exactly one match, Mimic does **not** drop candidates. You still have multiple matches and should use stronger `filter(...)` or an ordinal (`first/last/nth`).
+- `Locator<T>`
 
-Example (optional tie-breaker):
+## prefer
+
+`prefer(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<T>`
+
+Adds assistive filters that are used to try to break ties when multiple matches exist.
+
+### Usage
 
 ```js
 const button = page
@@ -44,78 +45,133 @@ const button = page
 await button.click();
 ```
 
-### get()
+### Arguments
+
+- `options?` `<LocatorFilterOption | LocatorFilterOption[]>`: assistive filter(s).
+
+### Returns
+
+- `Locator<T>`
+
+## get
+
+`get(): Promise<T>`
 
 Waits (up to the locator timeout) until there is exactly one match, then returns it.
 
-Example (avoid “Multiple Located”):
+### Usage
 
 ```js
-const input = await page
-  .element('input')
-  .filter({ type: 'attribute', name: 'name', value: 'user-name' })
-  .get();
+const page = await browser.page({ active: true, lastFocusedWindow: true }).get();
+await page.bringToFront();
 ```
 
-### count()
+### Arguments
+
+- None
+
+### Returns
+
+- `Promise<T>`
+
+## count
+
+`count(): Promise<number>`
 
 Returns the number of matches.
 
+### Usage
+
 ```js
 const n = await page.element('button').count();
-await expect(n > 0).toBeTruthy();
+expect(n > 0).toBeTruthy();
 ```
 
-### all()
+### Arguments
 
-Returns an array of `nth(i)` locators for all matches.
+- None
+
+### Returns
+
+- `Promise<number>`
+
+## all
+
+`all(): Promise<Locator<T>[]>`
+
+Returns locators for all matches (`nth(0..count-1)`).
+
+### Usage
 
 ```js
 const items = await page.element('li').all();
-for (const item of items) {
-  await item.highlight();
-}
+expect(items.length > 0).toBeTruthy();
 ```
 
-### nth(index)
+### Arguments
 
-Returns a locator for a specific match by index (0-based).
+- None
+
+### Returns
+
+- `Promise<Locator<T>[]>`
+
+## nth
+
+`nth(index: number): Locator<T>`
+
+Returns a locator for the match at `index` (0-based).
+
+### Usage
 
 ```js
 await page.element('button').nth(1).click();
 ```
 
-### first()
+### Arguments
+
+- `index` `<number>`: 0-based index.
+
+### Returns
+
+- `Locator<T>`
+
+## first
+
+`first(): Locator<T>`
 
 Alias for `nth(0)`.
+
+### Usage
 
 ```js
 await page.element('button').first().click();
 ```
 
-### last()
+### Arguments
+
+- None
+
+### Returns
+
+- `Locator<T>`
+
+## last
+
+`last(): Locator<T>`
 
 Selects the last match.
+
+### Usage
 
 ```js
 await page.element('button').last().click();
 ```
 
-## Filter Options
+### Arguments
 
-`filter()` and `prefer()` accept `LocatorFilterOption`:
+- None
 
-- `type`: `'property' | 'attribute' | 'function' | 'text'`
-- `name`: the property/attribute/function name (or a well-known virtual key for internals)
-- `value`: `string | number | boolean | RegExp`
-- `match`: `'has' | 'hasNot' | 'exact' | 'includes' | 'startsWith' | 'endsWith' | 'regex'`
+### Returns
 
-Examples:
-
-```js
-page.element().filter({ type: 'attribute', name: 'id', value: 'submit' });
-page.element().filter({ type: 'property', name: 'checked', value: true });
-page.element().filter({ type: 'attribute', name: 'class', value: /primary/, match: 'regex' });
-page.element().filter({ type: 'function', name: 'click', match: 'has' });
-page.text().filter({ type: 'text', name: 'nodeType', match: 'has' });
-```
+- `Locator<T>`
