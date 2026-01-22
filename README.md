@@ -5,16 +5,15 @@ Mimic enables reliable end-to-end automation on your machine, with a focus on br
 ## Mimic - extension
 
 Mimic extension is a standalone solution for browser automation.
-It is a modern web extension available on Chrome, Edge, Firefox and Safari. 
+It is a modern web extension available on Chrome and Edge (Firefox and Safari support coming soon). 
 It is small, safe, fast, reliable and user friendly with AI assistance.
 It helps you to generate, execute the automation steps on your browser directly without installing any heavy local tools.
 
 ## Key Features
 
-- **Cross-browser compatibility**: Works on Chrome, Edge, Firefox, and Safari
+- **Cross-browser compatibility**: Works on Chrome and Edge (Firefox and Safari support coming soon)
 - **AI-powered automation**: Generate automation steps with AI assistance
 - **Lightweight design**: No heavy local installations required
-- **Secure key management**: Protected extension signing keys
 - **Easy-to-use API**: Intuitive interface for automation tasks
 
 ## Quick Start
@@ -46,17 +45,15 @@ It helps you to generate, execute the automation steps on your browser directly 
 
 4. **Build the extension**
    ```bash
-   # Build Chrome extension (unpacked)
-   pnpm run build:chrome:v3:unpacked
+   # Build for development
+   pnpm build:dev
    
-   # Build for other browsers
-   pnpm run build:edge:v3:unpacked
-   pnpm run build:firefox:v3:unpacked
+   # Build for production
+   pnpm build:prod
    ```
 
 5. **Load the extension**
    - Chrome/Edge: Go to `chrome://extensions`, enable Developer mode, and load unpacked extension from `apps/extension/build/chrome/v3`
-   - Firefox: Go to `about:debugging`, click "This Firefox", and load temporary add-on from `apps/extension/build/firefox/v3`
 
 ## Documentation
 
@@ -102,8 +99,6 @@ pnpm run build:chrome:v3
 # Edge
 pnpm run build:edge:v3:unpacked
 
-# Firefox
-pnpm run build:firefox:v3:unpacked
 ```
 
 ### CI/CD (GitHub Actions)
