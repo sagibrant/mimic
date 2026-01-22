@@ -4,13 +4,20 @@ This API reference follows a Playwright-like structure.
 
 ## Member Template
 
-For each method/property/event, use:
+Group members into sections:
 
-- `## <memberName>`
+- `## Properties` (optional)
+- `## Methods` (required)
+- `## Events` (optional)
+
+For each method/property/event member block, use:
+
+- `---`
+- `### <memberName>`
 - Short description
-- `### Usage`
-- `### Arguments`
-- `### Returns`
+- `#### Usage`
+- `#### Arguments`
+- `#### Returns`
 
 ## Rules
 
@@ -21,4 +28,3 @@ For each method/property/event, use:
   - `tests/extension/dist/src/demo/**`    
   - `apps/web-site/public/aut/**`    
 - `expect(...)` methods return `void` in typings; examples should not use `await`.    
-

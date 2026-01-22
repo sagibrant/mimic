@@ -20,7 +20,7 @@ await element.click();
 
 - `Element` (via `ElementLocator.get()`)
 
-## Getters
+## Properties
 
 All getters are async and return a value from the DOM element.
 
@@ -60,7 +60,10 @@ All getters are async and return a value from the DOM element.
 | `selectedOptions()` | `await element.selectedOptions()` | `Promise<Element[]>` |
 | `visible()` | `await element.visible()` | `Promise<boolean>` |
 
-## highlight
+## Methods
+
+---
+### highlight
 
 `highlight(): Promise<void>`
 
@@ -80,7 +83,8 @@ await element.highlight();
 
 - `Promise<void>`
 
-## getProperty
+---
+### getProperty
 
 `getProperty(name: string): Promise<unknown>`
 
@@ -101,7 +105,8 @@ expect(value).toBeDefined();
 
 - `Promise<unknown>`
 
-## setProperty
+---
+### setProperty
 
 `setProperty(name: string, value: unknown): Promise<void>`
 
@@ -122,7 +127,8 @@ await element.setProperty('value', 'hello');
 
 - `Promise<void>`
 
-## getBoundingClientRect
+---
+### getBoundingClientRect
 
 `getBoundingClientRect(): Promise<RectInfo>`
 
@@ -143,7 +149,8 @@ expect(rect.width >= 0).toBeTruthy();
 
 - `Promise<RectInfo>`
 
-## dispatchEvent
+---
+### dispatchEvent
 
 `dispatchEvent(type: string, options?: object): Promise<void>`
 
@@ -164,7 +171,8 @@ await element.dispatchEvent('click');
 
 - `Promise<void>`
 
-## sendCDPCommand
+---
+### sendCDPCommand
 
 `sendCDPCommand(method: string, commandParams?: { [key: string]: unknown }): Promise<void>`
 
@@ -186,7 +194,8 @@ await element.sendCDPCommand('Input.dispatchMouseEvent', { type: 'mouseMoved', x
 
 - `Promise<void>`
 
-## getAttribute
+---
+### getAttribute
 
 `getAttribute(name: string): Promise<string | null>`
 
@@ -207,7 +216,8 @@ expect(id === null || typeof id === 'string').toBeTruthy();
 
 - `Promise<string | null>`
 
-## getAttributes
+---
+### getAttributes
 
 `getAttributes(): Promise<Record<string, unknown>>`
 
@@ -228,7 +238,8 @@ expect(typeof attrs === 'object').toBeTruthy();
 
 - `Promise<Record<string, unknown>>`
 
-## setAttribute
+---
+### setAttribute
 
 `setAttribute(name: string, value: string): Promise<void>`
 
@@ -249,7 +260,8 @@ await element.setAttribute('data-qa', 'submit');
 
 - `Promise<void>`
 
-## hasAttribute
+---
+### hasAttribute
 
 `hasAttribute(name: string): Promise<boolean>`
 
@@ -270,7 +282,8 @@ expect(typeof has === 'boolean').toBeTruthy();
 
 - `Promise<boolean>`
 
-## toggleAttribute
+---
+### toggleAttribute
 
 `toggleAttribute(name: string, force?: boolean): Promise<boolean>`
 
@@ -292,7 +305,8 @@ expect(on).toBeTruthy();
 
 - `Promise<boolean>`
 
-## querySelectorAll
+---
+### querySelectorAll
 
 `querySelectorAll(selector: string): Promise<Element[]>`
 
@@ -313,7 +327,8 @@ expect(children.length >= 0).toBeTruthy();
 
 - `Promise<Element[]>`
 
-## checkValidity
+---
+### checkValidity
 
 `checkValidity(): Promise<boolean>`
 
@@ -334,7 +349,8 @@ expect(typeof valid === 'boolean').toBeTruthy();
 
 - `Promise<boolean>`
 
-## checkVisibility
+---
+### checkVisibility
 
 `checkVisibility(options?: object): Promise<boolean>`
 
@@ -355,7 +371,8 @@ expect(typeof visible === 'boolean').toBeTruthy();
 
 - `Promise<boolean>`
 
-## focus
+---
+### focus
 
 `focus(): Promise<void>`
 
@@ -375,7 +392,8 @@ await element.focus();
 
 - `Promise<void>`
 
-## blur
+---
+### blur
 
 `blur(): Promise<void>`
 
@@ -395,7 +413,8 @@ await element.blur();
 
 - `Promise<void>`
 
-## scrollIntoViewIfNeeded
+---
+### scrollIntoViewIfNeeded
 
 `scrollIntoViewIfNeeded(): Promise<void>`
 
@@ -415,7 +434,8 @@ await element.scrollIntoViewIfNeeded();
 
 - `Promise<void>`
 
-## check
+---
+### check
 
 `check(options?: ActionOptions): Promise<void>`
 
@@ -435,7 +455,8 @@ await page.element('input[type=\"checkbox\"]').first().check();
 
 - `Promise<void>`
 
-## uncheck
+---
+### uncheck
 
 `uncheck(options?: ActionOptions): Promise<void>`
 
@@ -455,7 +476,8 @@ await page.element('input[type=\"checkbox\"]').first().uncheck();
 
 - `Promise<void>`
 
-## selectOption
+---
+### selectOption
 
 `selectOption(values: string | string[] | number | number[] | Element | Element[]): Promise<void>`
 
@@ -475,7 +497,8 @@ await page.element('select').first().selectOption('value1');
 
 - `Promise<void>`
 
-## setFileInputFiles
+---
+### setFileInputFiles
 
 `setFileInputFiles(files: string | string[]): Promise<void>`
 
@@ -495,7 +518,8 @@ await page.element('input[type=\"file\"]').get().then(el => el.setFileInputFiles
 
 - `Promise<void>`
 
-## element
+---
+### element
 
 `element(selector?: ElementLocatorOptions | string): ElementLocator`
 
@@ -515,7 +539,8 @@ await element.element('li').first().click();
 
 - `ElementLocator`
 
-## text
+---
+### text
 
 `text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
 
@@ -535,7 +560,8 @@ await element.text(/Item \\d+/).first().highlight();
 
 - `TextLocator`
 
-## hover
+---
+### hover
 
 `hover(options?: { position?: Point } & ActionOptions): Promise<void>`
 
@@ -553,7 +579,8 @@ await element.hover();
 
 - `Promise<void>`
 
-## click
+---
+### click
 
 `click(options?: ClickOptions & ActionOptions): Promise<void>`
 
@@ -572,7 +599,8 @@ await element.click({ mode: 'cdp' });
 
 - `Promise<void>`
 
-## dblclick
+---
+### dblclick
 
 `dblclick(options?: Omit<ClickOptions, 'clickCount'> & ActionOptions): Promise<void>`
 
@@ -590,7 +618,8 @@ await element.dblclick();
 
 - `Promise<void>`
 
-## wheel
+---
+### wheel
 
 `wheel(options?: { deltaX?: number, deltaY?: number } & ActionOptions): Promise<void>`
 
@@ -608,7 +637,8 @@ await element.wheel({ deltaY: 120 });
 
 - `Promise<void>`
 
-## dragTo
+---
+### dragTo
 
 `dragTo(target: Element | Text, options?: { sourcePosition?: Point, targetPosition?: Point, steps?: number } & ActionOptions): Promise<void>`
 
@@ -629,7 +659,8 @@ await source.dragTo(target);
 
 - `Promise<void>`
 
-## fill
+---
+### fill
 
 `fill(text: string, options?: TextInputOptions & ActionOptions): Promise<void>`
 
@@ -650,7 +681,8 @@ await page.element('#input_fill').fill('Hello');
 
 - `Promise<void>`
 
-## clear
+---
+### clear
 
 `clear(options?: ActionOptions): Promise<void>`
 
@@ -670,7 +702,8 @@ await page.element('#input_clear').clear();
 
 - `Promise<void>`
 
-## press
+---
+### press
 
 `press(keys: string | string[], options?: { delayBetweenDownUp?: number } & ActionOptions): Promise<void>`
 
@@ -691,7 +724,8 @@ await page.element('#input_fill').press(['Shift', 'KeyA']);
 
 - `Promise<void>`
 
-## tap
+---
+### tap
 
 `tap(options?: { position?: Point } & ActionOptions): Promise<void>`
 
@@ -711,7 +745,8 @@ await element.tap();
 
 - `Promise<void>`
 
-## ownerFrame
+---
+### ownerFrame
 
 `ownerFrame(): Promise<Frame>`
 
@@ -732,7 +767,8 @@ expect(frame).toBeDefined();
 
 - `Promise<Frame>`
 
-## contentFrame
+---
+### contentFrame
 
 `contentFrame(): Promise<Frame | null>`
 

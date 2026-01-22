@@ -2,84 +2,90 @@
 
 Keyboard controller for a page.
 
-## type
+## Methods
+
+---
+### type
 
 `type(text: string, options?: TextInputOptions): Promise<void>`
 
 Types text into the currently focused element.
 
-### Usage
+#### Usage
 
 ```js
 await page.keyboard().type('Hello World', { delayBetweenChar: 50 });
 ```
 
-### Arguments
+#### Arguments
 
 - `text` `<string>`
 - `options?` `<TextInputOptions>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## down
+---
+### down
 
 `down(key: string): Promise<void>`
 
 Presses down a key.
 
-### Usage
+#### Usage
 
 ```js
 await page.keyboard().down('Shift');
 ```
 
-### Arguments
+#### Arguments
 
 - `key` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## up
+---
+### up
 
 `up(key: string): Promise<void>`
 
 Releases a key.
 
-### Usage
+#### Usage
 
 ```js
 await page.keyboard().up('Shift');
 ```
 
-### Arguments
+#### Arguments
 
 - `key` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## press
+---
+### press
 
 `press(keys: string | string[], options?: { delayBetweenDownUp?: number }): Promise<void>`
 
 Presses and releases a key or chord.
 
-### Usage
+#### Usage
 
 ```js
 await page.keyboard().press(['Shift', 'KeyA'], { delayBetweenDownUp: 20 });
 ```
 
-### Arguments
+#### Arguments
 
 - `keys` `<string | string[]>`
 - `options?` `<{ delayBetweenDownUp?: number }>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`

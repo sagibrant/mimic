@@ -2,239 +2,255 @@
 
 Page (tab) automation object.
 
-## frame
+## Properties
 
-`frame(selector?: FrameLocatorOptions | string): FrameLocator`
-
-Creates a frame locator for this page.
-
-### Usage
-
-```js
-const frame = await page.frame({ url: /example/ }).get();
-await frame.element('button').first().click();
-```
-
-### Arguments
-
-- `selector?` `<FrameLocatorOptions | string>`: frame selector options or a selector string.
-
-### Returns
-
-- `FrameLocator`
-
-## element
-
-`element(selector?: ElementLocatorOptions | string): ElementLocator`
-
-Creates an element locator for this page.
-
-### Usage
-
-```js
-await page.element('#btn_click').click();
-```
-
-### Arguments
-
-- `selector?` `<ElementLocatorOptions | string>`: element locator options or CSS selector string.
-
-### Returns
-
-- `ElementLocator`
-
-## text
-
-`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
-
-Creates a text locator for this page.
-
-### Usage
-
-```js
-await page.text(/Welcome/).first().highlight();
-```
-
-### Arguments
-
-- `selector?` `<TextLocatorOptions | string | RegExp>`
-
-### Returns
-
-- `TextLocator`
-
-## url
+---
+### url
 
 `url(): Promise<string>`
 
 Returns the current page URL.
 
-### Usage
+#### Usage
 
 ```js
 const url = await page.url();
 expect(url).toMatch(/^https?:\\/\\//);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## title
+---
+### title
 
 `title(): Promise<string>`
 
 Returns the page title.
 
-### Usage
+#### Usage
 
 ```js
 const title = await page.title();
 expect(typeof title === 'string').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## content
+---
+### content
 
 `content(): Promise<string>`
 
 Returns the full HTML content.
 
-### Usage
+#### Usage
 
 ```js
 const html = await page.content();
 expect(html.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## status
+---
+### status
 
 `status(): Promise<'unloaded' | 'loading' | 'complete'>`
 
 Returns the loading status.
 
-### Usage
+#### Usage
 
 ```js
 await page.sync();
 expect(await page.status()).toBe('complete');
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<'unloaded' | 'loading' | 'complete'>`
 
-## active
+---
+### active
 
 `active(): Promise<boolean>`
 
 Returns whether the page is active.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.active()).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## closed
+---
+### closed
 
 `closed(): Promise<boolean>`
 
 Returns whether the page is closed.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.closed()).toBeFalsy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## activate
+## Methods
+
+---
+### frame
+
+`frame(selector?: FrameLocatorOptions | string): FrameLocator`
+
+Creates a frame locator for this page.
+
+#### Usage
+
+```js
+const frame = await page.frame({ url: /example/ }).get();
+await frame.element('button').first().click();
+```
+
+#### Arguments
+
+- `selector?` `<FrameLocatorOptions | string>`: frame selector options or a selector string.
+
+#### Returns
+
+- `FrameLocator`
+
+---
+### element
+
+`element(selector?: ElementLocatorOptions | string): ElementLocator`
+
+Creates an element locator for this page.
+
+#### Usage
+
+```js
+await page.element('#btn_click').click();
+```
+
+#### Arguments
+
+- `selector?` `<ElementLocatorOptions | string>`: element locator options or CSS selector string.
+
+#### Returns
+
+- `ElementLocator`
+
+---
+### text
+
+`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
+
+Creates a text locator for this page.
+
+#### Usage
+
+```js
+await page.text(/Welcome/).first().highlight();
+```
+
+#### Arguments
+
+- `selector?` `<TextLocatorOptions | string | RegExp>`
+
+#### Returns
+
+- `TextLocator`
+
+---
+### activate
 
 `activate(): Promise<void>`
 
 Activates the page (brings it to the front).
 
-### Usage
+#### Usage
 
 ```js
 await page.activate();
 expect(await page.active()).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## bringToFront
+---
+### bringToFront
 
 `bringToFront(): Promise<void>`
 
 Brings the page to the front.
 
-### Usage
+#### Usage
 
 ```js
 await page.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## sync
+---
+### sync
 
 `sync(timeout?: number): Promise<void>`
 
 Waits for the page to finish loading.
 
-### Usage
+#### Usage
 
 ```js
 await page.navigate('https://sagibrant.github.io/mimic/aut/mouse.html');
@@ -242,63 +258,66 @@ await page.sync(5000);
 expect(await page.status()).toBe('complete');
 ```
 
-### Arguments
+#### Arguments
 
 - `timeout?` `<number>`: timeout in milliseconds.
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## openNewPage
+---
+### openNewPage
 
 `openNewPage(url?: string): Promise<Page>`
 
 Opens a new page in the same window.
 
-### Usage
+#### Usage
 
 ```js
 const newPage = await page.openNewPage('https://sagibrant.github.io/mimic/aut/keyboard.html');
 await newPage.sync();
 ```
 
-### Arguments
+#### Arguments
 
 - `url?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## navigate
+---
+### navigate
 
 `navigate(url?: string): Promise<void>`
 
 Navigates to `url`.
 
-### Usage
+#### Usage
 
 ```js
 await page.navigate('https://sagibrant.github.io/mimic/aut/index.html');
 await page.sync();
 ```
 
-### Arguments
+#### Arguments
 
 - `url?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## refresh
+---
+### refresh
 
 `refresh(bypassCache?: boolean): Promise<void>`
 
 Refreshes the page.
 
-### Usage
+#### Usage
 
 ```js
 await page.refresh();
@@ -306,21 +325,22 @@ await page.sync();
 expect(await page.status()).toBe('complete');
 ```
 
-### Arguments
+#### Arguments
 
 - `bypassCache?` `<boolean>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## back
+---
+### back
 
 `back(): Promise<void>`
 
 Navigates back in history.
 
-### Usage
+#### Usage
 
 ```js
 await browser.attachDebugger();
@@ -333,21 +353,22 @@ await page.sync();
 await browser.detachDebugger();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## forward
+---
+### forward
 
 `forward(): Promise<void>`
 
 Navigates forward in history.
 
-### Usage
+#### Usage
 
 ```js
 await browser.attachDebugger();
@@ -356,106 +377,111 @@ await page.sync();
 await browser.detachDebugger();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## close
+---
+### close
 
 `close(): Promise<void>`
 
 Closes the page.
 
-### Usage
+#### Usage
 
 ```js
 await page.close();
 expect(await page.closed()).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## zoom
+---
+### zoom
 
 `zoom(zoomFactor: number): Promise<void>`
 
 Sets the page zoom factor.
 
-### Usage
+#### Usage
 
 ```js
 await page.zoom(1.5);
 await page.zoom(1);
 ```
 
-### Arguments
+#### Arguments
 
 - `zoomFactor` `<number>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## moveToWindow
+---
+### moveToWindow
 
 `moveToWindow(window: Window, index?: number): Promise<void>`
 
 Moves the page into another window.
 
-### Usage
+#### Usage
 
 ```js
 const windows = await browser.windows();
 await page.moveToWindow(windows[0], 0);
 ```
 
-### Arguments
+#### Arguments
 
 - `window` `<Window>`
 - `index?` `<number>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## captureScreenshot
+---
+### captureScreenshot
 
 `captureScreenshot(): Promise<string>`
 
 Captures a screenshot of the page.
 
-### Usage
+#### Usage
 
 ```js
 const data = await page.captureScreenshot();
 expect(data.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## querySelectorAll
+---
+### querySelectorAll
 
 `querySelectorAll(selector: string): Promise<Element[]>`
 
 Returns all elements matching `selector` in the main frame.
 
-### Usage
+#### Usage
 
 ```js
 await page.sync();
@@ -463,170 +489,180 @@ const divs = await page.querySelectorAll('div');
 expect(divs.length >= 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Element[]>`
 
-## executeScript
+---
+### executeScript
 
 `executeScript<Args extends unknown[], Result>(func: (...args: Args) => Result, args?: Args): Promise<Result>`
 
 Executes a function in the page context.
 
-### Usage
+#### Usage
 
 ```js
 const result = await page.executeScript((a, b, c) => ({ a, b, c }), [1, 'msg', { d: 3 }]);
 expect(result).toEqual({ a: 1, b: 'msg', c: { d: 3 } });
 ```
 
-### Arguments
+#### Arguments
 
 - `func` `<(...args: Args) => Result>`
 - `args?` `<Args>`
 
-### Returns
+#### Returns
 
 - `Promise<Result>`
 
-## window
+---
+### window
 
 `window(): Promise<Window | null>`
 
 Returns the window that owns this page, or `null`.
 
-### Usage
+#### Usage
 
 ```js
 const win = await page.window();
 expect(win).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Window | null>`
 
-## mainFrame
+---
+### mainFrame
 
 `mainFrame(): Promise<Frame | null>`
 
 Returns the main frame, or `null`.
 
-### Usage
+#### Usage
 
 ```js
 const frame = await page.mainFrame();
 expect(frame).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Frame | null>`
 
-## frames
+---
+### frames
 
 `frames(): Promise<Frame[]>`
 
 Returns all frames in the page.
 
-### Usage
+#### Usage
 
 ```js
 const frames = await page.frames();
 expect(frames.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Frame[]>`
 
-## mouse
+---
+### mouse
 
 `mouse(): Mouse`
 
 Returns the mouse controller.
 
-### Usage
+#### Usage
 
 ```js
 const mouse = page.mouse();
 await mouse.move(100, 100);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Mouse`
 
-## keyboard
+---
+### keyboard
 
 `keyboard(): Keyboard`
 
 Returns the keyboard controller.
 
-### Usage
+#### Usage
 
 ```js
 const keyboard = page.keyboard();
 await keyboard.type('Hello', { delayBetweenChar: 50 });
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Keyboard`
 
-## dialog
+---
+### dialog
 
 `dialog(): Dialog`
 
 Returns the current dialog handler object.
 
-### Usage
+#### Usage
 
 ```js
 const dialog = page.dialog();
 expect(await dialog.opened()).toBeFalsy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Dialog`
 
-## on
+## Events
+
+---
+### on
 
 `on(event: 'dialog', listener: (dialog: Dialog) => (unknown | Promise<unknown>)): this`     
 `on(event: 'domcontentloaded' | 'close', listener: (page: Page) => (unknown | Promise<unknown>)): this`
 
 Registers a page event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onDialog = async (dialog) => {
@@ -637,23 +673,24 @@ const onDialog = async (dialog) => {
 page.on('dialog', onDialog);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'dialog' | 'domcontentloaded' | 'close'>`
 - `listener` `<(dialog: Dialog) => unknown | Promise<unknown>>` or `<(page: Page) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`
 
-## off
+---
+### off
 
 `off(event: 'dialog', listener: (dialog: Dialog) => (unknown | Promise<unknown>)): this`     
 `off(event: 'domcontentloaded' | 'close', listener: (page: Page) => (unknown | Promise<unknown>)): this`
 
 Removes a specific page event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onClose = () => console.log('closed');
@@ -661,11 +698,11 @@ page.on('close', onClose);
 page.off('close', onClose);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'dialog' | 'domcontentloaded' | 'close'>`
 - `listener` `<(dialog: Dialog) => unknown | Promise<unknown>>` or `<(page: Page) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`

@@ -2,148 +2,157 @@
 
 Represents the most recent dialog on a page (`alert/confirm/prompt/beforeunload`).
 
-## page
+## Methods
+
+---
+### page
 
 `page(): Promise<Page>`
 
 Returns the page that triggered the dialog.
 
-### Usage
+#### Usage
 
 ```js
 const p = await page.dialog().page();
 expect(p).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## opened
+---
+### opened
 
 `opened(): Promise<boolean>`
 
 Returns whether the dialog is currently open.
 
-### Usage
+#### Usage
 
 ```js
 const open = await page.dialog().opened();
 expect(typeof open === 'boolean').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## type
+---
+### type
 
 `type(): Promise<'alert' | 'confirm' | 'prompt' | 'beforeunload'>`
 
 Returns the dialog type.
 
-### Usage
+#### Usage
 
 ```js
 const t = await page.dialog().type();
 expect(['alert', 'confirm', 'prompt', 'beforeunload']).toContain(t);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<'alert' | 'confirm' | 'prompt' | 'beforeunload'>`
 
-## defaultValue
+---
+### defaultValue
 
 `defaultValue(): Promise<string>`
 
 Returns the default prompt value.
 
-### Usage
+#### Usage
 
 ```js
 const v = await page.dialog().defaultValue();
 expect(typeof v === 'string').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## message
+---
+### message
 
 `message(): Promise<string>`
 
 Returns the dialog message.
 
-### Usage
+#### Usage
 
 ```js
 const msg = await page.dialog().message();
 expect(typeof msg === 'string').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## accept
+---
+### accept
 
 `accept(promptText?: string): Promise<void>`
 
 Accepts the dialog. For prompt dialogs, you can provide `promptText`.
 
-### Usage
+#### Usage
 
 ```js
 await page.dialog().accept();
 ```
 
-### Arguments
+#### Arguments
 
 - `promptText?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## dismiss
+---
+### dismiss
 
 `dismiss(): Promise<void>`
 
 Dismisses the dialog.
 
-### Usage
+#### Usage
 
 ```js
 await page.dialog().dismiss();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 

@@ -4,45 +4,49 @@ Locator for elements.
 
 This type is both `Locator<Element>` and `Element`.
 
-## element
+## Methods
+
+---
+### element
 
 `element(selector?: ElementLocatorOptions | string): ElementLocator`
 
 Creates a nested element locator scoped within the located element.
 
-### Usage
+#### Usage
 
 ```js
 const list = await page.element('#list').get();
 await list.element('li').first().click();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<ElementLocatorOptions | string>`
 
-### Returns
+#### Returns
 
 - `ElementLocator`
 
-## text
+---
+### text
 
 `text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
 
 Creates a text locator scoped within the located element.
 
-### Usage
+#### Usage
 
 ```js
 const card = await page.element('.card').first().get();
 await card.text(/details/i).first().highlight();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<TextLocatorOptions | string | RegExp>`
 
-### Returns
+#### Returns
 
 - `TextLocator`
 

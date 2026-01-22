@@ -22,6 +22,10 @@ await label.click();
 
 - `Text` (via `TextLocator.get()`)
 
+## Methods
+
+`TextLocator` does not add additional methods beyond `Locator<Text>` and `Text`. Use the sections below for details.
+
 ## Locator Members
 
 All locator methods are available. See [Locator](Locator.md) for details.     

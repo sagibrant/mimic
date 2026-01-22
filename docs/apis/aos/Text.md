@@ -19,7 +19,10 @@ await text.highlight();
 
 - `Text` (via `TextLocator.get()`)
 
-## ownerFrame
+## Methods
+
+---
+### ownerFrame
 
 `ownerFrame(): Promise<Frame>`
 
@@ -40,7 +43,8 @@ expect(frame).toBeDefined();
 
 - `Promise<Frame>`
 
-## ownerElement
+---
+### ownerElement
 
 `ownerElement(): Promise<Element | null>`
 
@@ -61,7 +65,7 @@ expect(el === null || typeof el === 'object').toBeTruthy();
 
 - `Promise<Element | null>`
 
-## Getters
+### Getters
 
 | Method name | Usage | Returns |
 | --- | --- | --- |
@@ -72,7 +76,8 @@ expect(el === null || typeof el === 'object').toBeTruthy();
 | `textContent()` | `await text.textContent()` | `Promise<string>` |
 | `boundingBox()` | `await text.boundingBox()` | `Promise<RectInfo \| null>` |
 
-## highlight
+---
+### highlight
 
 `highlight(): Promise<void>`
 
@@ -92,7 +97,8 @@ await text.highlight();
 
 - `Promise<void>`
 
-## getProperty
+---
+### getProperty
 
 `getProperty(name: string): Promise<unknown>`
 
@@ -111,7 +117,8 @@ expect(v).toBeDefined();
 
 - `Promise<unknown>`
 
-## setProperty
+---
+### setProperty
 
 `setProperty(name: string, value: unknown): Promise<void>`
 
@@ -130,7 +137,8 @@ await text.setProperty('nodeValue', 'x');
 
 - `Promise<void>`
 
-## getBoundingClientRect
+---
+### getBoundingClientRect
 
 `getBoundingClientRect(): Promise<RectInfo>`
 
@@ -149,7 +157,8 @@ expect(rect.width >= 0).toBeTruthy();
 
 - `Promise<RectInfo>`
 
-## dispatchEvent
+---
+### dispatchEvent
 
 `dispatchEvent(type: string, options?: object): Promise<void>`
 
@@ -168,7 +177,8 @@ await text.dispatchEvent('mousemove');
 
 - `Promise<void>`
 
-## sendCDPCommand
+---
+### sendCDPCommand
 
 `sendCDPCommand(method: string, commandParams?: { [key: string]: unknown }): Promise<void>`
 
@@ -188,7 +198,8 @@ await text.sendCDPCommand('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1
 
 - `Promise<void>`
 
-## hover
+---
+### hover
 
 `hover(options?: { position?: Point } & ActionOptions): Promise<void>`
 
@@ -206,7 +217,8 @@ await text.hover();
 
 - `Promise<void>`
 
-## click
+---
+### click
 
 `click(options?: ClickOptions & ActionOptions): Promise<void>`
 
@@ -224,7 +236,8 @@ await text.click();
 
 - `Promise<void>`
 
-## dblclick
+---
+### dblclick
 
 `dblclick(options?: Omit<ClickOptions, 'clickCount'> & ActionOptions): Promise<void>`
 
@@ -242,7 +255,8 @@ await text.dblclick();
 
 - `Promise<void>`
 
-## wheel
+---
+### wheel
 
 `wheel(options?: { deltaX?: number, deltaY?: number } & ActionOptions): Promise<void>`
 
@@ -260,7 +274,8 @@ await text.wheel({ deltaY: 120 });
 
 - `Promise<void>`
 
-## dragTo
+---
+### dragTo
 
 `dragTo(target: Element | Text, options?: { sourcePosition?: Point, targetPosition?: Point, steps?: number } & ActionOptions): Promise<void>`
 
@@ -280,7 +295,8 @@ await text.dragTo(target);
 
 - `Promise<void>`
 
-## tap
+---
+### tap
 
 `tap(options?: { position?: Point } & ActionOptions): Promise<void>`
 

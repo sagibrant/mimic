@@ -4,41 +4,45 @@ Locator for frames.
 
 This type is both `Locator<Frame>` and `Frame`.
 
-## element
+## Methods
+
+---
+### element
 
 `element(selector?: ElementLocatorOptions | string): ElementLocator`
 
-### Usage
+#### Usage
 
 ```js
 const frame = await page.frame({ url: /embedded/ }).get();
 await frame.element('input').first().fill('hello');
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<ElementLocatorOptions | string>`
 
-### Returns
+#### Returns
 
 - `ElementLocator`
 
-## text
+---
+### text
 
 `text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
 
-### Usage
+#### Usage
 
 ```js
 const frame = await page.frame({ url: /embedded/ }).get();
 await frame.text(/submit/i).first().click();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<TextLocatorOptions | string | RegExp>`
 
-### Returns
+#### Returns
 
 - `TextLocator`
 

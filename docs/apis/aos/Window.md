@@ -2,241 +2,257 @@
 
 Window automation object.
 
-## page
+## Properties
 
-`page(selector?: PageLocatorOptions): PageLocator`
-
-Creates a page locator scoped to this window.
-
-### Usage
-
-```js
-const active = await window.page({ active: true }).get();
-await active.bringToFront();
-```
-
-### Arguments
-
-- `selector?` `<PageLocatorOptions>`
-
-### Returns
-
-- `PageLocator`
-
-## state
+---
+### state
 
 `state(): Promise<'normal' | 'minimized' | 'maximized' | 'fullscreen' | 'locked-fullscreen'>`
 
 Returns the current window state.
 
-### Usage
+#### Usage
 
 ```js
 const state = await window.state();
 expect(['normal', 'minimized', 'maximized', 'fullscreen', 'locked-fullscreen']).toContain(state);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<'normal' | 'minimized' | 'maximized' | 'fullscreen' | 'locked-fullscreen'>`
 
-## focused
+---
+### focused
 
 `focused(): Promise<boolean>`
 
 Returns whether the window is focused.
 
-### Usage
+#### Usage
 
 ```js
 expect(await window.focused()).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## incognito
+---
+### incognito
 
 `incognito(): Promise<boolean>`
 
 Returns whether the window is incognito/private.
 
-### Usage
+#### Usage
 
 ```js
 const incognito = await window.incognito();
 expect(typeof incognito === 'boolean').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## closed
+---
+### closed
 
 `closed(): Promise<boolean>`
 
 Returns whether the window is closed.
 
-### Usage
+#### Usage
 
 ```js
 expect(await window.closed()).toBeFalsy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<boolean>`
 
-## openNewPage
+## Methods
+
+---
+### page
+
+`page(selector?: PageLocatorOptions): PageLocator`
+
+Creates a page locator scoped to this window.
+
+#### Usage
+
+```js
+const active = await window.page({ active: true }).get();
+await active.bringToFront();
+```
+
+#### Arguments
+
+- `selector?` `<PageLocatorOptions>`
+
+#### Returns
+
+- `PageLocator`
+
+---
+### openNewPage
 
 `openNewPage(url?: string): Promise<Page>`
 
 Opens a new page in this window.
 
-### Usage
+#### Usage
 
 ```js
 const p = await window.openNewPage('https://sagibrant.github.io/mimic/aut/mouse.html');
 await p.sync();
 ```
 
-### Arguments
+#### Arguments
 
 - `url?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## focus
+---
+### focus
 
 `focus(): Promise<void>`
 
 Brings the window into focus.
 
-### Usage
+#### Usage
 
 ```js
 await window.focus();
 expect(await window.focused()).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## close
+---
+### close
 
 `close(): Promise<void>`
 
 Closes the window.
 
-### Usage
+#### Usage
 
 ```js
 await window.close();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## minimize
+---
+### minimize
 
 `minimize(): Promise<void>`
 
 Minimizes the window.
 
-### Usage
+#### Usage
 
 ```js
 await window.minimize();
 expect(await window.state()).toBe('minimized');
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## maximize
+---
+### maximize
 
 `maximize(): Promise<void>`
 
 Maximizes the window.
 
-### Usage
+#### Usage
 
 ```js
 await window.maximize();
 expect(['normal', 'maximized']).toContain(await window.state());
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## restore
+---
+### restore
 
 `restore(): Promise<void>`
 
 Restores the window from minimized/maximized state.
 
-### Usage
+#### Usage
 
 ```js
 await window.restore();
 expect(await window.state()).toBe('normal');
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## fullscreen
+---
+### fullscreen
 
 `fullscreen(toggle?: boolean): Promise<void>`
 
 Toggles fullscreen mode.
 
-### Usage
+#### Usage
 
 ```js
 await window.fullscreen(false);
@@ -246,108 +262,115 @@ await window.fullscreen();
 expect(await window.state()).toBe('normal');
 ```
 
-### Arguments
+#### Arguments
 
 - `toggle?` `<boolean>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## browser
+---
+### browser
 
 `browser(): Promise<Browser>`
 
 Returns the owning browser.
 
-### Usage
+#### Usage
 
 ```js
 const b = await window.browser();
 expect(b.name()).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Browser>`
 
-## pages
+---
+### pages
 
 `pages(): Promise<Page[]>`
 
 Returns all pages in this window.
 
-### Usage
+#### Usage
 
 ```js
 const pages = await window.pages();
 expect(pages.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page[]>`
 
-## activePage
+---
+### activePage
 
 `activePage(): Promise<Page>`
 
 Returns the active page in this window.
 
-### Usage
+#### Usage
 
 ```js
 const active = await window.activePage();
 await active.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## on
+## Events
+
+---
+### on
 
 `on(event: 'page', listener: (page: Page) => (unknown | Promise<unknown>)): this`     
 `on(event: 'close', listener: (window: Window) => (unknown | Promise<unknown>)): this`
 
 Registers an event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onClose = () => console.log('window closed');
 window.on('close', onClose);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'page' | 'close'>`
 - `listener` `<(page: Page) => unknown | Promise<unknown>>` or `<(window: Window) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`
 
-## off
+---
+### off
 
 `off(event: 'page', listener: (page: Page) => (unknown | Promise<unknown>)): this`     
 `off(event: 'close', listener: (window: Window) => (unknown | Promise<unknown>)): this`
 
 Removes a specific event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onClose = () => console.log('window closed');
@@ -355,11 +378,11 @@ window.on('close', onClose);
 window.off('close', onClose);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'page' | 'close'>`
 - `listener` `<(page: Page) => unknown | Promise<unknown>>` or `<(window: Window) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`

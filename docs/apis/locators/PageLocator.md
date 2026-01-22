@@ -4,58 +4,63 @@ Locator for pages.
 
 This type is both `Locator<Page>` and `Page`.
 
-## frame
+## Methods
+
+---
+### frame
 
 `frame(selector?: FrameLocatorOptions | string): FrameLocator`
 
-### Usage
+#### Usage
 
 ```js
 const frame = await page.frame({ url: /example-frame/ }).get();
 await frame.element('button').first().click();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<FrameLocatorOptions | string>`
 
-### Returns
+#### Returns
 
 - `FrameLocator`
 
-## element
+---
+### element
 
 `element(selector?: ElementLocatorOptions | string): ElementLocator`
 
-### Usage
+#### Usage
 
 ```js
 await page.element('#submit-btn').click();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<ElementLocatorOptions | string>`
 
-### Returns
+#### Returns
 
 - `ElementLocator`
 
-## text
+---
+### text
 
 `text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
 
-### Usage
+#### Usage
 
 ```js
 await page.text(/Welcome/i).first().highlight();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<TextLocatorOptions | string | RegExp>`
 
-### Returns
+#### Returns
 
 - `TextLocator`
 

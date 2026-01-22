@@ -2,263 +2,281 @@
 
 Browser automation object.
 
-## name
+## Properties
+
+---
+
+### name
 
 `name(): string`
 
 Returns the browser name.
 
-### Usage
+#### Usage
 
 ```js
 const name = browser.name();
 expect(['edge', 'chrome']).toContain(name);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `string`
 
-## version
+---
+### version
 
 `version(): string`
 
 Returns the browser version.
 
-### Usage
+#### Usage
 
 ```js
 const version = browser.version();
 expect(version).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `string`
 
-## majorVersion
+---
+### majorVersion
 
 `majorVersion(): number`
 
 Returns the major browser version.
 
-### Usage
+#### Usage
 
 ```js
 const major = browser.majorVersion();
 expect(major > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `number`
 
-## window
+## Methods
+
+---
+### window
 
 `window(selector?: WindowLocatorOptions): WindowLocator`
 
 Creates a window locator.
 
-### Usage
+#### Usage
 
 ```js
 const win = await browser.window({ lastFocused: true }).get();
 await win.focus();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<WindowLocatorOptions>`
 
-### Returns
+#### Returns
 
 - `WindowLocator`
 
-## page
+---
+### page
 
 `page(selector?: PageLocatorOptions): PageLocator`
 
 Creates a page locator.
 
-### Usage
+#### Usage
 
 ```js
 const page = await browser.page({ active: true, lastFocusedWindow: true }).get();
 await page.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<PageLocatorOptions>`
 
-### Returns
+#### Returns
 
 - `PageLocator`
 
-## windows
+---
+### windows
 
 `windows(): Promise<Window[]>`
 
 Returns all open windows.
 
-### Usage
+#### Usage
 
 ```js
 const windows = await browser.windows();
 expect(windows.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Window[]>`
 
-## pages
+---
+### pages
 
 `pages(): Promise<Page[]>`
 
 Returns all open pages.
 
-### Usage
+#### Usage
 
 ```js
 const pages = await browser.pages();
 expect(pages.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page[]>`
 
-## lastFocusedWindow
+---
+### lastFocusedWindow
 
 `lastFocusedWindow(): Promise<Window>`
 
 Returns the last focused window.
 
-### Usage
+#### Usage
 
 ```js
 const win = await browser.lastFocusedWindow();
 await win.focus();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Window>`
 
-## lastActivePage
+---
+### lastActivePage
 
 `lastActivePage(): Promise<Page>`
 
 Returns the last active page.
 
-### Usage
+#### Usage
 
 ```js
 const page = await browser.lastActivePage();
 await page.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## attachDebugger
+---
+### attachDebugger
 
 `attachDebugger(): Promise<void>`
 
 Attaches the DevTools debugger (required by some CDP-powered actions).
 
-### Usage
+#### Usage
 
 ```js
 await browser.attachDebugger();
 await page.element('#btn_click').click({ mode: 'cdp' });
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## detachDebugger
+---
+### detachDebugger
 
 `detachDebugger(): Promise<void>`
 
 Detaches the DevTools debugger.
 
-### Usage
+#### Usage
 
 ```js
 await browser.detachDebugger();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## setDefaultTimeout
+---
+### setDefaultTimeout
 
 `setDefaultTimeout(timeout: number): Promise<void>`
 
 Sets the default timeout (ms) used by locator resolution and actions.
 
-### Usage
+#### Usage
 
 ```js
 await browser.setDefaultTimeout(5000);
 ```
 
-### Arguments
+#### Arguments
 
 - `timeout` `<number>`: timeout in milliseconds.
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## cookies
+---
+### cookies
 
 `cookies(urls?: string | string[]): Promise<Cookie[]>`
 
 Returns cookies for the given URL(s). If omitted, returns available cookies.
 
-### Usage
+#### Usage
 
 ```js
 const all = await browser.cookies();
@@ -268,147 +286,156 @@ const urlCookies = await browser.cookies('https://juejin.cn/');
 expect(urlCookies.length >= 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - `urls?` `<string | string[]>`
 
-### Returns
+#### Returns
 
 - `Promise<Cookie[]>`
 
-## addCookies
+---
+### addCookies
 
 `addCookies(cookies: (Cookie & { url?: string }) | (Cookie & { url?: string })[]): Promise<void>`
 
 Adds one or more cookies.
 
-### Usage
+#### Usage
 
 ```js
 await browser.addCookies({ name: 'test_cookie', value: '1', url: 'https://juejin.cn/' });
 ```
 
-### Arguments
+#### Arguments
 
 - `cookies` `<(Cookie & { url?: string }) | (Cookie & { url?: string })[]>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## clearCookies
+---
+### clearCookies
 
 `clearCookies(options?: { name?: string | RegExp, domain?: string | RegExp, path?: string | RegExp }): Promise<void>`
 
 Clears cookies matching the filter.
 
-### Usage
+#### Usage
 
 ```js
 await browser.clearCookies({ name: /^test_cookie/ });
 ```
 
-### Arguments
+#### Arguments
 
 - `options?` `<{ name?: string | RegExp, domain?: string | RegExp, path?: string | RegExp }>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## openNewWindow
+---
+### openNewWindow
 
 `openNewWindow(url?: string): Promise<Window>`
 
 Opens a new window.
 
-### Usage
+#### Usage
 
 ```js
 const win = await browser.openNewWindow('https://sagibrant.github.io/mimic/aut/mouse.html');
 await win.focus();
 ```
 
-### Arguments
+#### Arguments
 
 - `url?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Window>`
 
-## openNewPage
+---
+### openNewPage
 
 `openNewPage(url?: string): Promise<Page>`
 
 Opens a new page in the last focused window.
 
-### Usage
+#### Usage
 
 ```js
 const newPage = await browser.openNewPage('https://sagibrant.github.io/mimic/aut/keyboard.html');
 await newPage.sync();
 ```
 
-### Arguments
+#### Arguments
 
 - `url?` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## close
+---
+### close
 
 `close(): Promise<void>`
 
 Closes the browser (where supported by the environment).
 
-### Usage
+#### Usage
 
 ```js
 await browser.close();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## on
+## Events
+
+---
+### on
 
 `on(event: 'window', listener: (window: Window) => (unknown | Promise<unknown>)): this`     
 `on(event: 'page', listener: (page: Page) => (unknown | Promise<unknown>)): this`
 
 Registers an event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onPage = (p) => console.log('new page', p);
 browser.on('page', onPage);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'window' | 'page'>`
 - `listener` `<(window: Window) => unknown | Promise<unknown>>` or `<(page: Page) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`
 
-## off
+---
+### off
 
 `off(event: 'window', listener: (window: Window) => (unknown | Promise<unknown>)): this`   
 `off(event: 'page', listener: (page: Page) => (unknown | Promise<unknown>)): this`
 
 Removes a specific event listener.
 
-### Usage
+#### Usage
 
 ```js
 const onPage = (p) => console.log('new page', p);
@@ -416,11 +443,11 @@ browser.on('page', onPage);
 browser.off('page', onPage);
 ```
 
-### Arguments
+#### Arguments
 
 - `event` `<'window' | 'page'>`
 - `listener` `<(window: Window) => unknown | Promise<unknown>>` or `<(page: Page) => unknown | Promise<unknown>>`
 
-### Returns
+#### Returns
 
 - `this`

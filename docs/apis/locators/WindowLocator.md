@@ -4,13 +4,16 @@ Locator for windows.
 
 This type is both `Locator<Window>` and `Window`.
 
-## page
+## Methods
+
+---
+### page
 
 `page(selector?: PageLocatorOptions): PageLocator`
 
 Creates a page locator scoped to the located window.
 
-### Usage
+#### Usage
 
 ```js
 const win = await browser.window({ lastFocused: true }).get();
@@ -18,11 +21,11 @@ const activePage = await win.page({ active: true }).get();
 await activePage.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector?` `<PageLocatorOptions>`
 
-### Returns
+#### Returns
 
 - `PageLocator`
 

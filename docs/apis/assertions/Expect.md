@@ -2,264 +2,281 @@
 
 Assertion helper returned by `expect(actual)`.
 
-## expect(actual)
+## Methods
+
+---
+### expect(actual)
 
 Creates an `Expect` object for the given `actual` value.
 
-### Usage
+#### Usage
 
 ```js
 expect(2 + 2).toBe(4);
 expect('hello world').toMatch(/world/);
 ```
 
-### Arguments
+#### Arguments
 
 - `actual` `<unknown>`: actual value to assert on.
 
-### Returns
+#### Returns
 
 - `Expect`
 
-## not
+---
+### not
 
 Negates the next assertion.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.closed()).not.toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Expect`
 
-## toBe
+---
+### toBe
 
 Asserts strict equality (`===`) with `expected`.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.status()).toBe('complete');
 ```
 
-### Arguments
+#### Arguments
 
 - `expected` `<unknown>`
 
-### Returns
+#### Returns
 
 - `void`
 
-## toEqual
+---
+### toEqual
 
 Asserts deep equality with `expected`.
 
-### Usage
+#### Usage
 
 ```js
 expect({ a: 1 }).toEqual({ a: 1 });
 ```
 
-### Arguments
+#### Arguments
 
 - `expected` `<unknown>`
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeTruthy
+---
+### toBeTruthy
 
 Asserts `actual` is truthy.
 
-### Usage
+#### Usage
 
 ```js
 expect((await page.frames()).length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeFalsy
+---
+### toBeFalsy
 
 Asserts `actual` is falsy.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.closed()).toBeFalsy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeNaN
+---
+### toBeNaN
 
 Asserts `actual` is `NaN`.
 
-### Usage
+#### Usage
 
 ```js
 expect(Number('x')).toBeNaN();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeNull
+---
+### toBeNull
 
 Asserts `actual` is `null`.
 
-### Usage
+#### Usage
 
 ```js
 expect(null).toBeNull();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeUndefined
+---
+### toBeUndefined
 
 Asserts `actual` is `undefined`.
 
-### Usage
+#### Usage
 
 ```js
 expect(undefined).toBeUndefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeDefined
+---
+### toBeDefined
 
 Asserts `actual` is not `undefined`.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.title()).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toBeNullOrUndefined
+---
+### toBeNullOrUndefined
 
 Asserts `actual` is `null` or `undefined`.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.window()).toBeNullOrUndefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `void`
 
-## toHaveLength
+---
+### toHaveLength
 
 Asserts `actual.length === expected`.
 
-### Usage
+#### Usage
 
 ```js
 expect(await browser.windows()).toHaveLength(1);
 ```
 
-### Arguments
+#### Arguments
 
 - `expected` `<number>`
 
-### Returns
+#### Returns
 
 - `void`
 
-## toContain
+---
+### toContain
 
 Asserts `actual` contains `expected`.
 
-### Usage
+#### Usage
 
 ```js
 expect(['edge', 'chrome']).toContain(browser.name());
 ```
 
-### Arguments
+#### Arguments
 
 - `expected` `<unknown>`
 
-### Returns
+#### Returns
 
 - `void`
 
-## toMatch
+---
+### toMatch
 
 Asserts `actual` matches the regex/string.
 
-### Usage
+#### Usage
 
 ```js
 expect(await page.url()).toMatch(/example/);
 ```
 
-### Arguments
+#### Arguments
 
 - `expected` `<RegExp | string>`
 
-### Returns
+#### Returns
 
 - `void`
 
-## toThrow
+---
+### toThrow
 
 Asserts the function throws.
 
-### Usage
+#### Usage
 
 ```js
 expect(() => {
@@ -267,10 +284,10 @@ expect(() => {
 }).toThrow('boom');
 ```
 
-### Arguments
+#### Arguments
 
 - `expectedErrorMsg?` `<string>`
 
-### Returns
+#### Returns
 
 - `void`

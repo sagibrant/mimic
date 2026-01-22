@@ -2,273 +2,290 @@
 
 Frame automation object.
 
-## element
+## Properties
 
-`element(selector?: ElementLocatorOptions | string): ElementLocator`
-
-Creates an element locator scoped to this frame.
-
-### Usage
-
-```js
-await frame.element('button').first().click();
-```
-
-### Arguments
-
-- `selector?` `<ElementLocatorOptions | string>`
-
-### Returns
-
-- `ElementLocator`
-
-## text
-
-`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
-
-Creates a text locator scoped to this frame.
-
-### Usage
-
-```js
-await frame.text(/Submit/).first().click();
-```
-
-### Arguments
-
-- `selector?` `<TextLocatorOptions | string | RegExp>`
-
-### Returns
-
-- `TextLocator`
-
-## url
+---
+### url
 
 `url(): Promise<string>`
 
 Returns the frame URL.
 
-### Usage
+#### Usage
 
 ```js
 const url = await frame.url();
 expect(url.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## status
+---
+### status
 
 `status(): Promise<'BeforeNavigate' | 'Committed' | 'DOMContentLoaded' | 'Completed' | 'ErrorOccurred' | 'Removed'>`
 
 Returns the navigation lifecycle status.
 
-### Usage
+#### Usage
 
 ```js
 const status = await frame.status();
 expect(['BeforeNavigate', 'Committed', 'DOMContentLoaded', 'Completed', 'ErrorOccurred', 'Removed']).toContain(status);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<'BeforeNavigate' | 'Committed' | 'DOMContentLoaded' | 'Completed' | 'ErrorOccurred' | 'Removed'>`
 
-## readyState
+---
+### readyState
 
 `readyState(): Promise<'loading' | 'interactive' | 'complete'>`
 
 Returns the document readiness state.
 
-### Usage
+#### Usage
 
 ```js
 const state = await frame.readyState();
 expect(['loading', 'interactive', 'complete']).toContain(state);
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<'loading' | 'interactive' | 'complete'>`
 
-## content
+---
+### content
 
 `content(): Promise<string>`
 
 Returns the frame HTML content.
 
-### Usage
+#### Usage
 
 ```js
 const html = await frame.content();
 expect(html.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<string>`
 
-## sync
+## Methods
+
+---
+### element
+
+`element(selector?: ElementLocatorOptions | string): ElementLocator`
+
+Creates an element locator scoped to this frame.
+
+#### Usage
+
+```js
+await frame.element('button').first().click();
+```
+
+#### Arguments
+
+- `selector?` `<ElementLocatorOptions | string>`
+
+#### Returns
+
+- `ElementLocator`
+
+---
+### text
+
+`text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
+
+Creates a text locator scoped to this frame.
+
+#### Usage
+
+```js
+await frame.text(/Submit/).first().click();
+```
+
+#### Arguments
+
+- `selector?` `<TextLocatorOptions | string | RegExp>`
+
+#### Returns
+
+- `TextLocator`
+
+---
+### sync
 
 `sync(timeout?: number): Promise<void>`
 
 Waits for the frame to reach a ready state.
 
-### Usage
+#### Usage
 
 ```js
 await frame.sync(5000);
 ```
 
-### Arguments
+#### Arguments
 
 - `timeout?` `<number>`
 
-### Returns
+#### Returns
 
 - `Promise<void>`
 
-## querySelectorAll
+---
+### querySelectorAll
 
 `querySelectorAll(selector: string): Promise<Element[]>`
 
 Returns all elements matching `selector` within the frame.
 
-### Usage
+#### Usage
 
 ```js
 const divs = await frame.querySelectorAll('div');
 expect(divs.length >= 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - `selector` `<string>`
 
-### Returns
+#### Returns
 
 - `Promise<Element[]>`
 
-## executeScript
+---
+### executeScript
 
 `executeScript<Args extends unknown[], Result>(func: (...args: Args) => Result, args?: Args): Promise<Result>`
 
 Executes a function in the frame context.
 
-### Usage
+#### Usage
 
 ```js
 const value = await frame.executeScript((a, b) => a + b, [1, 2]);
 expect(value).toBe(3);
 ```
 
-### Arguments
+#### Arguments
 
 - `func` `<(...args: Args) => Result>`
 - `args?` `<Args>`
 
-### Returns
+#### Returns
 
 - `Promise<Result>`
 
-## page
+---
+### page
 
 `page(): Promise<Page>`
 
 Returns the page that owns this frame.
 
-### Usage
+#### Usage
 
 ```js
 const p = await frame.page();
 await p.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Page>`
 
-## parentFrame
+---
+### parentFrame
 
 `parentFrame(): Promise<Frame | null>`
 
 Returns the parent frame, or `null` if this is the main frame.
 
-### Usage
+#### Usage
 
 ```js
 const parent = await frame.parentFrame();
 expect(parent === null || typeof parent === 'object').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Frame | null>`
 
-## childFrames
+---
+### childFrames
 
 `childFrames(): Promise<Frame[]>`
 
 Returns child frames.
 
-### Usage
+#### Usage
 
 ```js
 const children = await frame.childFrames();
 expect(children.length >= 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Frame[]>`
 
-## ownerElement
+---
+### ownerElement
 
 `ownerElement(): Promise<Element | null>`
 
 Returns the owning element (e.g. iframe element), or `null` for main frame.
 
-### Usage
+#### Usage
 
 ```js
 const owner = await frame.ownerElement();
 expect(owner === null || typeof owner === 'object').toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Element | null>`

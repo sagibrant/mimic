@@ -4,13 +4,16 @@ Locator for the current browser.
 
 This type is both `Locator<Browser>` and `Browser`.
 
-## get
+## Methods
+
+---
+### get
 
 `get(): Promise<Browser>`
 
 Resolves a single browser instance.
 
-### Usage
+#### Usage
 
 ```js
 import { BrowserLocator } from 'mimic-sdk';
@@ -20,21 +23,22 @@ const page = await browser.lastActivePage();
 await page.bringToFront();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Browser>`
 
-## filter
+---
+### filter
 
 `filter(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<Browser>`
 
 Adds mandatory filters. See [Locator.filter](Locator.md#filter).
 
-### Usage
+#### Usage
 
 ```js
 const browser = await new BrowserLocator()
@@ -42,21 +46,22 @@ const browser = await new BrowserLocator()
   .get();
 ```
 
-### Arguments
+#### Arguments
 
 - `options?` `<LocatorFilterOption | LocatorFilterOption[]>`
 
-### Returns
+#### Returns
 
 - `Locator<Browser>`
 
-## prefer
+---
+### prefer
 
 `prefer(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<Browser>`
 
 Adds assistive filters. See [Locator.prefer](Locator.md#prefer).
 
-### Usage
+#### Usage
 
 ```js
 const browser = await new BrowserLocator()
@@ -64,116 +69,121 @@ const browser = await new BrowserLocator()
   .get();
 ```
 
-### Arguments
+#### Arguments
 
 - `options?` `<LocatorFilterOption | LocatorFilterOption[]>`
 
-### Returns
+#### Returns
 
 - `Locator<Browser>`
 
-## count
+---
+### count
 
 `count(): Promise<number>`
 
 Counts matches. See [Locator.count](Locator.md#count).
 
-### Usage
+#### Usage
 
 ```js
 const n = await new BrowserLocator().count();
 expect(n > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<number>`
 
-## all
+---
+### all
 
 `all(): Promise<Locator<Browser>[]>`
 
 Returns all matches. See [Locator.all](Locator.md#all).
 
-### Usage
+#### Usage
 
 ```js
 const all = await new BrowserLocator().all();
 expect(all.length > 0).toBeTruthy();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Promise<Locator<Browser>[]>`
 
-## nth
+---
+### nth
 
 `nth(index: number): Locator<Browser>`
 
 See [Locator.nth](Locator.md#nth).
 
-### Usage
+#### Usage
 
 ```js
 const browser = await new BrowserLocator().nth(0).get();
 expect(browser.name()).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - `index` `<number>`
 
-### Returns
+#### Returns
 
 - `Locator<Browser>`
 
-## first
+---
+### first
 
 `first(): Locator<Browser>`
 
 See [Locator.first](Locator.md#first).
 
-### Usage
+#### Usage
 
 ```js
 const browser = await new BrowserLocator().first().get();
 expect(browser.name()).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Locator<Browser>`
 
-## last
+---
+### last
 
 `last(): Locator<Browser>`
 
 See [Locator.last](Locator.md#last).
 
-### Usage
+#### Usage
 
 ```js
 const browser = await new BrowserLocator().last().get();
 expect(browser.name()).toBeDefined();
 ```
 
-### Arguments
+#### Arguments
 
 - None
 
-### Returns
+#### Returns
 
 - `Locator<Browser>`
 
