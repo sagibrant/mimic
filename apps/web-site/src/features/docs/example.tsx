@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Paragraph, Section } from '../../shared/components/Common';
+import { CodeBlock, Paragraph, Section } from '../../shared/components/Common';
 import { MimicUtils } from '../demo/utils/MimicUtils';
 
 export default function Example() {
@@ -13,18 +13,7 @@ export default function Example() {
       <Paragraph>
         You can paste and run it in the extension sidebar script editor. The runtime provides globals like page, browser, ai, expect, and wait.
       </Paragraph>
-      <pre
-        style={{
-          background: 'var(--mimic-codeblock-bg)',
-          color: 'var(--mimic-codeblock-fg)',
-          border: '1px solid var(--mimic-codeblock-border)',
-          padding: 16,
-          borderRadius: 8,
-          overflowX: 'auto',
-        }}
-      >
-        <code>{script}</code>
-      </pre>
+      <CodeBlock code={script} />
     </Section>
   );
 }

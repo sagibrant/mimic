@@ -1,5 +1,7 @@
+import { isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CodeBlock } from './Common';
 
 export default function MarkdownDoc({ source }: { source: string }) {
   return (
@@ -31,22 +33,34 @@ export default function MarkdownDoc({ source }: { source: string }) {
           ul: ({ children, ...props }) => <ul {...props} style={{ margin: '0 0 1rem 1.25rem', color: '#334155' }}>{children}</ul>,
           ol: ({ children, ...props }) => <ol {...props} style={{ margin: '0 0 1rem 1.25rem', color: '#334155' }}>{children}</ol>,
           li: ({ children, ...props }) => <li {...props} style={{ marginBottom: '0.25rem' }}>{children}</li>,
-          pre: ({ children, ...props }) => (
-            <pre
-              {...props}
-              style={{
-                background: 'var(--mimic-codeblock-bg)',
-                color: 'var(--mimic-codeblock-fg)',
-                border: '1px solid var(--mimic-codeblock-border)',
-                padding: '16px',
-                borderRadius: 8,
-                overflowX: 'auto',
-                marginBottom: '1rem',
-              }}
-            >
-              {children}
-            </pre>
-          ),
+          pre: ({ children, ...props }) => {
+            const childrenArray = Array.isArray(children) ? children : [children];
+            const codeElem = childrenArray.find(child => isValidElement(child) && (child.type === 'code' || (child.type as { name?: string }).name === 'code'));
+            if (isValidElement(codeElem)) {
+              const codeProps = codeElem.props as { children?: unknown; className?: string };
+              const raw = codeProps.children;
+              const text = Array.isArray(raw) ? raw.join('') : String(raw ?? '');
+              if (text.length > 0) {
+                return <CodeBlock code={text.replace(/\n$/, '')} languageClassName={codeProps.className} />;
+              }
+            }
+            return (
+              <pre
+                {...props}
+                style={{
+                  background: 'var(--mimic-codeblock-bg)',
+                  color: 'var(--mimic-codeblock-fg)',
+                  border: '1px solid var(--mimic-codeblock-border)',
+                  padding: '16px',
+                  borderRadius: 8,
+                  overflowX: 'auto',
+                  marginBottom: '1rem',
+                }}
+              >
+                {children}
+              </pre>
+            );
+          },
           code: ({ children, className, ...props }) => {
             const isBlock = typeof className === 'string' && className.includes('language-');
             if (isBlock) {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Section, Paragraph } from '../shared/components/Common';
+import { CodeBlock, Section, Paragraph } from '../shared/components/Common';
 import MarkdownDoc from '../shared/components/MarkdownDoc';
 import { Link, useParams } from 'react-router';
 
@@ -104,15 +104,15 @@ export default function APIs() {
                 Browse Automation Objects, Other Objects, Locators, Assertions, and Types using the sidebar.
               </Paragraph>
               <Paragraph>Quick Start:</Paragraph>
-              <pre style={{ background: 'var(--mimic-codeblock-bg)', color: 'var(--mimic-codeblock-fg)', border: '1px solid var(--mimic-codeblock-border)', padding: '16px', borderRadius: 8, overflowX: 'auto' }}>
-                <code>{`import { BrowserLocator } from 'mimic-sdk';
+              <CodeBlock
+                code={`import { BrowserLocator } from 'mimic-sdk';
 import { AIClient } from 'mimic-sdk';
 
 const browserLocator = new BrowserLocator();
 const browser = await browserLocator.get(); // get current browser
 const page = await browser.lastActivePage(); // get current page
-const ai = new AIClient(); // get ai client`}</code>
-              </pre>
+const ai = new AIClient(); // get ai client`}
+              />
             </Section>
           </>
         )}
