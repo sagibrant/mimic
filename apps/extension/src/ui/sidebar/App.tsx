@@ -1410,7 +1410,6 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       try {
-        console.log('useEffect ==> init');
         // Load last asset from storage
         const result = await chrome.storage.local.get(['lastAsset']);
         const content = result.lastAsset || '';
