@@ -6,8 +6,6 @@ The API behavior and examples are aligned with:
 
 - `packages/browser-sdk/src` (runtime implementation)
 - `packages/core/src/types/types.d.ts` (user-visible typings)
-- `tests/extension/dist/src/demo` and `tests/extension/dist/src/sdk` (real examples)
-- AUT pages under `apps/web-site/public/aut`
 
 ## Quick Start (Extension Script Environment)
 
