@@ -58,6 +58,69 @@ await button.click();
 - `Locator<T>`
 
 ---
+### nth
+
+`nth(index: number): Locator<T>`
+
+Returns a locator for the match at `index` (0-based).
+
+#### Usage
+
+```js
+await page.element('button').nth(1).click();
+```
+
+#### Arguments
+
+- `index` `<number>`: 0-based index.
+
+#### Returns
+
+- `Locator<T>`
+
+---
+### first
+
+`first(): Locator<T>`
+
+Alias for `nth(0)`.
+
+#### Usage
+
+```js
+await page.element('button').first().click();
+```
+
+#### Arguments
+
+- None
+
+#### Returns
+
+- `Locator<T>`
+
+---
+### last
+
+`last(): Locator<T>`
+
+Selects the last match.
+
+#### Usage
+
+```js
+await page.element('button').last().click();
+```
+
+#### Arguments
+
+- None
+
+#### Returns
+
+- `Locator<T>`
+
+---
 ### exists
 
 `exists(timeout?: number): Promise<boolean>`
@@ -145,66 +208,3 @@ expect(items.length > 0).toBeTruthy();
 #### Returns
 
 - `Promise<Locator<T>[]>`
-
----
-### nth
-
-`nth(index: number): Locator<T>`
-
-Returns a locator for the match at `index` (0-based).
-
-#### Usage
-
-```js
-await page.element('button').nth(1).click();
-```
-
-#### Arguments
-
-- `index` `<number>`: 0-based index.
-
-#### Returns
-
-- `Locator<T>`
-
----
-### first
-
-`first(): Locator<T>`
-
-Alias for `nth(0)`.
-
-#### Usage
-
-```js
-await page.element('button').first().click();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Locator<T>`
-
----
-### last
-
-`last(): Locator<T>`
-
-Selects the last match.
-
-#### Usage
-
-```js
-await page.element('button').last().click();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Locator<T>`
