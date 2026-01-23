@@ -2,6 +2,14 @@
 
 Keyboard controller for a page.
 
+## Getting Started
+
+### Usage
+
+```js
+await page.keyboard().type('Hello World');
+```
+
 ## Methods
 
 ---

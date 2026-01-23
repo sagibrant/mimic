@@ -4,6 +4,13 @@ This API reference follows a Playwright-like structure.
 
 ## Member Template
 
+Each `.md` file may start with an optional `## Getting Started` section. Inside it, you may include any of:
+
+- `### Usage`
+- `### Arguments`
+- `### Returns`
+- `### Notes`
+
 Group members into sections:
 
 - `## Properties` (optional)

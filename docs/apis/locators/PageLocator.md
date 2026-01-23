@@ -4,6 +4,23 @@ Locator for pages.
 
 This type extends `Locator<Page>` and `Page`.
 
+## Getting Started
+
+### Usage
+
+```js
+const page = await browser.page({ active: true, lastFocusedWindow: true }).get();
+await page.bringToFront();
+```
+
+### Arguments
+
+- `selector?` `<PageLocatorOptions>`
+
+### Returns
+
+- `Page` (via `PageLocator.get()`)
+
 ## Methods
 
 ---
@@ -11,11 +28,13 @@ This type extends `Locator<Page>` and `Page`.
 
 `frame(selector?: FrameLocatorOptions | string): FrameLocator`
 
+Creates a frame locator scoped to the located page.
+
 #### Usage
 
 ```js
-const frame = await page.frame({ url: /example-frame/ }).get();
-await frame.element('button').first().click();
+const frame = await page.frame({ url: /embedded/ }).get();
+await frame.sync();
 ```
 
 #### Arguments
@@ -31,10 +50,13 @@ await frame.element('button').first().click();
 
 `element(selector?: ElementLocatorOptions | string): ElementLocator`
 
+Creates an element locator scoped to the located page.
+
 #### Usage
 
 ```js
-await page.element('#submit-btn').click();
+const submit = await page.element('#submit').get();
+await submit.click();
 ```
 
 #### Arguments
@@ -50,10 +72,13 @@ await page.element('#submit-btn').click();
 
 `text(selector?: TextLocatorOptions | string | RegExp): TextLocator`
 
+Creates a text locator scoped to the located page.
+
 #### Usage
 
 ```js
-await page.text(/Welcome/i).first().highlight();
+const label = await page.text(/sign in/i).first().get();
+await label.click();
 ```
 
 #### Arguments
@@ -67,5 +92,7 @@ await page.text(/Welcome/i).first().highlight();
 ## Locator Members
 
 All locator methods are available. See [Locator](Locator.md) for details.     
+
 ## Page Members     
+
 All `Page` members are available on `PageLocator`. See [Page](../aos/Page.md) for full details.

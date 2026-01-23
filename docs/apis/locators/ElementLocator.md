@@ -4,6 +4,36 @@ Locator for elements.
 
 This type extends `Locator<Element>` and `Element`.
 
+## Getting Started
+
+### Usage
+
+```js
+const submit = await page.element('#submit').get();
+await submit.click();
+```
+
+### Shadow DOM Targeting
+
+`filter(...)` is the strongest way to identify elements across shadow DOM boundaries.
+
+```js
+const submit = await page
+  .element()
+  .filter({ type: 'attribute', name: 'data-test', value: 'shadow-submit' })
+  .get();
+
+await submit.click();
+```
+
+### Arguments
+
+- `selector?` `<ElementLocatorOptions | string>`
+
+### Returns
+
+- `Element` (via `ElementLocator.get()`)
+
 ## Methods
 
 ---
@@ -50,29 +80,10 @@ await card.text(/details/i).first().highlight();
 
 - `TextLocator`
 
-## Shadow DOM Targeting
+## Locator Members
 
-`filter(...)` is the strongest way to identify elements across shadow DOM boundaries.
-
-### Usage
-
-```js
-const submit = await page
-  .element()
-  .filter({ type: 'attribute', name: 'data-test', value: 'shadow-submit' })
-  .get();
-
-await submit.click();
-```
-
-### Arguments
-
-- Use `filter(...)` with `type: 'attribute' | 'property' | 'function' | 'text'`.     
-- Use `prefer(...)` to break ties when multiple elements still match.    
- 
-### Returns     
-- A narrowed `ElementLocator` (via `filter/prefer`) or a resolved `Element` (via `get()`)     
-## Locator Members     
 All locator methods are available. See [Locator](Locator.md) for details.     
+
 ## Element Members     
+
 All `Element` members are available on `ElementLocator`. See [Element](../aos/Element.md) for full details.

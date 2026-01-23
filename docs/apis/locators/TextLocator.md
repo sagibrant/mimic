@@ -29,5 +29,7 @@ await label.click();
 ## Locator Members
 
 All locator methods are available. See [Locator](Locator.md) for details.     
+
 ## Text Members     
+
 All `Text` members are available on `TextLocator`. See [Text](../aos/Text.md) for full details.

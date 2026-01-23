@@ -258,6 +258,27 @@ export abstract class Locator<T extends AutomationObject> extends ChannelBase im
     return all;
   }
 
+  async exists(timeout?: number): Promise<boolean> {
+    timeout = timeout ?? SettingUtils.getReplaySettings().locatorTimeout;
+    const startTime = performance.now();
+    const endTime = startTime + timeout;
+    while (true) {
+      try {
+        const count = await this.count();
+        if (count === 1) {
+          return true;
+        }
+      } catch {
+        void 0;
+      }
+      if (performance.now() >= endTime) {
+        break;
+      }
+      await Utils.wait(200);
+    }
+    return false;
+  }
+
   nth(index: number): Locator<T> {
     const ordinal = {
       type: 'default',

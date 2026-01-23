@@ -4,7 +4,7 @@ Represents the dialog on a page (`alert/confirm/prompt/beforeunload`).
 
 ## Getting Started
 
-This Dialog Event approach is the suggested solution rather than `page.dialog()`.
+### Usage
 
 ```js
 await browser.attachDebugger();
@@ -18,6 +18,10 @@ const onDialog = async (dialog) => {
 page.on('dialog', onDialog);
 await page.element('#alert_button').click({ mode: 'cdp' });
 ```
+
+### Notes
+
+This Dialog Event approach is the suggested solution rather than `page.dialog()`.
 
 ## Methods
 

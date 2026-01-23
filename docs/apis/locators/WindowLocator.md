@@ -4,6 +4,24 @@ Locator for windows.
 
 This type extends `Locator<Window>` and `Window`.
 
+## Getting Started
+
+### Usage
+
+```js
+const win = await browser.window({ lastFocused: true }).get();
+const page = await win.page({ active: true }).get();
+await page.bringToFront();
+```
+
+### Arguments
+
+- `selector?` `<WindowLocatorOptions>`
+
+### Returns
+
+- `Window` (via `WindowLocator.get()`)
+
 ## Methods
 
 ---
@@ -17,8 +35,8 @@ Creates a page locator scoped to the located window.
 
 ```js
 const win = await browser.window({ lastFocused: true }).get();
-const activePage = await win.page({ active: true }).get();
-await activePage.bringToFront();
+const page = await win.page({ active: true }).get();
+await page.bringToFront();
 ```
 
 #### Arguments
@@ -31,13 +49,8 @@ await activePage.bringToFront();
 
 ## Locator Members
 
-All locator methods are available. See [Locator](Locator.md) for details:     
-- `filter(...)`, `prefer(...)`     
-- `get()`, `count()`, `all()`     
-- `nth(...)`, `first()`, `last()`     
+All locator methods are available. See [Locator](Locator.md) for details.     
+
 ## Window Members     
-All `Window` members are available on `WindowLocator`. See [Window](../aos/Window.md) for full details, including:     
-- `state()`, `focused()`, `incognito()`, `closed()`     
-- `browser()`, `pages()`, `activePage()`     
-- `openNewPage(...)`, `focus()`, `close()`, `minimize()`, `maximize()`, `restore()`, `fullscreen(...)`     
-- `on(...)`, `off(...)`
+
+All `Window` members are available on `WindowLocator`. See [Window](../aos/Window.md) for full details.

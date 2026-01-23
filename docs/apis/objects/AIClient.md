@@ -4,6 +4,15 @@ AI client interface.
 
 ## Getting Started
 
+### Usage
+
+```js
+const response = await ai.init().setModel('gpt-4o').chat('How do I fill a login form?');
+expect(response === null || typeof response === 'string').toBeTruthy();
+```
+
+### Notes
+
 In Mimic extension sidebar, a global variable is available:
 
 - `ai: AIClient`, which represents the AIClient object and auto loads the AI Setting from extension.

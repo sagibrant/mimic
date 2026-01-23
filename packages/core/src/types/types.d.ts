@@ -51,13 +51,14 @@ export function expect(actual: unknown): Expect;
 export interface Locator<T> {
   filter(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<T>;
   prefer(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<T>;
+  nth(index: number): Locator<T>;
+  first(): Locator<T>;
+  last(): Locator<T>;
 
   get(): Promise<T>;
   count(): Promise<number>;
   all(): Promise<Locator<T>[]>;
-  nth(index: number): Locator<T>;
-  first(): Locator<T>;
-  last(): Locator<T>;
+  exists(timeout?: number): Promise<boolean>;
 }
 
 export interface BrowserLocatorOptions {

@@ -1,19 +1,12 @@
 # BrowserLocator
 
-Locator for the current browser.
+Locator for the current browser session.
 
 This type extends `Locator<Browser>` and `Browser`.
 
-## Methods
+## Getting Started
 
----
-### get
-
-`get(): Promise<Browser>`
-
-Resolves a single browser instance.
-
-#### Usage
+### Usage
 
 ```js
 import { BrowserLocator } from 'mimic-sdk';
@@ -23,177 +16,76 @@ const page = await browser.lastActivePage();
 await page.bringToFront();
 ```
 
-#### Arguments
+### Arguments
 
 - None
 
-#### Returns
+### Returns
 
-- `Promise<Browser>`
+- `Browser` (via `BrowserLocator.get()`)
+
+### Notes
+
+Currently, it only targets the browser session that hosts the Mimic extension.
+
+## Methods
 
 ---
-### filter
+### window
 
-`filter(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<Browser>`
+`window(selector?: WindowLocatorOptions): WindowLocator`
 
-Adds mandatory filters. See [Locator.filter](Locator.md#filter).
+Creates a window locator scoped to the current browser session.
 
 #### Usage
 
 ```js
-const browser = await new BrowserLocator()
-  .filter({ name: 'name', value: 'chrome', type: 'property' })
+import { BrowserLocator } from 'mimic-sdk';
+
+const win = await new BrowserLocator().window({ lastFocused: true }).get();
+const page = await win.page({ active: true }).get();
+await page.bringToFront();
+```
+
+#### Arguments
+
+- `selector?` `<WindowLocatorOptions>`
+
+#### Returns
+
+- `WindowLocator`
+
+---
+### page
+
+`page(selector?: PageLocatorOptions): PageLocator`
+
+Creates a page locator scoped to the current browser session.
+
+#### Usage
+
+```js
+import { BrowserLocator } from 'mimic-sdk';
+
+const page = await new BrowserLocator()
+  .page({ active: true, lastFocusedWindow: true })
   .get();
+
+await page.bringToFront();
 ```
 
 #### Arguments
 
-- `options?` `<LocatorFilterOption | LocatorFilterOption[]>`
+- `selector?` `<PageLocatorOptions>`
 
 #### Returns
 
-- `Locator<Browser>`
+- `PageLocator`
 
----
-### prefer
+## Locator Members
 
-`prefer(options?: LocatorFilterOption | LocatorFilterOption[]): Locator<Browser>`
+All locator methods are available. See [Locator](Locator.md) for details.     
 
-Adds assistive filters. See [Locator.prefer](Locator.md#prefer).
+## Browser Members     
 
-#### Usage
-
-```js
-const browser = await new BrowserLocator()
-  .prefer({ name: 'version', value: /^130/, type: 'property', match: 'regex' })
-  .get();
-```
-
-#### Arguments
-
-- `options?` `<LocatorFilterOption | LocatorFilterOption[]>`
-
-#### Returns
-
-- `Locator<Browser>`
-
----
-### count
-
-`count(): Promise<number>`
-
-Counts matches. See [Locator.count](Locator.md#count).
-
-#### Usage
-
-```js
-const n = await new BrowserLocator().count();
-expect(n > 0).toBeTruthy();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Promise<number>`
-
----
-### all
-
-`all(): Promise<Locator<Browser>[]>`
-
-Returns all matches. See [Locator.all](Locator.md#all).
-
-#### Usage
-
-```js
-const all = await new BrowserLocator().all();
-expect(all.length > 0).toBeTruthy();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Promise<Locator<Browser>[]>`
-
----
-### nth
-
-`nth(index: number): Locator<Browser>`
-
-See [Locator.nth](Locator.md#nth).
-
-#### Usage
-
-```js
-const browser = await new BrowserLocator().nth(0).get();
-expect(browser.name()).toBeDefined();
-```
-
-#### Arguments
-
-- `index` `<number>`
-
-#### Returns
-
-- `Locator<Browser>`
-
----
-### first
-
-`first(): Locator<Browser>`
-
-See [Locator.first](Locator.md#first).
-
-#### Usage
-
-```js
-const browser = await new BrowserLocator().first().get();
-expect(browser.name()).toBeDefined();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Locator<Browser>`
-
----
-### last
-
-`last(): Locator<Browser>`
-
-See [Locator.last](Locator.md#last).
-
-#### Usage
-
-```js
-const browser = await new BrowserLocator().last().get();
-expect(browser.name()).toBeDefined();
-```
-
-#### Arguments
-
-- None
-
-#### Returns
-
-- `Locator<Browser>`
-
-## Browser Members
-
-All `Browser` members are available on `BrowserLocator`. See [Browser](../aos/Browser.md) for full details, including:     
-- `name()`, `version()`, `majorVersion()`     
-- `window(...)`, `page(...)`     
-- `windows()`, `pages()`, `lastFocusedWindow()`, `lastActivePage()`     
-- `attachDebugger()`, `detachDebugger()`, `setDefaultTimeout(...)`     
-- `cookies(...)`, `addCookies(...)`, `clearCookies(...)`     
-- `openNewWindow(...)`, `openNewPage(...)`, `close()`     
-- `on(...)`, `off(...)`
+All `Browser` members are available on `BrowserLocator`. See [Browser](../aos/Browser.md) for full details.

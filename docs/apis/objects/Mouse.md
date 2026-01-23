@@ -2,6 +2,14 @@
 
 Mouse controller for a page (coordinate-based input).
 
+## Getting Started
+
+### Usage
+
+```js
+await page.mouse().click(100, 200);
+```
+
 ## Methods
 
 ---

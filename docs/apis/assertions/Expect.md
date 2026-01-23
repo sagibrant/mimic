@@ -4,6 +4,14 @@ Assertion helper returned by `expect(actual)`.
 
 ## Getting Started
 
+### Usage
+
+```js
+expect(await page.closed()).not.toBeTruthy();
+```
+
+### Notes
+
 In Mimic extension sidebar, a global function is available:
 
 - `expect(actual: unknown): Expect`, which is the assertion function to create `Expect` object.

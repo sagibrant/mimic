@@ -181,12 +181,13 @@ export class StepScriptEditorHelper {
       methods: [
         { name: "filter", params: ["options?: LocatorFilterOption | LocatorFilterOption[]"], returnType: "Locator<T>" },
         { name: "prefer", params: ["options?: LocatorFilterOption | LocatorFilterOption[]"], returnType: "Locator<T>" },
+        { name: "nth", params: ["index: number"], returnType: "Locator<T>" },
+        { name: "first", params: [], returnType: "Locator<T>" },
+        { name: "last", params: [], returnType: "Locator<T>" },
         { name: "get", params: [], returnType: "Promise<T>" },
         { name: "count", params: [], returnType: "Promise<number>" },
         { name: "all", params: [], returnType: "Promise<Locator<T>[]>" },
-        { name: "nth", params: ["index: number"], returnType: "Locator<T>" },
-        { name: "first", params: [], returnType: "Locator<T>" },
-        { name: "last", params: [], returnType: "Locator<T>" }
+        { name: "exists", params: ["timeout?: number"], returnType: "Promise<boolean>" }
       ]
     },
 

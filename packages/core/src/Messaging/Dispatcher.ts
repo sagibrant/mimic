@@ -76,6 +76,14 @@ export abstract class Dispatcher {
   }
 
   /**
+   * get default timeout for messaging
+   * @returns default timeout in milliseconds
+   */
+  getDefaultTimeout(): number {
+    return this._timeout;
+  }
+
+  /**
    * Send request
    * @param data Request Payload data
    * @param timeout Timeout in milliseconds (default: 5000ms)
